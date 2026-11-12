@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GRACE 5 v0: records/close.xml (K-13). Written by `close` only when every obligation is met; names the record that met each. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="common.xsd"/>
+
+  <xs:element name="Close">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Satisfied" minOccurs="0" maxOccurs="unbounded"><xs:complexType>
+          <xs:attribute name="check" type="xs:NCName" use="required"/>
+          <xs:attribute name="kind" type="CheckKind" use="required"/>
+          <xs:attribute name="run" type="xs:positiveInteger" use="required"/>
+          <xs:attribute name="claim" type="Text" use="required"/>
+        </xs:complexType></xs:element>
+        <!-- NotRequired: a check the contract marks required="false", with its latest verdict if any. Reported, never counted. -->
+        <xs:element name="NotRequired" minOccurs="0" maxOccurs="unbounded"><xs:complexType>
+          <xs:attribute name="check" type="xs:NCName" use="required"/>
+          <xs:attribute name="verdict" type="Text"/>
+        </xs:complexType></xs:element>
+      </xs:sequence>
+      <xs:attributeGroup ref="Binding"/>
+      <xs:attribute name="date" type="xs:dateTime" use="required"/>
+      <xs:attribute name="source-revision" type="GitRevision" use="required"/>
+      <xs:attribute name="candidate" type="Sha256" use="required"/>
+      <xs:attribute name="start-revision" type="GitRevision" use="required"/>
+      <xs:attribute name="brief" type="Text" use="required"/>
+      <xs:attribute name="approval" type="Text" use="required"/>
+      <xs:attribute name="review" type="xs:positiveInteger" use="required"/>
+      <xs:attribute name="kernel" type="Text" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

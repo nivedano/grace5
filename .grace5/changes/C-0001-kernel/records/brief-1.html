@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0001-kernel revision 1</title>
+<meta name="grace5:change" content="C-0001-kernel">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="1f71dc75856ad31be7b023306645be6c8f0538ddebc5e5cb331c26523d09cb47">
+<meta name="grace5:date" content="2026-11-12">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="533">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>The GRACE 5 kernel: settled semantics, three skills, five commands</h1>
+  <p class="lead">Brief for approval. Change <code>C-0001-kernel</code>, revision 1, 2026-11-12. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>The method documents, schemas, four examples with briefs, one defective brief, the case list, a measurement proposal and the ledger become the standing method.</li>
+        <li>The grace5 CLI provides init, check, run, status and close as that method defines them.</li>
+        <li>Three skills (prepare, execute, review) exist once. The harness packages are generated from them.</li>
+        <li>A conformance suite proves every case in models/architecture/conformance.md.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Writes src/**, skills/**, packages/**, models/architecture/**, package.json, bun.lock, tsconfig.json, README.md, .grace5/README.md, and the grace5 CLI.</li>
+        <li>Nothing is copied from GRACE 4; its tests are read as examples only. The surface is exactly the method&#x27;s list, with no deferred proposal. close refuses in the documented order and names the unmet obligation. Every mechanism has a ledger entry with a removal criterion. The kernel validates against the published XSD files, not a second copy of their rules.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>No pilots in other repositories; no release or publication of the package.</li>
+        <li>M2 is not defined here; models/architecture/m2-proposal.md is only a proposal to the owner&#x27;s measurement repository.</li>
+        <li>No GRACE 4 state read or written; no migration.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The project check script exited 0. Nothing more.</td><td class="limits">Not that the five commands behave as the method states.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><b>CK2</b> automated</td><td class="shows">The test suite exited 0. Nothing more.</td><td class="limits">Not that every case in conformance.md has a test, nor that each test fails when the kernel accepts the case. Review must compare the list.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><b>CK3</b> automated</td><td class="shows">The examples script exited 0. It is meant to cover: example contracts validate, example briefs pass the fidelity rules, and check reports the defective brief.</td><td class="limits">Only as strong as the script, which this change writes. The fidelity rules count items. They do not show that a brief describes its contract truthfully.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><b>CK4</b> automated</td><td class="shows">The package script exited 0. It is meant to cover: the three packages match the skills, and cli-reference.md matches the help text.</td><td class="limits">Not that a package installs or works in its harness.</td></tr>
+          <tr class="manual" data-check="CK5" data-kind="manual" data-required="true"><td><b>CK5</b> manual</td><td class="shows">You read example briefs A to D without their contracts and judged each sufficient for approval.</td><td class="limits">One person&#x27;s judgement of four briefs. It says nothing about briefs of later changes.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The CLI binary is named grace5.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Bun and TypeScript. XSD validation uses xmllint-wasm, the only runtime dependency.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The method documents under models/architecture were drafted before this contract. This change adopts them; no separate change does.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Single worktree, no new branch. The start run is written by hand at the scaffold commit, because no kernel exists yet. The kernel itself produces the final evidence.</span></li>
+        <li data-decision="D6"><b>D6</b><span>The brief is one self-contained HTML page for you to read, not XML. It is the only record without an XSD.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Review records are numbered review-n.xml. The approval record lists each check&#x27;s definition hash. The founding decisions left both open.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The kernel produces the final evidence for its own change, and the start run is written by hand. Only the review and CK5 stand outside.</li>
+        <li>All four automated checks run scripts this change writes. A pass is exit 0 and nothing more.</li>
+        <li>models/architecture/** is writable, so the change may rewrite the method it is checked against.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Carry out CK5. A brief you judge insufficient is recorded as failed, with the reason. CK5 is required.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>&quot;The accepted plan&quot; and its stages S0 to S4 are cited with no path, so the S2 case list of A2 cannot be located from the contract. A2 now cites conformance.md. Resolved: the labels were removed from the contract.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A3 names &quot;the deliberately defective brief&quot;; the Change mentions none, and its relation to the four briefs of A5 and CK5 is unstated. Resolved: the Change lists it, and A3 names it as the brief under examples/defective-brief that omits a protected path.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>N2 uses &quot;M2&quot; and &quot;the control center&quot; undefined, and says this change carries a proposal that the Change does not state. Resolved: N2 names the measurement repository and proposal file; the Change lists the proposal.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A4 requires a generated CLI reference; the contract gives it no location, and the method&#x27;s surface list, which K2 makes exact, has none. Resolved: A4 and the method name models/architecture/cli-reference.md.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>The Change makes models/architecture/m2-proposal.md part of the standing method, and K2 makes the surface exactly the one method.md lists. The Documents row of that list does not name m2-proposal.md. Resolved: the Documents row of method.md now names it.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 533 words against a target of 600, 5 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>1f71dc75856ad31be7b023306645be6c8f0538ddebc5e5cb331c26523d09cb47</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

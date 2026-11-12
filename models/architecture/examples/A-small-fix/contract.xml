@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0001-empty-export" revision="1" title="Reject an empty export destination">
+  <Problem>Export accepts an empty destination and attempts to write instead of failing validation. The focused regression test for this case exists and is red at the start revision.</Problem>
+  <Change>An empty export destination is rejected with the existing validation error, and no file is written.</Change>
+  <Constraints>
+    <Constraint id="K1">Exports to a valid destination behave as before, including the current filename behaviour: the file is written into the destination directory as export-YYYY-MM-DD.csv, dated in UTC, and replaces an existing file of that name.</Constraint>
+    <Constraint id="K2">The rejection reuses the existing validation error; no new error type or message is introduced.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">The storage format.</NonGoal>
+    <NonGoal id="N2">The public API of the export module.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1">An empty destination produces the validation error and writes no file.</Criterion>
+    <Criterion id="A2" checks="CK1 CK2 CK3">Valid destinations still export, under the filename K1 states.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/export/validate.ts</Path>
+    <Name>export validation</Name>
+    <Protected>src/storage/format.ts</Protected>
+    <Protected>src/export/index.ts</Protected>
+    <Protected>src/export/filename.test.ts</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="60">
+      <Command>bun test src/export/validate.test.ts</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun run verify</Command>
+    </Automated>
+    <Automated id="CK3" budget="60">
+      <Command>bun test src/export/filename.test.ts</Command>
+    </Automated>
+  </Checks>
+  <Decisions/>
+</Contract>

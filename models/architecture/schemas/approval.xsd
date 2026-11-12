@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GRACE 5 v0: records/approval-<rev>.xml. The decision of the owner on one contract revision, in the owner's quoted words. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="common.xsd"/>
+
+  <xs:element name="Approval">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Statement: the words of the owner, verbatim. Source: where they were said (conversation, message, commit). -->
+        <xs:element name="Statement" type="Text"/>
+        <xs:element name="Source" type="Text"/>
+        <!-- Bound: one per check of the approved revision with the hash of its definition, so run can tell an approved check from an amended one. -->
+        <xs:element name="Bound" minOccurs="0" maxOccurs="unbounded"><xs:complexType>
+          <xs:attribute name="check" type="xs:NCName" use="required"/>
+          <xs:attribute name="definition-sha256" type="Sha256" use="required"/>
+        </xs:complexType></xs:element>
+        <!-- Execution: present only when the owner authorized execution in a later statement than the approval. The one permitted addition to a written approval record. -->
+        <xs:element name="Execution" minOccurs="0"><xs:complexType>
+          <xs:sequence>
+            <xs:element name="Statement" type="Text"/>
+            <xs:element name="Source" type="Text"/>
+          </xs:sequence>
+          <xs:attribute name="date" type="xs:date" use="required"/>
+        </xs:complexType></xs:element>
+      </xs:sequence>
+      <xs:attributeGroup ref="Binding"/>
+      <!-- brief-sha256: hash of the brief-<rev>.html page the owner read. -->
+      <xs:attribute name="brief-sha256" type="Sha256" use="required"/>
+      <xs:attribute name="date" type="xs:date" use="required"/>
+      <xs:attribute name="owner" type="Text" use="required"/>
+      <xs:attribute name="decision" use="required"><xs:simpleType><xs:restriction base="xs:string">
+        <xs:enumeration value="approved"/><xs:enumeration value="rejected"/>
+      </xs:restriction></xs:simpleType></xs:attribute>
+      <!-- executes: whether the same statement authorizes execution. -->
+      <xs:attribute name="executes" type="xs:boolean" use="required"/>
+      <xs:attribute name="recorded-by" type="Text" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

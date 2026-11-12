@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0001-kernel" revision="1" title="The GRACE 5 kernel: settled semantics, three skills, five commands">
+  <Problem>The repository holds a scaffold and the founding decisions and nothing that runs: no method text, no schema, no skill, no command. The owner required a slim successor built from scratch and has ruled on its shape; the settled semantics, the skills and the kernel are unbuilt.</Problem>
+  <Change>The method document, its topic files, the XSD schemas, four worked examples with briefs, one deliberately defective brief, the conformance case list, a measurement proposal and the rationale ledger become the standing method under models/architecture. The grace5 CLI provides init, check, run, status and close as that method defines them. Three skills (prepare, execute, review) exist once and the harness packages are generated from them. A conformance suite proves every case in models/architecture/conformance.md.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="AGENTS.md">Nothing is copied from GRACE 4 or its tooling; its tests are read as examples and counterexamples only.</Constraint>
+    <Constraint id="K2" rule="models/architecture/method.md">The surface is exactly the one the method lists; no deferred proposal is implemented.</Constraint>
+    <Constraint id="K3" rule="models/architecture/evidence-records.md">close refuses in the order and for the reasons stated there, naming the unmet obligation.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">Every mechanism the kernel implements has a ledger entry with a removal criterion.</Constraint>
+    <Constraint id="K5">The kernel validates against the published XSD files themselves, not a second hand-written copy of their rules.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Pilots in other repositories, and release or publication of the package.</NonGoal>
+    <NonGoal id="N2">Defining the M2 measurement method, which belongs to the owner's separate measurement repository; models/architecture/m2-proposal.md is a proposal to it and no more.</NonGoal>
+    <NonGoal id="N3">Any read or write of GRACE 4 state, and any migration.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK2">Each of the five commands behaves as the method and its topic files state, on all three check kinds.</Criterion>
+    <Criterion id="A2" checks="CK2">Every case in models/architecture/conformance.md has a conformance test that fails when the kernel accepts the case.</Criterion>
+    <Criterion id="A3" checks="CK3">Every example contract validates against its XSD through the kernel, every example brief passes the fidelity rules of models/architecture/brief.md, and the brief under examples/defective-brief, which omits a protected path, is reported by check.</Criterion>
+    <Criterion id="A4" checks="CK4">The Claude plugin, OpenPackage and plain skills packages are generated from the canonical skills with no drift, and models/architecture/cli-reference.md is generated from the help text.</Criterion>
+    <Criterion id="A5" checks="CK5">The four example briefs suffice for approval without the contract, in the owner's judgement.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/**</Path>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>package.json</Path>
+    <Path>bun.lock</Path>
+    <Path>tsconfig.json</Path>
+    <Path>README.md</Path>
+    <Path>.grace5/README.md</Path>
+    <Name>grace5 CLI</Name>
+    <Protected>models/decisions/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>CLAUDE.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Manual id="CK5">
+      <Procedure>The owner reads the four example briefs under models/architecture/examples (A to D) without opening their contracts and states for each whether it would have sufficed for approval. Any brief judged insufficient is recorded as failed with the reason.</Procedure>
+    </Manual>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The CLI binary is named grace5.</Decision>
+    <Decision id="D2">Implementation is Bun and TypeScript; XSD validation uses the xmllint-wasm library as the one runtime dependency.</Decision>
+    <Decision id="D3">The method documents under models/architecture, drafted before this contract existed, are adopted by this change rather than by a separate one.</Decision>
+    <Decision id="D4">The change executes in the repository's single worktree with no new branch; the start run is written by hand at the scaffold commit because no kernel exists yet, and final evidence is produced by the kernel itself.</Decision>
+    <Decision id="D6">The brief is one self-contained HTML page for the owner to read, not XML; it is the only record without an XSD.</Decision>
+    <Decision id="D5">Review records are numbered review-n.xml and the approval record lists each check's definition hash, which the founding decisions left open.</Decision>
+  </Decisions>
+</Contract>

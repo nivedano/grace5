@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0004-bringup-trace revision 1</title>
+<meta name="grace5:change" content="C-0004-bringup-trace">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="a84e29f141b785c3d30e9491c7590c9aeb50e6bddfa37f15171f537a6362bf6b">
+<meta name="grace5:date" content="2026-11-12">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="498">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="3">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bring-up runs as named stages and app_main returns</h1>
+  <p class="lead">Brief for approval. Change <code>C-0004-bringup-trace</code>, revision 1, 2026-11-12. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>app_main runs each of 13 component inits as a named stage that logs begin and done.</li>
+        <li>Then it logs that all components initialized and returns.</li>
+        <li>A stage that fails enters diagnostic idle and names itself.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write src/firmware/main/main.c, the app_main bring-up sequence.</li>
+        <li>May write tools/capture_boot.py, tools/replay_log.py and tools/tests/data/boot-bench.log.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: initialization order does not change.</li>
+        <li>N2: no component&#x27;s own init logic changes.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/firmware/components/**">src/firmware/components/**</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The build command exited 0.</td><td class="limits">Partition fit is shown only if an oversized image fails the build.</td></tr>
+          <tr class="trace" data-check="CK2" data-kind="trace" data-required="true"><td><b>CK2</b> trace</td><td class="shows">A live boot of the candidate on BENCH-UNIT-01 printed begin and done for all 13 stages in order, then both closing lines, with no failure text.</td><td class="limits">One boot, one board. Order only, no timing. The companion controller&#x27;s absence is declared, not observed. Origin, device and build come from the capture script this change writes.</td></tr>
+          <tr class="trace optional" data-check="CK3" data-kind="trace" data-required="false"><td><b>CK3</b> trace, optional</td><td class="shows">The recorded log contains the first stage begin, the last stage done and both closing lines in order, with no failure text.</td><td class="limits">Nothing about the candidate. 4 of 28 markers, in a log this change writes. Not counted at close.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The live capture needs the board on the bench. Without it the change does not close.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The replay exercises only the four end markers, in a log captured from BENCH-UNIT-01 during this change. It never stands in for the live capture and names no environment. The full marker list rests on the live capture alone. A3 is advisory.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The failing-stage path is not provoked on hardware. Its only cover is no failure text on a clean boot.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The bench boots with no companion controller attached. Its stage still logging done is how the capture reads against K2. The absence is declared, not observed.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>K1 (stage deadlines) has no check.</li>
+        <li>K2 holds only if the operator&#x27;s declaration is true.</li>
+        <li>CK2 is refused unless the boot banner reports the device id and the commit.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Bench session: BENCH-UNIT-01 flashed with the committed candidate, console on COM7, companion controller detached.</li>
+        <li>Rule on the failure path and K1 as unverified, and K2 on a declared absence.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>A3 named CK3, which checks 4 of 28 markers. Resolved: A3 now claims only those four; D2 rests the full list on CK2.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>E1 was silent on the companion controller. Resolved: E1 and A2 state none attached; D4 records it as declared.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 498 words against a target of 600, 3 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>a84e29f141b785c3d30e9491c7590c9aeb50e6bddfa37f15171f537a6362bf6b</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

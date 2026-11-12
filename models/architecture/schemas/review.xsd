@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GRACE 5 v0: records/review-<n>.xml (K-8). One record per review pass; the highest n is current. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="common.xsd"/>
+
+  <xs:element name="Review">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Independence: who reviewed and what they had seen; a self-review states its limitation here. -->
+        <xs:element name="Independence" type="Text"/>
+        <xs:element name="Finding" minOccurs="0" maxOccurs="unbounded"><xs:complexType>
+          <xs:sequence>
+            <xs:element name="Text" type="Text"/>
+            <xs:element name="Resolution" type="Text" minOccurs="0"/>
+            <!-- OwnerDecision: the quoted words of the owner disposing of a finding that stays unresolved. -->
+            <xs:element name="OwnerDecision" type="Text" minOccurs="0"/>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:ID" use="required"/>
+          <xs:attribute name="severity" use="required"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="blocking"/><xs:enumeration value="non-blocking"/>
+          </xs:restriction></xs:simpleType></xs:attribute>
+          <xs:attribute name="status" use="required"><xs:simpleType><xs:restriction base="xs:string">
+            <xs:enumeration value="open"/><xs:enumeration value="resolved"/><xs:enumeration value="owner-disposed"/>
+          </xs:restriction></xs:simpleType></xs:attribute>
+          <xs:attribute name="path" type="Text"/>
+        </xs:complexType></xs:element>
+        <!-- Adequacy: per check, whether it discriminates the intended behaviour from its failure mode. -->
+        <xs:element name="Adequacy" minOccurs="0" maxOccurs="unbounded"><xs:complexType><xs:simpleContent>
+          <xs:extension base="Text">
+            <xs:attribute name="check" type="xs:NCName" use="required"/>
+            <xs:attribute name="discriminates" type="xs:boolean" use="required"/>
+          </xs:extension>
+        </xs:simpleContent></xs:complexType></xs:element>
+        <!-- Rule: the verdict on each project rule the contract cites. -->
+        <xs:element name="Rule" minOccurs="0" maxOccurs="unbounded"><xs:complexType><xs:simpleContent>
+          <xs:extension base="xs:string">
+            <xs:attribute name="rule" type="Text" use="required"/>
+            <xs:attribute name="verdict" use="required"><xs:simpleType><xs:restriction base="xs:string">
+              <xs:enumeration value="upheld"/><xs:enumeration value="violated"/><xs:enumeration value="not-applicable"/>
+            </xs:restriction></xs:simpleType></xs:attribute>
+          </xs:extension>
+        </xs:simpleContent></xs:complexType></xs:element>
+      </xs:sequence>
+      <xs:attributeGroup ref="Binding"/>
+      <xs:attribute name="n" type="xs:positiveInteger" use="required"/>
+      <xs:attribute name="date" type="xs:date" use="required"/>
+      <xs:attribute name="reviewer" type="Text" use="required"/>
+      <xs:attribute name="independence" use="required"><xs:simpleType><xs:restriction base="xs:string">
+        <xs:enumeration value="independent"/><xs:enumeration value="self"/>
+      </xs:restriction></xs:simpleType></xs:attribute>
+      <!-- The complete diff reviewed: start revision to end revision, and the candidate the end revision carries. -->
+      <xs:attribute name="start-revision" type="GitRevision" use="required"/>
+      <xs:attribute name="end-revision" type="GitRevision" use="required"/>
+      <xs:attribute name="candidate" type="Sha256" use="required"/>
+      <xs:attribute name="status" use="required"><xs:simpleType><xs:restriction base="xs:string">
+        <xs:enumeration value="completed"/><xs:enumeration value="incomplete"/>
+      </xs:restriction></xs:simpleType></xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GRACE 5 v0: types shared by the contract and every record. XSD 1.0, no namespace. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:simpleType name="ChangeId">
+    <xs:restriction base="xs:string"><xs:pattern value="C-[0-9]{4}(-[a-z0-9]+)*"/></xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Sha256">
+    <xs:restriction base="xs:string"><xs:pattern value="[0-9a-f]{64}"/></xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GitRevision">
+    <xs:restriction base="xs:string"><xs:pattern value="[0-9a-f]{40}"/></xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Text">
+    <xs:restriction base="xs:string"><xs:whiteSpace value="collapse"/><xs:minLength value="1"/></xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CheckKind">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="automated"/><xs:enumeration value="trace"/><xs:enumeration value="manual"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Where a trace log came from. A contract may also say "any"; a receipt never does. -->
+  <xs:simpleType name="Origin">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="live"/><xs:enumeration value="replay"/><xs:enumeration value="fixture"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Who established a fact: the capture command reported it during this run, the author wrote it in the contract, or nobody did. -->
+  <xs:simpleType name="IdentitySource">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="observed"/><xs:enumeration value="declared"/><xs:enumeration value="absent"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Attributes every record carries: the change, the contract revision and the hash of that revision of contract.xml. -->
+  <xs:attributeGroup name="Binding">
+    <xs:attribute name="change" type="ChangeId" use="required"/>
+    <xs:attribute name="revision" type="xs:positiveInteger" use="required"/>
+    <xs:attribute name="contract-sha256" type="Sha256" use="required"/>
+  </xs:attributeGroup>
+
+</xs:schema>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0003-reconnect-sample revision 1</title>
+<meta name="grace5:change" content="C-0003-reconnect-sample">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="74c934fd0a9e8bb4a44dfaa032599205a73bf04403c4d75c148d3e703fdeb329">
+<meta name="grace5:date" content="2026-11-12">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="404">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="2">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Show the current sample after a device reconnect</h1>
+  <p class="lead">Brief for approval. Change <code>C-0003-reconnect-sample</code>, revision 1, 2026-11-12. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>While unplugged the display shows &quot;No device&quot;, as today.</li>
+        <li>The return of the USB link empties the sample cache.</li>
+        <li>The display then shows no reading until the next device sample arrives, and shows that sample.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write src/display/sample_cache.py (the SampleCache component).</li>
+        <li>May write src/display/reading_view.py.</li>
+        <li>SampleCache subscribes to the existing link_up notification from src/display/link_monitor.py. That file is not modified.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: the device protocol is unchanged.</li>
+        <li>N2: the sampling frequency is unchanged.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/protocol/**">src/protocol/**</li>
+        <li data-protected="config/sampling.toml">config/sampling.toml</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The sample cache unit tests ran to completion without failure within 120 seconds.</td><td class="limits">A pass is command completion only. It does not show that the tests cover link_up, and shows nothing about the screen.</td></tr>
+          <tr class="manual" data-check="CK2" data-kind="manual" data-required="true"><td><b>CK2</b> manual</td><td class="shows">A named person recorded the display build identity and the firmware version, unplugged bench sensor SENSOR-BENCH-02, saw &quot;No device&quot; and no reading, replugged it, saw no reading, then saw exactly the device&#x27;s next sample.</td><td class="limits">One observation by one person on one device. No tool verifies it. A brief flash of the old value can be missed by eye. The moment between unplugging and the notice appearing is not judged.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>You accepted a manual bench check for the on-screen result, because no harness drives a physical reconnect.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Between reconnect and the next sample the display is blank, not a placeholder value.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The bench observation counts only if the About screen identity contains the first eight characters of the source revision. The contract says &quot;abbreviated&quot; without a length. Seven characters would not match.</li>
+        <li>If LinkMonitor does not already emit link_up on every return of the link, the work stops for a revision. Its file is outside the write boundary.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>One bench session per final candidate with SENSOR-BENCH-02 on firmware fw-2.4.1, performed by you or a person you name.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>No criterion covered K1 during the unplugged interval. Resolved: new criterion A3 requires the existing &quot;No device&quot; notice, and CK2 confirms it.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Environment E1 declared the device firmware as the build, so CK2 was not tied to the candidate. Resolved: E1 is now build=&quot;@revision&quot; for the display application, and CK2 records it.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>&quot;Reconnect event&quot; was undefined. Resolved: the Change defines it as the link_up notification from the existing LinkMonitor.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 404 words against a target of 600, 2 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>74c934fd0a9e8bb4a44dfaa032599205a73bf04403c4d75c148d3e703fdeb329</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

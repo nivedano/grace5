@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0001-kernel" revision="1" contract-sha256="1f71dc75856ad31be7b023306645be6c8f0538ddebc5e5cb331c26523d09cb47" brief-sha256="07e5a065beebb43fd0b5c3ca21873a0963996d694bac4722310c5829b84ca028" date="2026-11-12" owner="nivedano" decision="approved" executes="true" recorded-by="Claude (lead agent of the preparing session)">
+  <Statement>Approved, go ahead</Statement>
+  <Source>The owner's answer to the owner-gate question for C-0001-kernel revision 1 in the Claude Code session of 2026-11-12, given after reading records/brief-1.html. In the same session the owner answered the question of how to commit with: "Commit on master (Recommended)".</Source>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="ec4431d09e468bedf3067d6144afb26f6dfb3b2ca074bd57dd46f0dbaf0dd019"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="6af19dad49002c54fe547f263c35624fc0594592b494d02d839fa67f13fab0ce"/>
+</Approval>

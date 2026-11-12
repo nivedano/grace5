@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0003-reconnect-sample" revision="1" title="Show the current sample after a device reconnect">
+  <Problem>After the sensor device disconnects and reconnects, the display keeps showing the reading cached before the disconnect until some later refresh. An operator reads a stale value as current. While the device is unplugged the display already replaces the reading with its "No device" notice; the defect begins when the link returns.</Problem>
+  <Change>On reconnect the cached sample is invalidated, so the display shows no reading until the next device sample arrives and then shows that sample. A reconnect event is the link_up notification that the existing LinkMonitor in src/display/link_monitor.py emits when the USB link returns after a loss; SampleCache subscribes to it, and this change does not modify link_monitor.py.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="docs/rules/display.md#stale-data">A reading is never presented as current once its source is known to be gone.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">The device protocol is unchanged.</NonGoal>
+    <NonGoal id="N2">The sampling frequency is unchanged.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1">A reconnect event invalidates the sample cache, and the cache stays empty until a new sample is received.</Criterion>
+    <Criterion id="A2" checks="CK2">On the declared device, the first reading displayed after a reconnect equals the next sample the device sends, not the value shown before the disconnect.</Criterion>
+    <Criterion id="A3" checks="CK2">While the device is unplugged the display still shows the "No device" notice and no reading, so K1 holds across the whole interval from disconnect to the next sample.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/display/sample_cache.py</Path>
+    <Path>src/display/reading_view.py</Path>
+    <Name>SampleCache</Name>
+    <Protected>src/protocol/**</Protected>
+    <Protected>config/sampling.toml</Protected>
+  </Affected>
+  <Checks>
+    <Environment id="E1" device="SENSOR-BENCH-02" build="@revision">Bench sensor on its USB link, running released device firmware fw-2.4.1. The build under test is the display application built from the candidate revision; its About screen shows the build identity, which contains the abbreviated source revision.</Environment>
+    <Automated id="CK1" budget="120">
+      <Command>uv run pytest tests/display/test_sample_cache.py -q</Command>
+    </Automated>
+    <Manual id="CK2" environment="E1">
+      <Procedure>Record the build identity from the About screen and the firmware version from the device console. With the display showing a live reading, note it and unplug the device. Confirm the display shows "No device" and no reading. While it is unplugged, change the measured input so the next sample must differ. Plug the device back in. Read the next sample from the device console and compare it with the first reading the display shows. Pass: the display shows "No device" while unplugged, no reading between reconnect and that sample, then shows exactly that sample. Fail: the noted pre-disconnect value is displayed at any moment after the "No device" notice appears.</Procedure>
+    </Manual>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The owner accepts a manual obligation for A2: no harness drives a physical reconnect, and the unit test alone does not show what the screen displays.</Decision>
+    <Decision id="D2">Between reconnect and the next sample the display is blank, not a placeholder value.</Decision>
+  </Decisions>
+</Contract>

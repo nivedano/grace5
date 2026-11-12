@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0001-empty-export revision 1</title>
+<meta name="grace5:change" content="C-0001-empty-export">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="c71f327fbe297bc2d4f0234c0a95f3ca2c5dbf3583f61b8d92dc0fd52b05bfc8">
+<meta name="grace5:date" content="2026-11-12">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="138">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="3">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Reject an empty export destination</h1>
+  <p class="lead">Brief for approval. Change <code>C-0001-empty-export</code>, revision 1, 2026-11-12. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>An export with an empty destination is rejected and writes no file.</li>
+        <li>The rejection uses the validation error that already exists. No new error type or message appears.</li>
+        <li>Exports to a valid destination behave as before. The file is still written into the destination directory as export-YYYY-MM-DD.csv, dated in UTC, and still replaces an existing file of that name.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Only src/export/validate.ts (export validation) may be written. Its tests may be written too without being listed.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: the storage format is left alone.</li>
+        <li>N2: the public API of the export module is left alone.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/storage/format.ts">src/storage/format.ts</li>
+        <li data-protected="src/export/index.ts">src/export/index.ts</li>
+        <li data-protected="src/export/filename.test.ts">src/export/filename.test.ts</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The focused validation test file, red today, completes without failure.</td><td class="limits">Command completion only. It does not show that the test asserts the existing error or the absence of a written file. The test file is writable under this change, so the review must read it.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><b>CK2</b> automated</td><td class="shows">The project verify command completes without failure.</td><td class="limits">Command completion only. The contract does not say what verify covers.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><b>CK3</b> automated</td><td class="shows">The existing filename test completes without failure. The test file is protected, so the change cannot weaken it.</td><td class="limits">The contract says this test covers the filename behaviour. A pass does not show that it asserts each part: the name pattern, the UTC date and the replacement of an existing file.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li>None recorded.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The fix must fit in validate.ts. If the write is triggered from the protected src/export/index.ts, the change cannot finish without a new revision and a new approval.</li>
+        <li>The regression test and the fix are edited by the same agent. Weakening the test would turn CK1 green without the behaviour.</li>
+        <li>Unchanged filename behaviour rests on one existing test, now named as CK3 and protected. Its coverage of the UTC date and of replacement is asserted by the contract, not shown.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>The contract records no owner decisions. Confirm from memory that none were made during preparation.</li>
+        <li>Confirm that the filename behaviour stated in K1 is the behaviour you know today.</li>
+        <li>No manual procedure and no bench session is required.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>K1 cites &quot;the current filename behaviour&quot; without defining it or naming a check that exercises it. State the behaviour or name the test that covers it. Resolved: K1 now states the behaviour, CK3 names the covering test, A2 cites CK3, and the test file is protected.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 138 words against a target of 600, 3 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>c71f327fbe297bc2d4f0234c0a95f3ca2c5dbf3583f61b8d92dc0fd52b05bfc8</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

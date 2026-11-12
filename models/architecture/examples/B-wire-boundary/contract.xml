@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0002-seq-wire" revision="1" title="Agree the wire representation of the sequence field">
+  <Problem>The canonical wire definition states the signed 64-bit sequence field as a zigzag varint of at most ten bytes. The consumer decodes it as an unsigned varint, and the producer, which holds the value as a big integer, encodes without a range test, so values near the sign and range boundaries do not survive a round trip.</Problem>
+  <Change>The wire format does not move: the canonical definition is unchanged and a conforming peer is unaffected. The consumer decodes the sequence field as the zigzag varint the definition states, and both sides reject a value outside the supported domain. The supported domain is every integer from -9223372036854775808 through 9223372036854775807. Out of domain means, on encode, an integer outside that range and, on decode, a varint longer than ten bytes or one carrying more than 64 bits.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="docs/rules/wire.md#W-3">Both sides take the field from the one canonical definition, wire/messages.schema.</Constraint>
+    <Constraint id="K2" rule="docs/rules/wire.md#W-5">The framing version is unchanged.</Constraint>
+    <Constraint id="K3">The shared vectors hold at least these cases. Accepted, each with its exact bytes: 0, -1, 1, 9223372036854775807 and -9223372036854775808. Rejected on encode: 9223372036854775808 and -9223372036854775809. Rejected on decode: an eleven-byte varint and a ten-byte varint carrying 65 bits.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Transport retries.</NonGoal>
+    <NonGoal id="N2">The UI.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK2">Every accepted vector of K3 encodes to its stated bytes and decodes to its stated value on both sides.</Criterion>
+    <Criterion id="A2" checks="CK1 CK2">Every rejected vector of K3 is refused, the encode cases by the producer and the decode cases by the consumer, and a vector marked rejected that is accepted fails the conformance command.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>wire/vectors/seq.json</Path>
+    <Path>producer/src/codec/**</Path>
+    <Path>consumer/src/codec/**</Path>
+    <Name>producer-consumer wire boundary</Name>
+    <Protected>wire/messages.schema</Protected>
+    <Protected>wire/framing-version.schema</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" cwd="producer" budget="300">
+      <Command>bun run conformance --definition ../wire/messages.schema --vectors ../wire/vectors/seq.json</Command>
+    </Automated>
+    <Automated id="CK2" cwd="consumer" budget="300">
+      <Command>bun run conformance --definition ../wire/messages.schema --vectors ../wire/vectors/seq.json</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">If a change to the framing version or to the canonical definition proves necessary, it is a material revision of this contract and needs a new approval before any such work.</Decision>
+    <Decision id="D2">No check tests that the vectors hold the K3 cases; the owner leaves that to review of the diff.</Decision>
+  </Decisions>
+</Contract>

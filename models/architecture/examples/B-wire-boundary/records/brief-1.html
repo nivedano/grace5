@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0002-seq-wire revision 1</title>
+<meta name="grace5:change" content="C-0002-seq-wire">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="622f8d722efa6a49d3a7f8363ed435ee533f862032248de4b5b33e6566bf7ed1">
+<meta name="grace5:date" content="2026-11-12">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="316">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="2">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Agree the wire representation of the sequence field</h1>
+  <p class="lead">Brief for approval. Change <code>C-0002-seq-wire</code>, revision 1, 2026-11-12. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>The wire format does not move. The canonical definition already states the sequence field as a zigzag varint of at most ten bytes.</li>
+        <li>The consumer is corrected: it decodes that zigzag varint, not an unsigned varint.</li>
+        <li>The producer refuses to encode an integer outside -9223372036854775808 through 9223372036854775807.</li>
+        <li>The consumer refuses a varint longer than ten bytes or carrying more than 64 bits.</li>
+        <li>The values 0, -1, 1 and both range limits survive a round trip on both sides.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>The shared vectors, wire/vectors/seq.json, may be edited. They must hold nine named cases: five accepted with exact bytes, two rejected on encode, two rejected on decode.</li>
+        <li>Producer codec code, producer/src/codec/**, may be edited.</li>
+        <li>Consumer codec code, consumer/src/codec/**, may be edited.</li>
+        <li>The change crosses the producer-consumer wire boundary. The framing version is unchanged.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>Transport retries.</li>
+        <li>The UI.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="wire/messages.schema">wire/messages.schema</li>
+        <li data-protected="wire/framing-version.schema">wire/framing-version.schema</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The producer conformance command passed against the definition and the shared vectors. A vector marked rejected that is accepted fails it.</td><td class="limits">It proves no more than the vectors contain.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><b>CK2</b> automated</td><td class="shows">The consumer conformance command passed against the same definition and vectors.</td><td class="limits">Each side is tested against the vectors, never against the other side. No real transport is exercised.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>If the framing version or the canonical definition needs a change, that is a revised contract. You approve it again before any such work.</span></li>
+        <li data-decision="D2"><b>D2</b><span>No check tests that the vectors hold the named cases. You leave that to review of the diff.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The vectors are writable. Both checks can pass on a vectors file that lacks a named case.</li>
+        <li>A peer that mirrors the old unsigned decoding will disagree with the corrected consumer.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>No manual procedure and no bench session.</li>
+        <li>Review of the diff must confirm that the vectors hold all nine cases with the right bytes.</li>
+        <li>You accept that agreement rests on shared vectors, with no cross-side or live test.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>&quot;Supported domain&quot; was undefined. Resolved: the Change gives the range and what out of domain means on each side.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A2 was not served by the vectors. Resolved: K3 names the rejected cases, A2 refers to them, D2 leaves their presence to review.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Representation and changing side were not stated. Resolved: the format stays, the consumer is corrected, the definition is protected.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 316 words against a target of 600, 2 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>622f8d722efa6a49d3a7f8363ed435ee533f862032248de4b5b33e6566bf7ed1</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

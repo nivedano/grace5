@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GRACE 5 v0: records/run-<n>.xml, the receipt of one `run` invocation (K-6, K-7, K-12). Written once, never edited. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="common.xsd"/>
+
+  <xs:simpleType name="Verdict">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="passed"/>
+      <xs:enumeration value="failed"/>
+      <xs:enumeration value="blocked"/>        <!-- manual: the procedure could not be carried out -->
+      <xs:enumeration value="not-attempted"/>  <!-- selected but never started -->
+      <xs:enumeration value="skipped"/>        <!-- deliberately not run -->
+      <xs:enumeration value="cancelled"/>      <!-- stopped by budget or operator -->
+      <xs:enumeration value="interrupted"/>    <!-- the run died under it -->
+      <xs:enumeration value="refused"/>        <!-- not authorized, or provenance missing or mismatched -->
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- What a passed verdict claims, and no more than that. -->
+  <xs:simpleType name="Claim">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="command-completion"/>
+      <xs:enumeration value="marker-sequence-live"/>
+      <xs:enumeration value="marker-sequence-replay"/>
+      <xs:enumeration value="marker-sequence-fixture"/>
+      <xs:enumeration value="marker-sequence-unattributed"/>
+      <xs:enumeration value="observation"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="Run">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Preexisting: on a start run, each dirty or untracked source path found before work began. Identified, never adopted. -->
+        <xs:element name="Preexisting" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="Result" type="Result" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="Binding"/>
+      <xs:attribute name="n" type="xs:positiveInteger" use="required"/>
+      <xs:attribute name="run-id" type="Text" use="required"/>
+      <xs:attribute name="started" type="xs:dateTime" use="required"/>
+      <xs:attribute name="ended" type="xs:dateTime" use="required"/>
+      <xs:attribute name="status" use="required"><xs:simpleType><xs:restriction base="xs:string">
+        <xs:enumeration value="completed"/><xs:enumeration value="interrupted"/>
+      </xs:restriction></xs:simpleType></xs:attribute>
+      <!-- start: this run records the start revision and the starting-state observations of the automated checks, failures included. -->
+      <xs:attribute name="start" type="xs:boolean" default="false"/>
+      <!-- Source identity (source-identity.md): the commit, whether source paths were dirty, and the hash of the source tree with record paths excluded. -->
+      <xs:attribute name="source-revision" type="GitRevision" use="required"/>
+      <xs:attribute name="dirty" type="xs:boolean" use="required"/>
+      <xs:attribute name="candidate" type="Sha256" use="required"/>
+      <!-- kernel: name and version of the tool that wrote the record, or "by-hand" before the kernel existed. -->
+      <xs:attribute name="kernel" type="Text" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="Result">
+    <xs:sequence>
+      <!-- Definition: the exact check definition that was run or observed, as canonical text. -->
+      <xs:element name="Definition" type="xs:string"/>
+      <xs:element name="Trace" type="TraceProvenance" minOccurs="0"/>
+      <xs:element name="Observation" type="Observation" minOccurs="0"/>
+      <xs:element name="Reason" type="Text" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="check" type="xs:NCName" use="required"/>
+    <xs:attribute name="kind" type="CheckKind" use="required"/>
+    <xs:attribute name="required" type="xs:boolean" use="required"/>
+    <xs:attribute name="definition-sha256" type="Sha256" use="required"/>
+    <xs:attribute name="verdict" type="Verdict" use="required"/>
+    <xs:attribute name="claim" type="Claim"/>
+    <xs:attribute name="cwd" type="Text"/>
+    <xs:attribute name="exit" type="xs:integer"/>
+    <xs:attribute name="elapsed-ms" type="xs:nonNegativeInteger"/>
+    <xs:attribute name="log" type="Text"/>
+    <xs:attribute name="log-sha256" type="Sha256"/>
+    <!-- Declared environment identity, copied from the Environment the check names in the contract. -->
+    <xs:attribute name="environment" type="Text"/>
+  </xs:complexType>
+
+  <!-- Provenance of a trace (K-12; trace-provenance.md). The artifact identity is log and log-sha256 of the Result. -->
+  <xs:complexType name="TraceProvenance">
+    <xs:sequence>
+      <xs:element name="Missing" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="Forbidden" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="origin" type="Origin"/>
+    <xs:attribute name="origin-source" type="IdentitySource" use="required"/>
+    <!-- run-echo: the capture command reported the run id of this run, so the provenance line was produced in this run. -->
+    <xs:attribute name="run-echo" type="xs:boolean" use="required"/>
+    <xs:attribute name="capture-started" type="xs:dateTime" use="required"/>
+    <xs:attribute name="capture-ended" type="xs:dateTime" use="required"/>
+    <xs:attribute name="device" type="Text"/>
+    <xs:attribute name="device-source" type="IdentitySource" use="required"/>
+    <xs:attribute name="build" type="Text"/>
+    <xs:attribute name="build-source" type="IdentitySource" use="required"/>
+    <xs:attribute name="matched" type="xs:nonNegativeInteger" use="required"/>
+    <xs:attribute name="expected" type="xs:nonNegativeInteger" use="required"/>
+  </xs:complexType>
+
+  <!-- A manual observation (K-7): who saw what, on which build and environment. The candidate and check definition come from the enclosing Run and Result. -->
+  <xs:complexType name="Observation">
+    <xs:simpleContent><xs:extension base="Text">
+      <xs:attribute name="by" type="Text" use="required"/>
+      <xs:attribute name="at" type="xs:dateTime" use="required"/>
+      <xs:attribute name="build" type="Text" use="required"/>
+      <xs:attribute name="environment" type="Text" use="required"/>
+      <xs:attribute name="reference" type="Text"/>
+    </xs:extension></xs:simpleContent>
+  </xs:complexType>
+</xs:schema>

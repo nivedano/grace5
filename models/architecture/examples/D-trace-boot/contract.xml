@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0004-bringup-trace" revision="1" title="Bring-up runs as named stages and app_main returns">
+  <Problem>In the firmware project the compile gate proves only that the image builds; it says nothing about bring-up order. Boot behaviour is confirmed only when someone reads the boot log off the board, and app_main loops forever, so nothing marks the end of bring-up.</Problem>
+  <Change>app_main runs each component init as a named stage that logs begin and done, logs that all components initialized, and then returns. A stage that fails enters diagnostic idle and names itself.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="docs/design-rules.md#DR-FW-3">Stage deadlines hold as the rule states them.</Constraint>
+    <Constraint id="K2" rule="docs/design-rules.md#DR-FW-9">An absent companion controller is not a boot failure.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">The order of component initialization is unchanged.</NonGoal>
+    <NonGoal id="N2">No component's own init logic changes.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1">The image builds and fits its partition.</Criterion>
+    <Criterion id="A2" checks="CK2">A clean boot of the candidate build on the board, with no companion controller attached, logs begin and done for every stage in bring-up order, then that all components initialized, then the return from app_main, with no diagnostic idle and no panic.</Criterion>
+    <Criterion id="A3" checks="CK3">The recorded log replays off the bench with the first stage begin, the last stage done and both closing lines in order, and no failure text.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/firmware/main/main.c</Path>
+    <Path>tools/capture_boot.py</Path>
+    <Path>tools/replay_log.py</Path>
+    <Path>tools/tests/data/boot-bench.log</Path>
+    <Name>app_main bring-up sequence</Name>
+    <Protected>src/firmware/components/**</Protected>
+  </Affected>
+  <Checks>
+    <Environment id="E1" device="BENCH-UNIT-01" build="@revision">development board on the bench, flashed with the candidate build, console on COM7, no companion controller attached.</Environment>
+    <Automated id="CK1" budget="900">
+      <Command>build.cmd</Command>
+    </Automated>
+    <Trace id="CK2" origin="live" environment="E1" budget="60">
+      <Command>uv run tools/capture_boot.py --port COM7 --reset --seconds 20</Command>
+      <Expect>&gt;&gt; stage console_init: begin</Expect>
+      <Expect>&lt;&lt; stage console_init: done</Expect>
+      <Expect>&gt;&gt; stage config_init: begin</Expect>
+      <Expect>&lt;&lt; stage config_init: done</Expect>
+      <Expect>&gt;&gt; stage core_init: begin</Expect>
+      <Expect>&lt;&lt; stage core_init: done</Expect>
+      <Expect>&gt;&gt; stage companion_init: begin</Expect>
+      <Expect>&lt;&lt; stage companion_init: done</Expect>
+      <Expect>&gt;&gt; stage radio_link_connect: begin</Expect>
+      <Expect>&lt;&lt; stage radio_link_connect: done</Expect>
+      <Expect>&gt;&gt; stage radio_update_check: begin</Expect>
+      <Expect>&lt;&lt; stage radio_update_check: done</Expect>
+      <Expect>&gt;&gt; stage beacon_init: begin</Expect>
+      <Expect>&lt;&lt; stage beacon_init: done</Expect>
+      <Expect>&gt;&gt; stage identity_ready: begin</Expect>
+      <Expect>&lt;&lt; stage identity_ready: done</Expect>
+      <Expect>&gt;&gt; stage beacon_start: begin</Expect>
+      <Expect>&lt;&lt; stage beacon_start: done</Expect>
+      <Expect>&gt;&gt; stage storage_init: begin</Expect>
+      <Expect>&lt;&lt; stage storage_init: done</Expect>
+      <Expect>&gt;&gt; stage sessions_init: begin</Expect>
+      <Expect>&lt;&lt; stage sessions_init: done</Expect>
+      <Expect>&gt;&gt; stage sensor_init: begin</Expect>
+      <Expect>&lt;&lt; stage sensor_init: done</Expect>
+      <Expect>&gt;&gt; stage network_init: begin</Expect>
+      <Expect>&lt;&lt; stage network_init: done</Expect>
+      <Expect>All components initialized</Expect>
+      <Expect>Returned from app_main()</Expect>
+      <Forbid>diagnostic idle</Forbid>
+      <Forbid>Guru Meditation Error</Forbid>
+      <Forbid>abort() was called</Forbid>
+    </Trace>
+    <Trace id="CK3" origin="replay" required="false" budget="30">
+      <Command>uv run tools/replay_log.py tools/tests/data/boot-bench.log</Command>
+      <Expect>&gt;&gt; stage console_init: begin</Expect>
+      <Expect>&lt;&lt; stage network_init: done</Expect>
+      <Expect>All components initialized</Expect>
+      <Expect>Returned from app_main()</Expect>
+      <Forbid>diagnostic idle</Forbid>
+      <Forbid>Guru Meditation Error</Forbid>
+      <Forbid>abort() was called</Forbid>
+    </Trace>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The live capture CK2 needs the board on the bench; without it the change does not close.</Decision>
+    <Decision id="D2">The replay CK3 exercises only the four end markers, in a log captured from BENCH-UNIT-01 during this change, and never substitutes for CK2; that the full marker list matches what the firmware prints rests on CK2 alone. CK3 is optional, so A3 is advisory and does not gate close. It carries no environment, because a recorded log cannot be the candidate build.</Decision>
+    <Decision id="D3">The failing-stage path is not provoked on hardware in this change; it is covered only by the Forbid markers staying absent on a clean boot.</Decision>
+    <Decision id="D4">E1 declares the companion controller absent, and CK2 then shows companion_init still logs done, which is how the capture reads against K2. The absence is declared by the bench operator, not observed by the capture.</Decision>
+  </Decisions>
+</Contract>

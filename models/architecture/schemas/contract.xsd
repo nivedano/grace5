@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GRACE 5 v0: contract.xml, the one approved artifact of a change (K-2). Eight sections, fixed order. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="common.xsd"/>
+
+  <xs:element name="Contract">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Problem" type="Text"/>
+        <xs:element name="Change" type="Text"/>
+        <xs:element name="Constraints">
+          <xs:complexType><xs:sequence>
+            <xs:element name="Constraint" type="Constraint" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence></xs:complexType>
+        </xs:element>
+        <xs:element name="NonGoals">
+          <xs:complexType><xs:sequence>
+            <xs:element name="NonGoal" type="Item" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence></xs:complexType>
+        </xs:element>
+        <xs:element name="Acceptance">
+          <xs:complexType><xs:sequence>
+            <xs:element name="Criterion" type="Criterion" maxOccurs="unbounded"/>
+          </xs:sequence></xs:complexType>
+        </xs:element>
+        <xs:element name="Affected">
+          <xs:complexType><xs:sequence>
+            <!-- Path: a path or glob the change may write. Name: a project-native name (component, boundary, rule). Protected: a path or glob the change must not write. -->
+            <xs:element name="Path" type="Text" maxOccurs="unbounded"/>
+            <xs:element name="Name" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Protected" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence></xs:complexType>
+        </xs:element>
+        <xs:element name="Checks">
+          <xs:complexType><xs:sequence>
+            <xs:element name="Environment" type="Environment" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:choice maxOccurs="unbounded">
+              <xs:element name="Automated" type="Automated"/>
+              <xs:element name="Trace" type="Trace"/>
+              <xs:element name="Manual" type="Manual"/>
+            </xs:choice>
+          </xs:sequence></xs:complexType>
+        </xs:element>
+        <xs:element name="Decisions">
+          <xs:complexType><xs:sequence>
+            <xs:element name="Decision" type="Item" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence></xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="id" type="ChangeId" use="required"/>
+      <xs:attribute name="revision" type="xs:positiveInteger" use="required"/>
+      <xs:attribute name="title" type="Text" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="Item">
+    <xs:simpleContent><xs:extension base="Text">
+      <xs:attribute name="id" type="xs:ID" use="required"/>
+    </xs:extension></xs:simpleContent>
+  </xs:complexType>
+
+  <!-- rule: the path of a standing project rule this constraint cites (optionally path#id); cited, never restated. -->
+  <xs:complexType name="Constraint">
+    <xs:simpleContent><xs:extension base="Item">
+      <xs:attribute name="rule" type="Text"/>
+    </xs:extension></xs:simpleContent>
+  </xs:complexType>
+
+  <!-- checks: the declared association of K-6. It is a declaration, never proof. -->
+  <xs:complexType name="Criterion">
+    <xs:simpleContent><xs:extension base="Item">
+      <xs:attribute name="checks" type="xs:IDREFS" use="required"/>
+    </xs:extension></xs:simpleContent>
+  </xs:complexType>
+
+  <!-- Declared environment identity. device and build are what the author expects; build="@revision" means the observed build identity must contain the abbreviated source revision of the candidate. -->
+  <xs:complexType name="Environment">
+    <xs:simpleContent><xs:extension base="Text">
+      <xs:attribute name="id" type="xs:ID" use="required"/>
+      <xs:attribute name="device" type="Text"/>
+      <xs:attribute name="build" type="Text"/>
+    </xs:extension></xs:simpleContent>
+  </xs:complexType>
+
+  <xs:attributeGroup name="CheckCommon">
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+    <xs:attribute name="required" type="xs:boolean" default="true"/>
+    <xs:attribute name="environment" type="xs:IDREF"/>
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="Execution">
+    <xs:attribute name="cwd" type="Text" default="."/>
+    <xs:attribute name="budget" type="xs:positiveInteger" use="required"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="Automated">
+    <xs:sequence>
+      <xs:element name="Command" type="Text"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="CheckCommon"/>
+    <xs:attributeGroup ref="Execution"/>
+  </xs:complexType>
+
+  <!-- The command produces the log on its standard output and error, or in the file named by log (relative to cwd). Markers are plain substrings: Expect elements must be found in document order; a Forbid must not appear anywhere. min and max bound how many times an Expect marker occurs before the next one. No time bound beyond budget. -->
+  <xs:complexType name="Trace">
+    <xs:sequence>
+      <xs:element name="Command" type="Text"/>
+      <xs:element name="Expect" maxOccurs="unbounded">
+        <xs:complexType><xs:simpleContent><xs:extension base="Text">
+          <xs:attribute name="min" type="xs:positiveInteger" default="1"/>
+          <xs:attribute name="max" type="xs:positiveInteger"/>
+        </xs:extension></xs:simpleContent></xs:complexType>
+      </xs:element>
+      <xs:element name="Forbid" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="CheckCommon"/>
+    <xs:attributeGroup ref="Execution"/>
+    <xs:attribute name="log" type="Text"/>
+    <!-- origin: the provenance the check requires. "any" accepts every origin; the receipt still labels what it got. -->
+    <xs:attribute name="origin" use="required">
+      <xs:simpleType><xs:restriction base="xs:string">
+        <xs:enumeration value="live"/><xs:enumeration value="replay"/><xs:enumeration value="fixture"/><xs:enumeration value="any"/>
+      </xs:restriction></xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="Manual">
+    <xs:sequence>
+      <xs:element name="Procedure" type="Text"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="CheckCommon"/>
+  </xs:complexType>
+</xs:schema>
