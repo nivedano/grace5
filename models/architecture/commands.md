@@ -43,3 +43,31 @@ Without a change id it lists every change with one line each. A change that fail
 ## close
 
 Applies the eight steps of `evidence-records.md` and writes `close.xml`, or refuses at the first unmet step. A closed change refuses further runs.
+
+## Output conventions
+
+Output is plain text, one fact per line, stable enough to grep. The invocation is `grace5 [--root <dir>] <command> [change] [flags]`; `--root` defaults to the current directory. Exit status is 0 on success, 1 on a refusal, a defect or a run in which any executed check did not pass, and 2 on a usage error.
+
+| Command | Lines |
+|---|---|
+| `check` | `contract-sha256: <hash>`, `definition <id>: <hash>` per check, `words: <n> (target 600)`, `checks: <n> (target 8)`, and `defect: <text>` per defect. A brief defect names the file and the omitted item, for example `defect: brief-1.html: protected path src/x/** is missing`. |
+| `run` | `run <n>: <check> <verdict>` per result with the reason after a colon when there is one, then `receipt: <path>`. A refused invocation prints `refused: <reason>` and writes no receipt. |
+| `status` | `change:`, `revision:`, `authorization:` (`unapproved`, `approved`, `approved for execution`, `rejected` or `altered after approval`), `start:`, `candidate: <hash> (clean)` or `(dirty)`, `outside: <path>` and `protected: <path>` per file, `check <id>: <verdict>` followed by `, counts` or `, does not count: <reason>`, `review:`, `interrupted: run-<n>`, `closed:` when closed, and last `next: <obligation>`. In the listing, one line per change: `<id>: <authorization>, next: <obligation>` or `<id>: malformed: <first error>`. |
+| `close` | `closed: <path of close.xml>`, or `refused: <obligation>`. |
+
+The reasons use fixed phrases, so a reader and a test can rely on them: `no approval for revision <n>`, `contract altered after approval`, `approval does not authorize execution`, `no brief for revision <n>`, `brief does not match the approval`, `no start run`, `working tree is dirty`, `protected path touched: <path>`, `check <id>: no result`, `check <id>: current result is <verdict>`, `check <id>: recorded on an earlier candidate`, `check <id>: recorded dirty`, `check <id>: definition changed since the result`, `no review`, `review is incomplete`, `review covers an earlier candidate`, `blocking finding <id> is open`, `no adequacy statement for check <id>`, `check <id> does not discriminate`, `rule violated: <rule>`, and for refused results `amended in unapproved revision`, `live provenance missing`, `origin is <origin>, check requires <origin>`, `device mismatch`, `build mismatch`, `identity missing`, and also `change is malformed: <error>`, `approval does not bind check <id>`, `change is closed`, `a start run exists: run-<n>`, `review covers an earlier revision`, `not a git repository`, `no source revision`. A missing origin is written `origin is unattributed, check requires <origin>`.
+
+## Details settled in implementation
+
+- The change id comes before the flags; `--check` takes one id and may be repeated.
+- A refusal is printed on standard error; everything else on standard output.
+- A trace command that exits nonzero is `failed` before provenance is considered.
+- A run whose start state is red exits 1 and is still a valid start run; a recorded observation exits 0 unless it is refused; a skip exits 0.
+- `--from <file>` reads `name=value` lines with the names of the observation flags.
+- A check that serves no criterion is a `defect:` of `check` and does not make the change malformed.
+- A contract altered after approval is treated like an unapproved revision: the checks the last executing approval binds still run.
+- Dirty state counts every untracked file individually (`git status --porcelain --untracked-files=all`).
+- The brief hash is over the raw bytes of the page; only the contract reads CRLF as LF.
+- `Result/@log` is relative to the change directory; printed paths are relative to the root.
+- `status` shows uncommitted writes to protected and outside paths as well as committed ones, and reuses the close phrases after `does not count:`.
+- On Windows a run can only be interrupted by killing it, so the interrupted receipt is written on POSIX systems only; the log directory without a receipt is the record everywhere.

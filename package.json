@@ -7,10 +7,24 @@
   "private": true,
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "examples:verify": "bun src/tools/examples-verify.ts",
+    "package": "bun src/tools/package.ts",
+    "package:verify": "bun src/tools/package.ts --verify"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.9.0"
-  }
+  },
+  "dependencies": {
+    "xmllint-wasm": "^5.3.0"
+  },
+  "bin": {
+    "grace5": "src/cli.ts"
+  },
+  "files": [
+    "src",
+    "skills",
+    "models/architecture"
+  ]
 }
