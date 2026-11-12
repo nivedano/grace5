@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0001-kernel" revision="1" contract-sha256="1f71dc75856ad31be7b023306645be6c8f0538ddebc5e5cb331c26523d09cb47" n="8" run-id="c834d4984c224a4aae7b22ca92090204" started="2026-11-12T16:49:11.304Z" ended="2026-11-12T16:49:11.304Z" status="completed" source-revision="07517a1e3b72957d186c833033bb8fa702d534f3" dirty="false" candidate="25405d1770d36a99fedc82bb481c9e5bb4c57716221d4c26a86c26f6543be3e0" kernel="grace5 0.0.0">
+  <Result check="CK5" kind="manual" required="true" definition-sha256="6af19dad49002c54fe547f263c35624fc0594592b494d02d839fa67f13fab0ce" verdict="passed" claim="observation">
+    <Definition>kind=manual
+id=CK5
+required=true
+procedure=The owner reads the four example briefs under models/architecture/examples (A to D) without opening their contracts and states for each whether it would have sufficed for approval. Any brief judged insufficient is recorded as failed with the reason.
+</Definition>
+    <Observation by="nivedano (owner)" at="2026-11-12T16:49:11.304Z" build="source revision 07517a1e" environment="The owner's own reading of the four brief pages under models/architecture/examples, in a browser, during the Claude Code session of 2026-11-12">Owner's words, to the question whether each of the four example briefs A to D would have sufficed for approval without opening its contract: "All four suffice". Earlier in the session, after a first reading: "Regarding the example briefs. This is generally okay.", with requests since applied (boundaries section to the bottom, check ids explained, clearer evidence column headings).</Observation>
+  </Result>
+</Run>
