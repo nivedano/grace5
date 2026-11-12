@@ -32,7 +32,8 @@ code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monosp
 table{width:100%;border-collapse:collapse}
 th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
 td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
-td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
 td:first-child b{color:var(--ink)}
 td.shows{width:40%}
 td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
@@ -70,35 +71,14 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
       </ul>
     </div>
   </section>
-  <section id="boundaries">
-    <h2>Where it may reach</h2>
-    <div>
-      <ul class="writes">
-        <li>The shared vectors, wire/vectors/seq.json, may be edited. They must hold nine named cases: five accepted with exact bytes, two rejected on encode, two rejected on decode.</li>
-        <li>Producer codec code, producer/src/codec/**, may be edited.</li>
-        <li>Consumer codec code, consumer/src/codec/**, may be edited.</li>
-        <li>The change crosses the producer-consumer wire boundary. The framing version is unchanged.</li>
-      </ul>
-      <h3>Left alone on purpose</h3>
-      <ul class="exclusions">
-        <li>Transport retries.</li>
-        <li>The UI.</li>
-      </ul>
-      <h3>Must not be written</h3>
-      <ul class="protected">
-        <li data-protected="wire/messages.schema">wire/messages.schema</li>
-        <li data-protected="wire/framing-version.schema">wire/framing-version.schema</li>
-      </ul>
-    </div>
-  </section>
   <section id="evidence">
     <h2>What will count as done</h2>
     <div>
       <table>
         <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
         <tbody>
-          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The producer conformance command passed against the definition and the shared vectors. A vector marked rejected that is accepted fails it.</td><td class="limits">It proves no more than the vectors contain.</td></tr>
-          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><b>CK2</b> automated</td><td class="shows">The consumer conformance command passed against the same definition and vectors.</td><td class="limits">Each side is tested against the vectors, never against the other side. No real transport is exercised.</td></tr>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Producer conformance suite</span><b>CK1</b> automated</td><td class="shows">The producer conformance command passed against the definition and the shared vectors. A vector marked rejected that is accepted fails it.</td><td class="limits">It proves no more than the vectors contain.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Consumer conformance suite</span><b>CK2</b> automated</td><td class="shows">The consumer conformance command passed against the same definition and vectors.</td><td class="limits">Each side is tested against the vectors, never against the other side. No real transport is exercised.</td></tr>
         </tbody>
       </table>
     </div>
@@ -128,6 +108,27 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
         <li>No manual procedure and no bench session.</li>
         <li>Review of the diff must confirm that the vectors hold all nine cases with the right bytes.</li>
         <li>You accept that agreement rests on shared vectors, with no cross-side or live test.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>The shared vectors, wire/vectors/seq.json, may be edited. They must hold nine named cases: five accepted with exact bytes, two rejected on encode, two rejected on decode.</li>
+        <li>Producer codec code, producer/src/codec/**, may be edited.</li>
+        <li>Consumer codec code, consumer/src/codec/**, may be edited.</li>
+        <li>The change crosses the producer-consumer wire boundary. The framing version is unchanged.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>Transport retries.</li>
+        <li>The UI.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="wire/messages.schema">wire/messages.schema</li>
+        <li data-protected="wire/framing-version.schema">wire/framing-version.schema</li>
       </ul>
     </div>
   </section>

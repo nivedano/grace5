@@ -32,7 +32,8 @@ code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monosp
 table{width:100%;border-collapse:collapse}
 th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
 td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
-td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
 td:first-child b{color:var(--ink)}
 td.shows{width:40%}
 td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
@@ -68,34 +69,15 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
       </ul>
     </div>
   </section>
-  <section id="boundaries">
-    <h2>Where it may reach</h2>
-    <div>
-      <ul class="writes">
-        <li>Only src/export/validate.ts (export validation) may be written. Its tests may be written too without being listed.</li>
-      </ul>
-      <h3>Left alone on purpose</h3>
-      <ul class="exclusions">
-        <li>N1: the storage format is left alone.</li>
-        <li>N2: the public API of the export module is left alone.</li>
-      </ul>
-      <h3>Must not be written</h3>
-      <ul class="protected">
-        <li data-protected="src/storage/format.ts">src/storage/format.ts</li>
-        <li data-protected="src/export/index.ts">src/export/index.ts</li>
-        <li data-protected="src/export/filename.test.ts">src/export/filename.test.ts</li>
-      </ul>
-    </div>
-  </section>
   <section id="evidence">
     <h2>What will count as done</h2>
     <div>
       <table>
         <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
         <tbody>
-          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The focused validation test file, red today, completes without failure.</td><td class="limits">Command completion only. It does not show that the test asserts the existing error or the absence of a written file. The test file is writable under this change, so the review must read it.</td></tr>
-          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><b>CK2</b> automated</td><td class="shows">The project verify command completes without failure.</td><td class="limits">Command completion only. The contract does not say what verify covers.</td></tr>
-          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><b>CK3</b> automated</td><td class="shows">The existing filename test completes without failure. The test file is protected, so the change cannot weaken it.</td><td class="limits">The contract says this test covers the filename behaviour. A pass does not show that it asserts each part: the name pattern, the UTC date and the replacement of an existing file.</td></tr>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Focused export regression test</span><b>CK1</b> automated</td><td class="shows">The focused validation test file, red today, completes without failure.</td><td class="limits">Command completion only. It does not show that the test asserts the existing error or the absence of a written file. The test file is writable under this change, so the review must read it.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Project verify script</span><b>CK2</b> automated</td><td class="shows">The project verify command completes without failure.</td><td class="limits">Command completion only. The contract does not say what verify covers.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Existing filename test</span><b>CK3</b> automated</td><td class="shows">The existing filename test completes without failure. The test file is protected, so the change cannot weaken it.</td><td class="limits">The contract says this test covers the filename behaviour. A pass does not show that it asserts each part: the name pattern, the UTC date and the replacement of an existing file.</td></tr>
         </tbody>
       </table>
     </div>
@@ -125,6 +107,25 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
         <li>The contract records no owner decisions. Confirm from memory that none were made during preparation.</li>
         <li>Confirm that the filename behaviour stated in K1 is the behaviour you know today.</li>
         <li>No manual procedure and no bench session is required.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Only src/export/validate.ts (export validation) may be written. Its tests may be written too without being listed.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: the storage format is left alone.</li>
+        <li>N2: the public API of the export module is left alone.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/storage/format.ts">src/storage/format.ts</li>
+        <li data-protected="src/export/index.ts">src/export/index.ts</li>
+        <li data-protected="src/export/filename.test.ts">src/export/filename.test.ts</li>
       </ul>
     </div>
   </section>

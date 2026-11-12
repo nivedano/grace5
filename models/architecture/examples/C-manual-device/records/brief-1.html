@@ -32,7 +32,8 @@ code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monosp
 table{width:100%;border-collapse:collapse}
 th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
 td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
-td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
 td:first-child b{color:var(--ink)}
 td.shows{width:40%}
 td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
@@ -68,34 +69,14 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
       </ul>
     </div>
   </section>
-  <section id="boundaries">
-    <h2>Where it may reach</h2>
-    <div>
-      <ul class="writes">
-        <li>May write src/display/sample_cache.py (the SampleCache component).</li>
-        <li>May write src/display/reading_view.py.</li>
-        <li>SampleCache subscribes to the existing link_up notification from src/display/link_monitor.py. That file is not modified.</li>
-      </ul>
-      <h3>Left alone on purpose</h3>
-      <ul class="exclusions">
-        <li>N1: the device protocol is unchanged.</li>
-        <li>N2: the sampling frequency is unchanged.</li>
-      </ul>
-      <h3>Must not be written</h3>
-      <ul class="protected">
-        <li data-protected="src/protocol/**">src/protocol/**</li>
-        <li data-protected="config/sampling.toml">config/sampling.toml</li>
-      </ul>
-    </div>
-  </section>
   <section id="evidence">
     <h2>What will count as done</h2>
     <div>
       <table>
         <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
         <tbody>
-          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The sample cache unit tests ran to completion without failure within 120 seconds.</td><td class="limits">A pass is command completion only. It does not show that the tests cover link_up, and shows nothing about the screen.</td></tr>
-          <tr class="manual" data-check="CK2" data-kind="manual" data-required="true"><td><b>CK2</b> manual</td><td class="shows">A named person recorded the display build identity and the firmware version, unplugged bench sensor SENSOR-BENCH-02, saw &quot;No device&quot; and no reading, replugged it, saw no reading, then saw exactly the device&#x27;s next sample.</td><td class="limits">One observation by one person on one device. No tool verifies it. A brief flash of the old value can be missed by eye. The moment between unplugging and the notice appearing is not judged.</td></tr>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Sample cache unit tests</span><b>CK1</b> automated</td><td class="shows">The sample cache unit tests ran to completion without failure within 120 seconds.</td><td class="limits">A pass is command completion only. It does not show that the tests cover link_up, and shows nothing about the screen.</td></tr>
+          <tr class="manual" data-check="CK2" data-kind="manual" data-required="true"><td><span>Bench reconnect procedure</span><b>CK2</b> manual</td><td class="shows">A named person recorded the display build identity and the firmware version, unplugged bench sensor SENSOR-BENCH-02, saw &quot;No device&quot; and no reading, replugged it, saw no reading, then saw exactly the device&#x27;s next sample.</td><td class="limits">One observation by one person on one device. No tool verifies it. A brief flash of the old value can be missed by eye. The moment between unplugging and the notice appearing is not judged.</td></tr>
         </tbody>
       </table>
     </div>
@@ -123,6 +104,26 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
     <div>
       <ul>
         <li>One bench session per final candidate with SENSOR-BENCH-02 on firmware fw-2.4.1, performed by you or a person you name.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write src/display/sample_cache.py (the SampleCache component).</li>
+        <li>May write src/display/reading_view.py.</li>
+        <li>SampleCache subscribes to the existing link_up notification from src/display/link_monitor.py. That file is not modified.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: the device protocol is unchanged.</li>
+        <li>N2: the sampling frequency is unchanged.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/protocol/**">src/protocol/**</li>
+        <li data-protected="config/sampling.toml">config/sampling.toml</li>
       </ul>
     </div>
   </section>

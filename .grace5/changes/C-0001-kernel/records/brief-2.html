@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0001-kernel revision 2</title>
+<meta name="grace5:change" content="C-0001-kernel">
+<meta name="grace5:revision" content="2">
+<meta name="grace5:contract-sha256" content="8885f29ef5c0b7a5815bc923486acf1c108e5692123a0f2a7e75c0156765f9a0">
+<meta name="grace5:date" content="2026-11-12">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="difference">
+<meta name="grace5:previous-revision" content="1">
+<meta name="grace5:words" content="587">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>The GRACE 5 kernel: settled semantics, three skills, five commands</h1>
+  <p class="lead">Brief for approval. Change <code>C-0001-kernel</code>, revision 2, 2026-11-12. Difference from revision 1, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>Changed: the standing method carries three worked examples with briefs (A to C), not four. The boot-trace example D is removed from the tree.</li>
+        <li>Changed: the deliberately defective brief stays, rebuilt on example C.</li>
+        <li>Unchanged: everything else. The CLI and its five commands, the three skills, the generated packages, the conformance suite, all constraints, and all five checks by id.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Project check script</span><b>CK1</b> automated</td><td class="shows">Unchanged. The project check script exited 0. Nothing more.</td><td class="limits">Not that the five commands behave as the method states.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>The test suite</span><b>CK2</b> automated</td><td class="shows">Unchanged. The test suite exited 0. Nothing more.</td><td class="limits">Not that every case in conformance.md has a test, nor that each test fails when the kernel accepts the case. Review must compare the list. With example D gone, these tests are the only running demonstration of trace checks.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Examples verify script</span><b>CK3</b> automated</td><td class="shows">Command unchanged, coverage smaller in revision 2. The examples script exited 0. It is meant to cover: the three example contracts validate, the three example briefs pass the fidelity rules, and check reports the defective brief.</td><td class="limits">No longer covers any example with a trace check. Only as strong as the script, which this change writes. The fidelity rules count items. They do not show that a brief describes its contract truthfully.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages match the skills</span><b>CK4</b> automated</td><td class="shows">Unchanged. The package script exited 0. It is meant to cover: the three packages match the skills, and cli-reference.md matches the help text.</td><td class="limits">Not that a package installs or works in its harness.</td></tr>
+          <tr class="manual" data-check="CK5" data-kind="manual" data-required="true"><td><span>Your reading of example briefs</span><b>CK5</b> manual</td><td class="shows">Changed in revision 2. You read example briefs A to C, not A to D, without their contracts and judged each sufficient for approval.</td><td class="limits">One person&#x27;s judgement of three briefs. You no longer judge a brief that presents a trace check. It says nothing about briefs of later changes.</td></tr>
+        </tbody>
+      </table>
+      <h3>Gone from revision 1</h3>
+      <ul>
+        <li>No check and no criterion is removed. Criterion A5 and check CK5 now say three briefs, not four.</li>
+        <li>Lost evidence: a worked trace example validated by CK3, and your judgement of a trace brief under CK5.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Unchanged. The CLI binary is named grace5.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Unchanged. Bun and TypeScript. XSD validation uses xmllint-wasm, the only runtime dependency.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Unchanged. The method documents under models/architecture were drafted before this contract. This change adopts them; no separate change does.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Unchanged. Single worktree, no new branch. The start run is written by hand at the scaffold commit, because no kernel exists yet. The kernel itself produces the final evidence.</span></li>
+        <li data-decision="D6"><b>D6</b><span>Unchanged. The brief is one self-contained HTML page for you to read, not XML. It is the only record without an XSD.</span></li>
+        <li data-decision="D7"><b>D7</b><span>New in revision 2. The boot-trace example carried a real device name and real log strings from a private repository. You asked on 2026-11-12 that it be removed from the tree. It remains in git history. The defective brief is rebuilt on example C. Trace checks stay demonstrated in prose in trace-provenance.md and by the conformance tests.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Unchanged. Review records are numbered review-n.xml. The approval record lists each check&#x27;s definition hash. The founding decisions left both open.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The device name and log strings stay in git history. Removal from the tree does not remove them from any copy of the repository.</li>
+        <li>No worked example shows a trace check any more. Authors and readers have prose and tests only, and you never read a brief with a trace row.</li>
+        <li>The procedure of CK5 changed, so the approval of revision 1 no longer binds it. CK5 cannot be run until this revision is approved. CK1 to CK4 keep their definitions and still run.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Changed: carry out CK5 on three briefs, A to C, not four. It stays required. A brief you judge insufficient is recorded as failed, with the reason.</li>
+        <li>New: confirm that D7 reports your request of 2026-11-12 correctly.</li>
+        <li>Rule on whether leaving the removed example in git history is enough.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Unchanged: writes src/**, skills/**, packages/**, models/architecture/**, package.json, bun.lock, tsconfig.json, README.md, .grace5/README.md, and the grace5 CLI.</li>
+        <li>Within that boundary, revision 2 now deletes the boot-trace example under models/architecture/examples and rebuilds the defective brief.</li>
+        <li>Constraints unchanged: nothing copied from GRACE 4; the surface is exactly the method&#x27;s list; close refuses in the documented order; every mechanism has a ledger entry; validation uses the published XSD files.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>Unchanged: no pilots in other repositories; no release or publication of the package.</li>
+        <li>Unchanged: M2 is not defined here; models/architecture/m2-proposal.md is only a proposal to your measurement repository.</li>
+        <li>Unchanged: no GRACE 4 state read or written; no migration.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/decisions/**">models/decisions/** (unchanged)</li>
+        <li data-protected="AGENTS.md">AGENTS.md (unchanged)</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md (unchanged)</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li><span>None</span><span>No mechanical finding in revision 2. Every criterion names a check that exists, the counts in the Change, A5 and CK5 agree, and every cited path exists.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 587 words against a target of 600, 5 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>8885f29ef5c0b7a5815bc923486acf1c108e5692123a0f2a7e75c0156765f9a0</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

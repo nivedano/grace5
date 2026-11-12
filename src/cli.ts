@@ -74,8 +74,8 @@ Checks, for the selected change:
   3. Every rule path, without its #fragment, exists in the repository.
   4. Protected globs are well formed, and no Path is wholly covered by a Protected.
   5. Every XML record present validates against its schema and names this change.
-  6. Every brief passes the mechanical fidelity rules, against the contract text whose hash
-     it carries when that is the current text.
+  6. The brief of the contract's current revision carries the current contract hash and
+     passes every mechanical fidelity rule; briefs of other revisions are not checked.
   7. An approved approval has one Bound per check; a rejected one has executes="false".
 
 Output:

@@ -8,16 +8,16 @@ An independent subagent that never saw the authoring conversation receives the c
 
 ## Layout and minimum content
 
-The page keeps the template's sections, in order, and its style block unchanged. No script, no external asset.
+The page keeps the template's sections, in order, and its style block unchanged. The order puts what the owner decides on first and the boundaries near the end, at the owner's request. No script, no external asset.
 
 | Section (`id`) | Must contain |
 |---|---|
 | `result` | The intended result as theses the owner can agree or disagree with. |
-| `boundaries` | Every material boundary; every exclusion, one item per NonGoal, in the list of class `exclusions`; every protected path as its own item with `data-protected` equal to the path. |
-| `evidence` | One table row per check with `data-check`, `data-kind` and `data-required`: what a pass shows, and for every manual or trace check, and wherever it matters for an automated one, what it does not show. |
+| `evidence` | One table row per check with `data-check`, `data-kind` and `data-required`, opening with a plain name for the check in a few words so the owner never has to decode an id: what a pass shows, and for every manual or trace check, and wherever it matters for an automated one, what it does not show. |
 | `decisions` | Every Decision of the contract, as an item with `data-decision` equal to its id, in words the owner will recognise. |
 | `risks` | Consequential risks of the contract as written. |
 | `burdens` | What the owner must do or rule on: a bench session, a manual procedure, an open limitation. |
+| `boundaries` | Every material boundary; every exclusion, one item per NonGoal, in the list of class `exclusions`; every protected path as its own item with `data-protected` equal to the path. |
 | `findings` | The mechanical findings returned, each with `data-finding` of `resolved` or `open`. |
 | footer | Contract words and check count against the target with the reason for any excess, and the contract hash. |
 
@@ -29,7 +29,7 @@ Commands stay in the contract unless their consequence matters to approval. A di
 
 Two checks, neither of which replaces the other.
 
-Mechanical, by `grace5 check` on every brief, reading only the `meta` elements and the `data-` attributes: `grace5:contract-sha256` equals the contract's hash; every check of the contract has exactly one evidence row with the same kind and required flag, and every manual or trace row has a non-empty limitation cell; every Protected path of the contract has an item whose `data-protected` equals it; there are at least as many exclusion items as NonGoals; every Decision id has an item with that `data-decision`; `grace5:words` and `grace5:checks` equal what `check` counts (`commands.md`); no finding is `open`. A brief that fails is reported with the omitted item named. `examples/defective-brief/` holds a brief that omits a protected path, and the check must expose it.
+Mechanical, by `grace5 check` on the brief of the contract's current revision (briefs of earlier revisions are history), reading only the `meta` elements and the `data-` attributes: `grace5:contract-sha256` is present and equals the contract's hash, and `grace5:revision` agrees with the file name; every check of the contract has exactly one evidence row with the same kind and required flag, and every manual or trace row has a non-empty limitation cell; every Protected path of the contract has an item whose `data-protected` equals it; there are at least as many exclusion items as NonGoals; every Decision id has an item with that `data-decision`; `grace5:words` and `grace5:checks` equal what `check` counts (`commands.md`); no finding is `open`. A brief that fails is reported with the omitted item named. `examples/defective-brief/` holds a brief that omits a protected path, and the check must expose it.
 
 Human, by the owner: the owner compares the listed decisions with their own memory of the conversation. That is the one check no auditor can do, and it is why the decisions are listed in recognisable words. The sampled comparison of brief and owner statements is defined in `m2-proposal.md`.
 

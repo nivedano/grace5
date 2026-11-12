@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0001-kernel" revision="2" contract-sha256="8885f29ef5c0b7a5815bc923486acf1c108e5692123a0f2a7e75c0156765f9a0" brief-sha256="46b5bf74caa264c6d2f01c097ba5190b9d492ad5c17a312bd706749ba3d4670c" date="2026-11-12" owner="nivedano" decision="rejected" executes="false" recorded-by="Claude (lead agent of the executing session)">
+  <Statement>Yeah, I see it's all of work. Let's keep it. No bother.</Statement>
+  <Source>The owner's answer to the owner-gate question for C-0001-kernel revision 2 in the Claude Code session of 2026-11-12, given on records/brief-2.html. Revision 2 proposed removing the boot-trace example; the owner chose to keep it, so the contract is restored to the approved text of revision 1 and number 2 is not reused.</Source>
+</Approval>

@@ -32,7 +32,8 @@ code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monosp
 table{width:100%;border-collapse:collapse}
 th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
 td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
-td:first-child{white-space:nowrap;color:var(--muted);font-size:13px}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
 td:first-child b{color:var(--ink)}
 td.shows{width:40%}
 td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
@@ -68,33 +69,15 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
       </ul>
     </div>
   </section>
-  <section id="boundaries">
-    <h2>Where it may reach</h2>
-    <div>
-      <ul class="writes">
-        <li>May write src/firmware/main/main.c, the app_main bring-up sequence.</li>
-        <li>May write tools/capture_boot.py, tools/replay_log.py and tools/tests/data/boot-bench.log.</li>
-      </ul>
-      <h3>Left alone on purpose</h3>
-      <ul class="exclusions">
-        <li>N1: initialization order does not change.</li>
-        <li>N2: no component&#x27;s own init logic changes.</li>
-      </ul>
-      <h3>Must not be written</h3>
-      <ul class="protected">
-        <li data-protected="src/firmware/components/**">src/firmware/components/**</li>
-      </ul>
-    </div>
-  </section>
   <section id="evidence">
     <h2>What will count as done</h2>
     <div>
       <table>
         <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
         <tbody>
-          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><b>CK1</b> automated</td><td class="shows">The build command exited 0.</td><td class="limits">Partition fit is shown only if an oversized image fails the build.</td></tr>
-          <tr class="trace" data-check="CK2" data-kind="trace" data-required="true"><td><b>CK2</b> trace</td><td class="shows">A live boot of the candidate on BENCH-UNIT-01 printed begin and done for all 13 stages in order, then both closing lines, with no failure text.</td><td class="limits">One boot, one board. Order only, no timing. The companion controller&#x27;s absence is declared, not observed. Origin, device and build come from the capture script this change writes.</td></tr>
-          <tr class="trace optional" data-check="CK3" data-kind="trace" data-required="false"><td><b>CK3</b> trace, optional</td><td class="shows">The recorded log contains the first stage begin, the last stage done and both closing lines in order, with no failure text.</td><td class="limits">Nothing about the candidate. 4 of 28 markers, in a log this change writes. Not counted at close.</td></tr>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Firmware build</span><b>CK1</b> automated</td><td class="shows">The build command exited 0.</td><td class="limits">Partition fit is shown only if an oversized image fails the build.</td></tr>
+          <tr class="trace" data-check="CK2" data-kind="trace" data-required="true"><td><span>Live boot log capture</span><b>CK2</b> trace</td><td class="shows">A live boot of the candidate on BENCH-UNIT-01 printed begin and done for all 13 stages in order, then both closing lines, with no failure text.</td><td class="limits">One boot, one board. Order only, no timing. The companion controller&#x27;s absence is declared, not observed. Origin, device and build come from the capture script this change writes.</td></tr>
+          <tr class="trace optional" data-check="CK3" data-kind="trace" data-required="false"><td><span>Recorded boot log replay</span><b>CK3</b> trace, optional</td><td class="shows">The recorded log contains the first stage begin, the last stage done and both closing lines in order, with no failure text.</td><td class="limits">Nothing about the candidate. 4 of 28 markers, in a log this change writes. Not counted at close.</td></tr>
         </tbody>
       </table>
     </div>
@@ -126,6 +109,24 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
       <ul>
         <li>Bench session: BENCH-UNIT-01 flashed with the committed candidate, console on COM7, companion controller detached.</li>
         <li>Rule on the failure path and K1 as unverified, and K2 on a declared absence.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write src/firmware/main/main.c, the app_main bring-up sequence.</li>
+        <li>May write tools/capture_boot.py, tools/replay_log.py and tools/tests/data/boot-bench.log.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: initialization order does not change.</li>
+        <li>N2: no component&#x27;s own init logic changes.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/firmware/components/**">src/firmware/components/**</li>
       </ul>
     </div>
   </section>
