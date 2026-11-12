@@ -15,7 +15,7 @@ Validates and executes nothing. For the selected change:
 3. Every `rule` path, without its `#fragment`, exists in the repository. Paths under Affected are not required to exist.
 4. Protected globs are well formed, and no `Path` is wholly covered by a `Protected`.
 5. Every XML record present validates against its schema and names this change.
-6. Every brief passes the mechanical fidelity rules of `brief.md`, against the contract text whose hash it carries when that is the current text.
+6. The brief whose `grace5:revision` equals the contract's revision carries the current contract hash and passes every mechanical fidelity rule of `brief.md`; a missing or different hash is itself a defect. Briefs of other revisions are history and are not checked.
 7. An approval that is `approved` has one `Bound` per check; one that is `rejected` has `executes="false"`.
 
 It prints the contract hash, each check's definition hash, and size against target. Words are the whitespace-separated tokens of all element text in `contract.xml`, attribute values excluded. Checks are all check elements, optional ones included.
@@ -64,7 +64,7 @@ The reasons use fixed phrases, so a reader and a test can rely on them: `no appr
 - A trace command that exits nonzero is `failed` before provenance is considered.
 - A run whose start state is red exits 1 and is still a valid start run; a recorded observation exits 0 unless it is refused; a skip exits 0.
 - `--from <file>` reads `name=value` lines with the names of the observation flags.
-- A check that serves no criterion is a `defect:` of `check` and blocks nothing. Every other defect, a brief fidelity defect included, makes `run` and `close` refuse.
+- A check that serves no criterion is a `defect:` of `check` and blocks nothing. Every other defect, a brief fidelity defect included, makes `close` refuse. `run` refuses on a defect of the contract or of an approval or run record at any time, and on a defect of the current revision's brief only once that revision is approved, so a draft brief of a revision awaiting approval never stops the checks the last approval still binds.
 - A contract altered after approval is treated like an unapproved revision: the checks the last executing approval binds still run.
 - Dirty state counts every untracked file individually (`git status --porcelain --untracked-files=all`).
 - The brief hash is over the raw bytes of the page; only the contract reads CRLF as LF.

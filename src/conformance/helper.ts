@@ -373,6 +373,8 @@ export interface BriefOptions {
   revision?: number;
   omitProtected?: string[];
   openFinding?: boolean;
+  /** Replaces the grace5:contract-sha256 meta value; null leaves the meta element out. */
+  contractShaMeta?: string | null;
 }
 
 export interface ApprovalOptions {
@@ -678,7 +680,7 @@ export class Scenario {
       `<title>Brief: ${def.id} revision ${rev}</title>`,
       `<meta name="grace5:change" content="${def.id}">`,
       `<meta name="grace5:revision" content="${rev}">`,
-      `<meta name="grace5:contract-sha256" content="${info.contractSha}">`,
+      ...(o.contractShaMeta === null ? [] : [`<meta name="grace5:contract-sha256" content="${o.contractShaMeta ?? info.contractSha}">`]),
       `<meta name="grace5:date" content="${today()}">`,
       `<meta name="grace5:writer" content="independent">`,
       `<meta name="grace5:basis" content="${basis}">`,

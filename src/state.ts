@@ -42,6 +42,8 @@ export interface ChangeState {
   readonly defects: readonly string[];
   /** The defects that hold run and close: all of them except a check that serves no criterion. */
   readonly blocking: readonly string[];
+  /** The defects of the current revision's brief, a part of `blocking`. They hold a run only once that revision is approved. */
+  readonly briefDefects: readonly string[];
   /** The start run names a revision this repository cannot resolve, so the complete diff cannot be computed. */
   readonly startUnresolved: boolean;
   readonly authorization: Authorization;
@@ -174,12 +176,19 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
   const brief = contract === undefined ? undefined : records.briefs.get(contract.revision);
   const authorization = contract === undefined || report === undefined ? "unapproved" : authorizationOf(contract, report.sha256, approval);
 
+  const currentBriefDefects: string[] = [];
   if (contract !== undefined && report !== undefined) {
-    // Check rule 6: a brief is held to the contract text whose hash it carries when that is the current text.
+    // Check rule 6: the brief of the contract's revision carries the current hash and passes every fidelity rule.
+    // Briefs of other revisions are history. The file name decides the revision; a meta that disagrees is a defect.
     for (const file of records.briefs.values()) {
-      if (file.brief.meta.get("grace5:contract-sha256") !== report.sha256) continue;
-      for (const defect of briefDefects(file.brief, { contract, sha256: report.sha256, words: report.words })) defects.push(`${file.file}: ${defect}`);
+      const stated = file.brief.meta.get("grace5:revision");
+      const named = file.revision === contract.revision;
+      if (!named && stated !== String(contract.revision)) continue;
+      if (stated !== String(file.revision)) currentBriefDefects.push(`${file.file}: grace5:revision is ${stated ?? "missing"}, the file name says ${String(file.revision)}`);
+      if (!named) continue;
+      for (const defect of briefDefects(file.brief, { contract, sha256: report.sha256, words: report.words })) currentBriefDefects.push(`${file.file}: ${defect}`);
     }
+    defects.push(...currentBriefDefects);
     // Check rule 7.
     for (const record of records.approvals.values()) {
       if (record.decision === "rejected") {
@@ -231,10 +240,13 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
 
   const obligation = ((): string | undefined => {
     if (malformed !== undefined || contract === undefined || report === undefined) return `change is malformed: ${malformed ?? "contract.xml could not be read"}`;
-    // Step 1: no blocking defect of check first, then the approval.
-    if (blocking[0] !== undefined) return `change has defects: ${blocking[0]}`;
+    // Step 1: no blocking defect of check, and the approval. A defect of the current brief is named after the state of
+    // the approval, because a contract altered after approval makes its brief defective and the alteration is the cause.
+    const other = blocking.find((defect) => !currentBriefDefects.includes(defect));
+    if (other !== undefined) return `change has defects: ${other}`;
     const unauthorized = authorizationObligation(authorization, contract.revision);
     if (unauthorized !== undefined) return unauthorized;
+    if (blocking[0] !== undefined) return `change has defects: ${blocking[0]}`;
     // A missing or wrong Bound of the current approval is already a defect of check (rule 7), so this is a second guard.
     const unbound = contract.checks.find((check) => !(approval?.bound.some((b) => b.check === check.id && b.definitionSha256 === check.definitionSha256) ?? false));
     if (unbound !== undefined) return `approval does not bind check ${unbound.id}`;
@@ -270,6 +282,7 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     malformed,
     defects,
     blocking,
+    briefDefects: currentBriefDefects,
     startUnresolved,
     authorization,
     approval,

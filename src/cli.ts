@@ -202,9 +202,10 @@ Usage:
   grace5 [--root <dir>] close [change]
 
 Checks these in order and refuses at the first unmet one, naming it:
-  1. check reports no defect that blocks, and the contract's hash equals the hash in the
-     current revision's approval; that approval is approved, authorizes execution and binds
-     every check.
+  1. check reports no defect in the contract or in an approval, run or review record; then
+     the contract's hash equals the hash in the current revision's approval, and that
+     approval is approved, authorizes execution and binds every check; then check reports
+     no defect in the current revision's brief.
   2. A brief exists for the current revision with the same contract hash, and its own hash
      equals the approval's brief-sha256.
   3. A start run exists and its source revision can be resolved in the repository.

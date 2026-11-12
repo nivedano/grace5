@@ -139,8 +139,7 @@ export function briefDefects(brief: Brief, basis: BriefBasis): string[] {
   const { contract } = basis;
   const defects: string[] = [];
   const hash = brief.meta.get("grace5:contract-sha256");
-  if (hash === undefined) defects.push("meta grace5:contract-sha256 is missing");
-  else if (hash !== basis.sha256) defects.push(`grace5:contract-sha256 is ${hash}, the contract is ${basis.sha256}`);
+  if (hash !== basis.sha256) defects.push("contract hash does not match the contract");
 
   for (const check of contract.checks) {
     const rows = brief.rows.filter((row) => row.check === check.id);

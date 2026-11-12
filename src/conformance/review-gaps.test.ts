@@ -314,3 +314,109 @@ test(
   },
   TEST_TIMEOUT,
 );
+
+test(
+  "FS-14 a current brief with a stale or missing contract hash is a defect",
+  () => {
+    const s = new Scenario({ id: "C-0313-stale-brief", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
+    s.takeHashes();
+    const briefDefect = /^refused: change has defects: .*brief-1\.html/;
+
+    // The brief of the current revision carries the hash of other contract text, and omits a protected path.
+    s.writeBrief({ omitProtected: ["src/secret/**"], contractShaMeta: sha256("other contract text") });
+    const stale = s.check();
+    expect(stale.code).toBe(1);
+    expect(stale.defects.some((d) => d.startsWith("brief-1.html: "))).toBe(true);
+    // The owner approved exactly that page.
+    s.writeApproval();
+    s.commit("prepare with a brief written for other contract text");
+    const staleStart = s.start();
+    expect(staleStart.code).toBe(1);
+    expect(hasLine(staleStart, briefDefect)).toBe(true);
+    expect(s.runNumbers()).toEqual([]);
+
+    // The same brief with no contract hash at all.
+    s.writeBrief({ omitProtected: ["src/secret/**"], contractShaMeta: null });
+    const missing = s.check();
+    expect(missing.code).toBe(1);
+    expect(missing.defects.some((d) => d.startsWith("brief-1.html: "))).toBe(true);
+    s.writeApproval();
+    const missingStart = s.start();
+    expect(missingStart.code).toBe(1);
+    expect(hasLine(missingStart, briefDefect)).toBe(true);
+    expect(s.runNumbers()).toEqual([]);
+
+    // A complete brief with only the hash wrong is a defect by that alone.
+    s.writeBrief({ contractShaMeta: sha256("other contract text") });
+    const hashOnly = s.check();
+    expect(hashOnly.code).toBe(1);
+    expect(hashOnly.defects.some((d) => d.startsWith("brief-1.html: "))).toBe(true);
+
+    // Control: the sound brief, approved, starts.
+    s.writeBrief();
+    s.writeApproval();
+    expect(s.check().defects).toEqual([]);
+    expect(s.start().code).toBe(0);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "FL-04 a defective draft brief does not stop bound checks",
+  () => {
+    const rev1: ContractDef = { id: "C-0314-draft-brief", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] };
+    const s = prepared(rev1);
+    expect(s.start().code).toBe(0);
+
+    // Revision 2 adds a check. Its brief is drafted, defective, and not approved.
+    s.writeContract({ id: rev1.id, revision: 2, protectedPaths: ["src/secret/**"], checks: [automated("CK1"), automated("CK2", "bun tools/env.js")] });
+    s.takeHashes();
+    s.writeBrief({ omitProtected: ["src/secret/**"] });
+    const check = s.check();
+    expect(check.code).toBe(1);
+    expect(hasLine(check, "defect: brief-2.html: protected path src/secret/** is missing")).toBe(true);
+    expect(s.hasRecord("approval-2.xml")).toBe(false);
+
+    const bound = s.run("--check", "CK1");
+    expect(bound.out).not.toContain("change has defects");
+    expect(bound.code).toBe(0);
+    expect(hasLine(bound, "run 2: CK1 passed")).toBe(true);
+
+    const added = s.run("--check", "CK2");
+    expect(added.code).toBe(1);
+    expect(hasLine(added, "run 3: CK2 refused: amended in unapproved revision")).toBe(true);
+    expect(added.out).not.toContain("change has defects");
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "FS-14 a brief of an older revision is history and is no defect",
+  () => {
+    const rev1: ContractDef = { id: "C-0315-old-brief", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] };
+    const s = prepared(rev1);
+
+    // Revision 2 protects one more path and adds a check: read against it, brief-1.html would lack both and carry another hash.
+    s.writeContract({
+      id: rev1.id,
+      revision: 2,
+      protectedPaths: ["src/secret/**", "docs/frozen.md"],
+      checks: [automated("CK1"), automated("CK2", "bun tools/env.js")],
+    });
+    s.takeHashes();
+    s.writeBrief();
+    s.writeApproval();
+    s.commit("revision 2 approved on its own brief");
+    expect(s.hasRecord("brief-1.html")).toBe(true);
+    expect(s.hasRecord("approval-1.xml")).toBe(true);
+
+    const check = s.check();
+    expect(check.defects).toEqual([]);
+    expect(check.code).toBe(0);
+    const start = s.start();
+    expect(start.code).toBe(0);
+    expect(hasLine(start, "run 1: CK2 passed")).toBe(true);
+    expect(start.out).not.toContain("change has defects");
+  },
+  TEST_TIMEOUT,
+);

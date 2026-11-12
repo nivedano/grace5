@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Review change="C-0001-kernel" revision="1" contract-sha256="1f71dc75856ad31be7b023306645be6c8f0538ddebc5e5cb331c26523d09cb47" n="3" date="2026-11-12" reviewer="Claude reviewer subagent (claude-fable-5-2)" independence="independent" start-revision="a3d2b7d1d5e3a8cdb646d7b9b78d6b54269ac32a" end-revision="b5e004f306c8d3c34cb1cac19d01a9e33ee311e2" candidate="53548b592f18f7312269c472d97da7663a273f107d3781aa9db00aa94508cee1" status="completed">
+  <Independence>The same agent that wrote reviews 1 and 2, which took no part in authoring or implementing the change or its fixes and saw nothing of those conversations. This pass covers the complete diff a3d2b7d..b5e004f (82 files): everything read for reviews 1 and 2, plus the whole of the last commit 32540c6..b5e004f read line by line (src/state.ts, src/commands/run.ts, src/cli.ts, review-gaps.test.ts, commands.md and the regenerated cli-reference.md). review-1.xml and review-2.xml as committed are byte-identical to the files I wrote. Given beyond the skill's hand-over: the author's list of what the fixes claim and of two side changes; each was checked against the code and by probes, none taken on trust. All four automated checks were rerun at b5e004f and exited 0 (56 tests pass, 1 skipped); the log hashes of run-4 match its receipt. Probes: 3 groups, about 25 invocations, in throwaway repositories under the OS temp directory; 3 mutations in a throwaway clone. Limits unchanged: the approval statement was not compared with its conversation; K1 rests on the targeted search of review 1, and the later commits add nothing that would reopen it; the interrupted-receipt path cannot be exercised on Windows; CK5 is the owner's and has no observation; packages/** and cli-reference.md are covered by the byte comparison of CK4, the HTML style blocks were not read. K5 has no rule file and no Rule element; it is upheld, with the residue in F13.</Independence>
+  <Finding id="F1" severity="blocking" status="resolved" path="src/state.ts">
+    <Text>Review 1: step 5 of close failed open when git could not resolve the start revision.</Text>
+    <Resolution>Verified in review 2 and again here: in a shallow clone status and close name `start revision cannot be resolved`.</Resolution>
+  </Finding>
+  <Finding id="F2" severity="blocking" status="resolved" path="src/state.ts">
+    <Text>Review 1: close did not verify what the review covered.</Text>
+    <Resolution>Verified in review 2 by probes of all three fields. The last commit only reorders the three comparisons to the order of step 8; the tests of FS-16 pass at b5e004f.</Resolution>
+  </Finding>
+  <Finding id="F3" severity="blocking" status="resolved" path="src/state.ts">
+    <Text>Review 1: a blocking finding marked owner-disposed closed without an OwnerDecision.</Text>
+    <Resolution>Verified in review 2 by probe; the code is unchanged since and the test of FS-17 passes at b5e004f.</Resolution>
+  </Finding>
+  <Finding id="F4" severity="blocking" status="resolved" path="models/architecture/method.md">
+    <Text>Review 1: packages, repository tools, the help form and --version were absent from the surface table.</Text>
+    <Resolution>Verified in review 2 by reading the table against the tree; unchanged since.</Resolution>
+  </Finding>
+  <Finding id="F5" severity="non-blocking" status="resolved" path="src/commands/close.ts">
+    <Text>Review 1: refusals were printed on standard output.</Text>
+    <Resolution>Verified in review 2; every refusal in this pass's probes again arrived on stderr.</Resolution>
+  </Finding>
+  <Finding id="F6" severity="non-blocking" status="open" path="src/git.ts">
+    <Text>Unchanged, kept by the author as designed and still stated in no document: files under .grace5/changes/ that a check executes, or code placed there, are outside the candidate and the dirty state.</Text>
+  </Finding>
+  <Finding id="F7" severity="non-blocking" status="resolved" path="models/architecture/source-identity.md">
+    <Text>Review 1: skip-worktree and ignored files read as clean, and the document did not name the limit.</Text>
+    <Resolution>The limit is stated in source-identity.md since 32540c6; read there. Behaviour unchanged by decision.</Resolution>
+  </Finding>
+  <Finding id="F8" severity="non-blocking" status="resolved" path="src/state.ts">
+    <Text>Review 1: defects reported by check did not hold run or close.</Text>
+    <Resolution>Verified in review 2. run now refuses on any blocking defect, whatever the authorization; probed, and the new test RV-10 fails when the refusal is removed. What this side change costs is in F17 and F18.</Resolution>
+  </Finding>
+  <Finding id="F9" severity="non-blocking" status="open" path="src/records.ts">
+    <Text>Unchanged, kept by the author as designed: a change counts as closed when a file named close.xml exists.</Text>
+  </Finding>
+  <Finding id="F10" severity="non-blocking" status="resolved" path="src/conformance">
+    <Text>Review 1: close obligations without tests and loose assertions.</Text>
+    <Resolution>Verified in review 2 by mutation. The suite now has 57 tests; the interrupted receipt is still not exercised on Windows.</Resolution>
+  </Finding>
+  <Finding id="F11" severity="non-blocking" status="open" path=".gitignore">
+    <Text>Unchanged: `outside: .gitignore`, an unlisted write that does only what evidence-records.md says of run logs. Acceptable in my judgement; it stays on the record.</Text>
+  </Finding>
+  <Finding id="F12" severity="non-blocking" status="resolved" path="models/architecture/rationale-ledger.md">
+    <Text>Review 1: five ledger entries gave None as their removal criterion.</Text>
+    <Resolution>Verified in review 2 by reading all 21 entries; unchanged since.</Resolution>
+  </Finding>
+  <Finding id="F13" severity="non-blocking" status="open" path="src/commands/init.ts">
+    <Text>Unchanged: init.ts carries its own copy of the ChangeId pattern, schema defaults are restated, and a second hand-written XML reader fails closed. Acceptable in my judgement under K5.</Text>
+  </Finding>
+  <Finding id="F14" severity="non-blocking" status="resolved" path=".grace5/README.md">
+    <Text>Review 1: stale README sentence and unchecked G-12.</Text>
+    <Resolution>Verified in review 2 by reading the diff; unchanged since.</Resolution>
+  </Finding>
+  <Finding id="F15" severity="blocking" status="resolved" path="src/state.ts">
+    <Text>Review 2: resolvability of the start revision, step 3 in evidence-records.md, was tested after the dirty tree of step 4.</Text>
+    <Resolution>evaluate now tests it inside step 3. Rerun: a shallow clone with an untracked source file answers `start revision cannot be resolved` from close and from status; in the full repository a dirty tree is still named before a protected path. Moving the line back turns the new test "FS-15 unresolvable start revision is reported before a dirty tree" red.</Resolution>
+  </Finding>
+  <Finding id="F16" severity="non-blocking" status="resolved" path="src/cli.ts">
+    <Text>Review 2: stale close help and CLI reference, an unreachable phrase listed in commands.md, no test for the run refusal on defects, tests without their case ids, and three smaller remarks.</Text>
+    <Resolution>The close help and cli-reference.md now give steps 1, 3 and 8 as evidence-records.md does (read in the diff; CK4 confirms the reference equals the help). commands.md no longer lists `approval does not bind check`; state.ts keeps the line as a second guard. Five tests carry FS-15 to FS-18 and RV-10 covers the run refusal. Left as they were and of no weight: the word form `grace5 help`, the empty list from a failing git status, and G-12 resting on a targeted search.</Resolution>
+  </Finding>
+  <Finding id="F17" severity="blocking" status="open" path="src/state.ts">
+    <Text>New, introduced by the last commit. check no longer examines a brief unless its grace5:contract-sha256 meta already equals the current contract hash; before, the brief of the current revision was always examined. brief.md says the mechanical check runs on every brief and that its first rule is that this meta equals the contract's hash. Probe: a brief of the current revision that omits a protected path makes check exit 1 with the FS-14 defect; delete its hash meta line, or change the hash, and check exits 0 with no defect line, status shows approved for execution, and run --start executes. The commonest way to reach this needs no tampering: the author edits the contract to resolve the brief writer's findings and the brief is not brought up to the new text. check then reports nothing, where the prepare skill has the owner read nothing only while check reports a defect, so the owner can be handed a brief written for other contract text with a clean check. close still refuses at step 2 (brief does not match the approval), so nothing closes falsely; what is lost is the one mechanical guard before the owner gate, and it is found only after the work is done. The rule that reports a wrong or missing hash in briefDefects can no longer be reached from check. The change was made so that an altered contract does not stop its bound checks now that run refuses on every defect (restoring the old rule turns FL-08 red); commands.md rule 6 can be read to allow it, and brief.md cannot. No test covers a current-revision brief with a wrong or missing hash.</Text>
+  </Finding>
+  <Finding id="F18" severity="non-blocking" status="open" path="src/commands/run.ts">
+    <Text>New, from the same commit. run now refuses on any blocking defect before it looks at the authorization. Probe: with revision 2 awaiting approval and a draft brief-2 that has a fidelity defect, run refuses outright, although authorization.md says a check the last approved revision bound still runs while a revision awaits approval; before brief-2 was written the same run executed CK1. commands.md, as amended, says every such defect makes run refuse, so the two documents now pull apart. The commit message does not mention this change or the one in F17, and the run help text does not mention that defects hold a run.</Text>
+  </Finding>
+  <Adequacy check="CK1" discriminates="true">Unchanged from reviews 1 and 2: `tsc --noEmit` separates a tree that type-checks from one that does not, a failure of A1 that CK2 cannot see because Bun runs TypeScript unchecked. It discriminates that failure mode and no other. A narrow check that shares its criterion; read alone against A1 it would not discriminate.</Adequacy>
+  <Adequacy check="CK2" discriminates="true">`bun test` now runs 57 black-box tests. For A2 a pass discriminates: every case of conformance.md has a test named by its id, and across the three passes 25 of 26 mutations that made the kernel accept a case or drop a refusal turned the test of that case red, the one earlier survivor now being covered by RV-10. For A1 it does not reach the behaviour of check on a brief whose hash is wrong or missing (F17), and on Windows one test is skipped, so the pass of run-4 does not include the interrupted receipt.</Adequacy>
+  <Adequacy check="CK3" discriminates="true">Unchanged; the script and the examples are untouched since review 1, where it failed for each of eleven mutations of the examples. It calls briefDefects directly, so it is not affected by F17 and cannot notice it. Limits as before.</Adequacy>
+  <Adequacy check="CK4" discriminates="true">Unchanged; the script is untouched. It failed and named the file for six kinds of drift in review 1, and in this pass it passed only after cli-reference.md had been regenerated from the changed help text. A pass shows no drift.</Adequacy>
+  <Adequacy check="CK5" discriminates="true">Unchanged. The procedure makes the owner's judgement of the four example briefs the recorded result, which is what A5 asks. One reader, four briefs, no view of what a brief left out. No observation is recorded; this judges the procedure only.</Adequacy>
+  <Rule rule="AGENTS.md" verdict="upheld">K1. The verdict of review 1 stands; the two fix commits add one test file written against this kernel's own phrases and edit existing files. A targeted search, not a proof. No deferred proposal is implemented.</Rule>
+  <Rule rule="models/architecture/method.md" verdict="upheld">K2. The surface table lists everything present, as verified in review 2; the last commit adds nothing to the surface.</Rule>
+  <Rule rule="models/architecture/evidence-records.md" verdict="upheld">K3. close now refuses in the stated order, each step by one fixed phrase: step 3 before step 4 and step 4 before step 5 were reprobed, the order inside step 8 follows the sentence, and the remaining steps were probed in reviews 1 and 2 and are covered by tests that pass at b5e004f. F17 concerns check and brief.md, not what close verifies; step 2 still stops a brief that does not carry the contract hash.</Rule>
+  <Rule rule="models/architecture/rationale-ledger.md" verdict="upheld">K4. Every mechanism the kernel implements maps to one of L-01 to L-21 and every entry states a removal criterion; the last commit adds no mechanism.</Rule>
+</Review>
