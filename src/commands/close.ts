@@ -5,7 +5,7 @@ import { closeNode, kernelName, writeRecord, type CloseRecord } from "../records
 import { evaluate, selectChange } from "../state";
 
 function refuse(reason: string): number {
-  console.log(`refused: ${reason}`);
+  console.error(`refused: ${reason}`);
   return 1;
 }
 

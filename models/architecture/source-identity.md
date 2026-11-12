@@ -12,7 +12,7 @@ Source is every path git tracks at a revision, except the GRACE 5 change directo
 | Dirty | `git status --porcelain` lists at least one source path, untracked files included, ignored files excluded. |
 | Candidate | SHA-256 of the lines `<mode> <object> <path>` built from `git ls-tree -r <revision>`, one space between fields, each line ended by a line feed, sorted by the bytes of the path, with every path under `.grace5/changes/` removed. Two revisions with the same source tree are the same candidate. |
 
-Every run receipt records `source-revision`, `dirty` and `candidate`. A receipt taken dirty is evidence for iteration only. `close` computes the candidate of a clean `HEAD` and accepts only results recorded clean on that candidate.
+Dirty state is what git reports: a file git is told to ignore, or to assume unchanged, is invisible to it and to the kernel, and keeping build inputs out of those is the project's responsibility. Every run receipt records `source-revision`, `dirty` and `candidate`. A receipt taken dirty is evidence for iteration only. `close` computes the candidate of a clean `HEAD` and accepts only results recorded clean on that candidate.
 
 ## Why the contract is excluded and still bound
 

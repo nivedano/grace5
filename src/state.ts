@@ -40,6 +40,10 @@ export interface ChangeState {
   readonly malformed: string | undefined;
   /** Every defect `check` reports. */
   readonly defects: readonly string[];
+  /** The defects that hold run and close: all of them except a check that serves no criterion. */
+  readonly blocking: readonly string[];
+  /** The start run names a revision this repository cannot resolve, so the complete diff cannot be computed. */
+  readonly startUnresolved: boolean;
   readonly authorization: Authorization;
   /** The approval record of the current revision. */
   readonly approval: Approval | undefined;
@@ -120,13 +124,28 @@ function checkState(check: Check, runs: readonly RunRecord[], candidate: string 
   return { check, current, counts: reason === undefined, reason };
 }
 
-function reviewObligation(review: Review | undefined, contract: Contract, candidate: string | undefined): string | undefined {
+interface ReviewBasis {
+  readonly contract: Contract;
+  readonly contractSha256: string;
+  readonly candidate: string | undefined;
+  readonly startRevision: string | undefined;
+  /** The candidate a revision carries, or undefined when the revision does not resolve. */
+  readonly candidateOfRevision: (revision: string) => string | undefined;
+}
+
+function reviewObligation(review: Review | undefined, basis: ReviewBasis): string | undefined {
+  const { contract, candidate } = basis;
   if (review === undefined) return "no review";
   if (review.status !== "completed") return "review is incomplete";
-  if (review.candidate !== candidate) return "review covers an earlier candidate";
-  if (review.revision !== contract.revision) return "review covers an earlier revision";
+  // The review must cover the complete diff to the final revision (evidence-records.md, Supersession).
+  if (review.candidate !== candidate || basis.candidateOfRevision(review.endRevision) !== candidate) return "review covers an earlier candidate";
+  if (review.revision !== contract.revision || review.contractSha256 !== basis.contractSha256) return "review covers an earlier revision";
+  if (review.startRevision !== basis.startRevision) return "review does not cover the complete diff";
   const open = review.findings.find((f) => f.severity === "blocking" && f.status === "open");
   if (open !== undefined) return `blocking finding ${open.id} is open`;
+  // A blocking finding is disposed of only by the owner's quoted decision.
+  const undecided = review.findings.find((f) => f.severity === "blocking" && f.status === "owner-disposed" && (f.ownerDecision ?? "") === "");
+  if (undecided !== undefined) return `blocking finding ${undecided.id} is disposed without an owner decision`;
   for (const check of contract.checks.filter((c) => c.required)) {
     const adequacy = review.adequacy.filter((a) => a.check === check.id);
     if (adequacy.length === 0) return `no adequacy statement for check ${check.id}`;
@@ -148,7 +167,8 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
   const contractDefects: string[] = report === undefined ? ["contract.xml is missing"] : [...report.defects];
   if (contract !== undefined && contract.id !== id) contractDefects.push(`contract.xml: id ${contract.id} is not the directory name ${id}`);
   const malformed = contractDefects[0] ?? records.defects[0];
-  const defects: string[] = [...contractDefects, ...(report?.unused ?? []).map((check) => `check ${check} serves no criterion (unused)`), ...records.defects];
+  const unusedDefects = (report?.unused ?? []).map((check) => `check ${check} serves no criterion (unused)`);
+  const defects: string[] = [...contractDefects, ...unusedDefects, ...records.defects];
 
   const approval = contract === undefined ? undefined : records.approvals.get(contract.revision);
   const brief = contract === undefined ? undefined : records.briefs.get(contract.revision);
@@ -193,9 +213,14 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
   const candidate = source?.candidate;
 
   const changed = new Set<string>(source?.dirty ?? []);
+  let startUnresolved = false;
   if (startRun !== undefined && source?.revision !== undefined) {
-    for (const path of changedBetween(source.git, startRun.sourceRevision, source.revision) ?? []) changed.add(path);
+    const committed = changedBetween(source.git, startRun.sourceRevision, source.revision);
+    // A diff that cannot be computed is not a diff that touches nothing.
+    if (committed === undefined) startUnresolved = true;
+    for (const path of committed ?? []) changed.add(path);
   } else if (startRun === undefined) changed.clear();
+  const blocking = defects.filter((defect) => !unusedDefects.includes(defect));
   const changedList = [...changed].sort();
   const protectedTouched = contract === undefined ? [] : changedList.filter((path) => matchesAny(contract.protectedPaths, path));
   const outside = contract === undefined ? [] : changedList.filter((path) => !matchesAny(contract.protectedPaths, path) && !matchesAny(contract.paths, path));
@@ -210,6 +235,7 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     // Step 1.
     const unauthorized = authorizationObligation(authorization, contract.revision);
     if (unauthorized !== undefined) return unauthorized;
+    if (blocking[0] !== undefined) return `change has defects: ${blocking[0]}`;
     const unbound = contract.checks.find((check) => !(approval?.bound.some((b) => b.check === check.id && b.definitionSha256 === check.definitionSha256) ?? false));
     if (unbound !== undefined) return `approval does not bind check ${unbound.id}`;
     // Step 2.
@@ -222,6 +248,7 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     if (source.revision === undefined) return "no source revision";
     if (source.dirty.length > 0) return "working tree is dirty";
     // Step 5.
+    if (startUnresolved) return "start revision cannot be resolved";
     if (protectedTouched[0] !== undefined) return `protected path touched: ${protectedTouched[0]}`;
     // Steps 6 and 7.
     for (const manual of [false, true]) {
@@ -229,7 +256,8 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
       if (unmet !== undefined) return `check ${unmet.check.id}: ${unmet.reason ?? "no result"}`;
     }
     // Step 8.
-    return reviewObligation(review, contract, candidate);
+    const git = source.git;
+    return reviewObligation(review, { contract, contractSha256: report.sha256, candidate, startRevision: startRun.sourceRevision, candidateOfRevision: (revision) => candidateOf(git, revision) });
   })();
 
   return {
@@ -241,6 +269,8 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     records,
     malformed,
     defects,
+    blocking,
+    startUnresolved,
     authorization,
     approval,
     executionApproval,

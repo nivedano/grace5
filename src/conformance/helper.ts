@@ -158,6 +158,8 @@ export interface ContractDef {
   environments?: EnvDef[];
   checks: CheckDef[];
   decisions?: string[];
+  /** Path of a standing project rule the one Constraint cites. */
+  rule?: string;
 }
 
 export const DEFAULT_BUDGET = 30;
@@ -177,7 +179,8 @@ export function contractXml(def: ContractDef): string {
   lines.push(`  <Problem>${xmlEscape(def.problem ?? "The product file lacks the line the fixture wants.")}</Problem>`);
   lines.push(`  <Change>${xmlEscape(def.change ?? "The product file carries the wanted line.")}</Change>`);
   lines.push(`  <Constraints>`);
-  lines.push(`    <Constraint id="K1">The fixture scripts stay as they are.</Constraint>`);
+  const rule = def.rule === undefined ? "" : ` rule="${xmlEscape(def.rule)}"`;
+  lines.push(`    <Constraint id="K1"${rule}>The fixture scripts stay as they are.</Constraint>`);
   lines.push(`  </Constraints>`);
   lines.push(`  <NonGoals>`);
   (def.nonGoals ?? ["Nothing else changes."]).forEach((text, i) => {
@@ -378,6 +381,8 @@ export interface ApprovalOptions {
   executes?: boolean;
   /** Adds the later Execution statement of authorization.md. */
   execution?: boolean;
+  /** Check ids left without a Bound element. */
+  omitBound?: string[];
 }
 
 export interface FindingDef {
@@ -385,6 +390,8 @@ export interface FindingDef {
   severity: "blocking" | "non-blocking";
   status: "open" | "resolved" | "owner-disposed";
   text?: string;
+  /** For owner-disposed: false leaves the OwnerDecision element out. */
+  ownerDecision?: boolean;
 }
 
 export interface ReviewOptions {
@@ -394,6 +401,12 @@ export interface ReviewOptions {
   notDiscriminating?: string[];
   /** Check ids with no Adequacy statement at all. */
   omitAdequacy?: string[];
+  /** Overrides of what the record says it covered. */
+  startRevision?: string;
+  endRevision?: string;
+  contractSha?: string;
+  candidate?: string;
+  rules?: { rule: string; verdict: "upheld" | "violated" | "not-applicable" }[];
 }
 
 export interface ObserveOptions {
@@ -781,6 +794,7 @@ export class Scenario {
     ];
     if (decision === "approved") {
       for (const c of this.def.checks) {
+        if ((o.omitBound ?? []).includes(c.id)) continue;
         lines.push(`  <Bound check="${c.id}" definition-sha256="${info.definitions[c.id] ?? ""}"/>`);
       }
     }
@@ -842,27 +856,27 @@ export class Scenario {
       ? fs.readdirSync(this.recordsDir).filter((f) => /^review-\d+\.xml$/.test(f)).length
       : 0;
     const n = existing + 1;
-    const latest = this.receipt();
-    const candidate = attr(latest, "Run", "candidate") ?? "";
-    let startRevision = "";
+    const candidate = o.candidate ?? (this.runNumbers().length > 0 ? (attr(this.receipt(), "Run", "candidate") ?? "") : this.computeCandidate());
+    let startRevision = this.head();
     for (const rn of this.runNumbers()) {
       const r = this.receipt(rn);
       if (attr(r, "Run", "start") === "true") {
-        startRevision = attr(r, "Run", "source-revision") ?? "";
+        startRevision = attr(r, "Run", "source-revision") ?? startRevision;
         break;
       }
     }
-    const contractSha = sha256(fs.readFileSync(path.join(this.changeDir, "contract.xml"), "utf8").replace(/\r\n/g, "\n"));
+    if (o.startRevision !== undefined) startRevision = o.startRevision;
+    const contractSha = o.contractSha ?? sha256(fs.readFileSync(path.join(this.changeDir, "contract.xml"), "utf8").replace(/\r\n/g, "\n"));
     const lines = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
-      `<Review change="${this.id}" revision="${this.revision}" contract-sha256="${contractSha}" n="${n}" date="${today()}" reviewer="Fixture Reviewer" independence="independent" start-revision="${startRevision}" end-revision="${this.head()}" candidate="${candidate}" status="${o.status ?? "completed"}">`,
+      `<Review change="${this.id}" revision="${this.revision}" contract-sha256="${contractSha}" n="${n}" date="${today()}" reviewer="Fixture Reviewer" independence="independent" start-revision="${startRevision}" end-revision="${o.endRevision ?? this.head()}" candidate="${candidate}" status="${o.status ?? "completed"}">`,
       `  <Independence>A reviewer that saw the contract and the complete diff, and nothing of the authoring conversation.</Independence>`,
     ];
     for (const f of o.findings ?? []) {
       lines.push(`  <Finding id="${f.id}" severity="${f.severity}" status="${f.status}">`);
       lines.push(`    <Text>${xmlEscape(f.text ?? "The product line is not what the Change states.")}</Text>`);
       if (f.status === "resolved") lines.push(`    <Resolution>Shown to be as the Change states.</Resolution>`);
-      if (f.status === "owner-disposed") lines.push(`    <OwnerDecision>Leave it; I accept that.</OwnerDecision>`);
+      if (f.status === "owner-disposed" && f.ownerDecision !== false) lines.push(`    <OwnerDecision>Leave it; I accept that.</OwnerDecision>`);
       lines.push(`  </Finding>`);
     }
     const omit = new Set(o.omitAdequacy ?? []);
@@ -871,6 +885,7 @@ export class Scenario {
       if (omit.has(c.id)) continue;
       lines.push(`  <Adequacy check="${c.id}" discriminates="${weak.has(c.id) ? "false" : "true"}">Read against the criterion it serves.</Adequacy>`);
     }
+    for (const r of o.rules ?? []) lines.push(`  <Rule rule="${xmlEscape(r.rule)}" verdict="${r.verdict}">Read against the complete diff.</Rule>`);
     lines.push(`</Review>`, ``);
     this.write(`.grace5/changes/${this.id}/records/review-${n}.xml`, lines.join("\n"));
     return n;

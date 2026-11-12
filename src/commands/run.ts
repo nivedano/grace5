@@ -221,7 +221,7 @@ function nextRunNumber(state: ChangeState): number {
 }
 
 function refuse(reason: string): number {
-  console.log(`refused: ${reason}`);
+  console.error(`refused: ${reason}`);
   return 1;
 }
 
@@ -278,6 +278,8 @@ async function runInner(options: RunOptions): Promise<number> {
     if (state.authorization === "approved") return refuse("approval does not authorize execution");
     return refuse(`no approval for revision ${String(contract.revision)}`);
   }
+  // Defects hold a run of an approved revision; while a revision awaits approval its brief may lag, and the bound checks still run (authorization.md).
+  if (state.authorization === "approved for execution" && state.blocking[0] !== undefined) return refuse(`change has defects: ${state.blocking[0]}`);
   if (options.start && state.startRun !== undefined) return refuse(`a start run exists: run-${String(state.startRun.n)}`);
   if (!options.start && state.startRun === undefined) return refuse("no start run");
 

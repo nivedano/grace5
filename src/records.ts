@@ -93,7 +93,7 @@ export interface Review extends Binding {
   readonly startRevision: string;
   readonly endRevision: string;
   readonly candidate: string;
-  readonly findings: readonly { readonly id: string; readonly severity: string; readonly status: string }[];
+  readonly findings: readonly { readonly id: string; readonly severity: string; readonly status: string; readonly ownerDecision: string | undefined }[];
   readonly adequacy: readonly { readonly check: string; readonly discriminates: boolean }[];
   readonly rules: readonly { readonly rule: string; readonly verdict: string }[];
 }
@@ -238,7 +238,10 @@ function readReview(root: XmlElement): Review {
     startRevision: attr(root, "start-revision"),
     endRevision: attr(root, "end-revision"),
     candidate: attr(root, "candidate"),
-    findings: childrenNamed(root, "Finding").map((f) => ({ id: attr(f, "id"), severity: attr(f, "severity"), status: attr(f, "status") })),
+    findings: childrenNamed(root, "Finding").map((f) => {
+      const decision = childNamed(f, "OwnerDecision");
+      return { id: attr(f, "id"), severity: attr(f, "severity"), status: attr(f, "status"), ownerDecision: decision === undefined ? undefined : collapse(decision.text) };
+    }),
     adequacy: childrenNamed(root, "Adequacy").map((a) => ({ check: attr(a, "check"), discriminates: xsBoolean(a.attributes["discriminates"], false) })),
     rules: childrenNamed(root, "Rule").map((r) => ({ rule: attr(r, "rule"), verdict: attr(r, "verdict") })),
   };

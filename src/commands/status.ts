@@ -35,7 +35,7 @@ export async function statusCommand(root: string, change: string | undefined): P
   if (change !== undefined) {
     const selection = selectChange(root, change);
     if ("error" in selection) {
-      console.log(`refused: ${selection.error}`);
+      console.error(`refused: ${selection.error}`);
       return 1;
     }
     for (const line of describe(await evaluate(root, selection.id))) console.log(line);

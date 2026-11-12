@@ -63,7 +63,7 @@ export function initCommand(root: string, change: string | undefined): number {
     return 2;
   }
   if (!existsSync(root) || !statSync(root).isDirectory()) {
-    console.log(`refused: ${root} is not a directory`);
+    console.error(`refused: ${root} is not a directory`);
     return 1;
   }
   const report = (path: string, created: boolean): void => console.log(`${created ? "created" : "exists"}: ${path}`);

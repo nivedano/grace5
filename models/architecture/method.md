@@ -12,8 +12,9 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 |---|---|
 | Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` |
 | Records | `brief-<rev>.html`, `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/` |
-| Commands | `grace5 init`, `check`, `run`, `status`, `close` |
-| Skills | prepare, execute, review |
+| Commands | `grace5 init`, `check`, `run`, `status`, `close`; `--help` and `--version` |
+| Skills | prepare, execute, review, in `skills/`; the harness packages in `packages/` are generated from them and never edited |
+| Tools of this repository | `src/tools/`: the package generator, the CLI reference generator and the example verifier; not part of the installed CLI |
 | Documents | this method and its topic files (`commands.md`, `authorization.md`, `brief.md`, `source-identity.md`, `trace-provenance.md`, `evidence-records.md`), the schemas in `schemas/`, the brief template in `templates/`, the worked examples in `examples/`, `conformance.md`, `rationale-ledger.md`, `retirement.md`, `m2-proposal.md` (a proposal to the measurement method, not part of the kernel), `cli-reference.md` generated from the help text |
 
 Anything not in this table is absent: no graph, no module index, no source markup, no literal text assertions, no rule parser, no log parser beyond ordered substring matching, no migration, no daemon. The deferred proposals and their admission tests are at the end.
