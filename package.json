@@ -1,0 +1,16 @@
+{
+  "name": "@nivedano/grace5",
+  "version": "0.0.0",
+  "description": "GRACE 5: a kernel for owner-approved, evidence-closed changes made by coding agents",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.tmp/
+*.log
+.claude/settings.local.json
+
+# Local working notes, not published.
+HANDOFF.md
+models/decisions/grace-slim-session/
+models/decisions/2026-11-12-consensus.md
+models/decisions/2026-11-12-plan.md
