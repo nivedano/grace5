@@ -73,7 +73,7 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
     <h2>What will count as done</h2>
     <div>
       <table>
-        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
         <tbody>
           <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Firmware build</span><b>CK1</b> automated</td><td class="shows">The build command exited 0.</td><td class="limits">Partition fit is shown only if an oversized image fails the build.</td></tr>
           <tr class="trace" data-check="CK2" data-kind="trace" data-required="true"><td><span>Live boot log capture</span><b>CK2</b> trace</td><td class="shows">A live boot of the candidate on BENCH-UNIT-01 printed begin and done for all 13 stages in order, then both closing lines, with no failure text.</td><td class="limits">One boot, one board. Order only, no timing. The companion controller&#x27;s absence is declared, not observed. Origin, device and build come from the capture script this change writes.</td></tr>

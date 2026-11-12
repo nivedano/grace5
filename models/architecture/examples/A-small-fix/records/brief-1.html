@@ -73,7 +73,7 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
     <h2>What will count as done</h2>
     <div>
       <table>
-        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
         <tbody>
           <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Focused export regression test</span><b>CK1</b> automated</td><td class="shows">The focused validation test file, red today, completes without failure.</td><td class="limits">Command completion only. It does not show that the test asserts the existing error or the absence of a written file. The test file is writable under this change, so the review must read it.</td></tr>
           <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Project verify script</span><b>CK2</b> automated</td><td class="shows">The project verify command completes without failure.</td><td class="limits">Command completion only. The contract does not say what verify covers.</td></tr>

@@ -13,7 +13,7 @@ The page keeps the template's sections, in order, and its style block unchanged.
 | Section (`id`) | Must contain |
 |---|---|
 | `result` | The intended result as theses the owner can agree or disagree with. |
-| `evidence` | One table row per check with `data-check`, `data-kind` and `data-required`, opening with a plain name for the check in a few words so the owner never has to decode an id: what a pass shows, and for every manual or trace check, and wherever it matters for an automated one, what it does not show. |
+| `evidence` | One table row per check with `data-check`, `data-kind` and `data-required`, opening with a plain name for the check in a few words so the owner never has to decode an id: under the headings "If it passes, we know" and "Even then, we do not know": what a passing result establishes, and for every manual or trace check, and wherever it matters for an automated one, what it leaves unknown. |
 | `decisions` | Every Decision of the contract, as an item with `data-decision` equal to its id, in words the owner will recognise. |
 | `risks` | Consequential risks of the contract as written. |
 | `burdens` | What the owner must do or rule on: a bench session, a manual procedure, an open limitation. |

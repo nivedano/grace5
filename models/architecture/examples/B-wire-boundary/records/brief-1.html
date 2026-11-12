@@ -75,7 +75,7 @@ footer .say{color:var(--ink);font-size:15px;margin-top:12px}
     <h2>What will count as done</h2>
     <div>
       <table>
-        <thead><tr><th>Check</th><th>A pass shows</th><th>A pass does not show</th></tr></thead>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
         <tbody>
           <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Producer conformance suite</span><b>CK1</b> automated</td><td class="shows">The producer conformance command passed against the definition and the shared vectors. A vector marked rejected that is accepted fails it.</td><td class="limits">It proves no more than the vectors contain.</td></tr>
           <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Consumer conformance suite</span><b>CK2</b> automated</td><td class="shows">The consumer conformance command passed against the same definition and vectors.</td><td class="limits">Each side is tested against the vectors, never against the other side. No real transport is exercised.</td></tr>
