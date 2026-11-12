@@ -137,10 +137,10 @@ function reviewObligation(review: Review | undefined, basis: ReviewBasis): strin
   const { contract, candidate } = basis;
   if (review === undefined) return "no review";
   if (review.status !== "completed") return "review is incomplete";
-  // The review must cover the complete diff to the final revision (evidence-records.md, Supersession).
-  if (review.candidate !== candidate || basis.candidateOfRevision(review.endRevision) !== candidate) return "review covers an earlier candidate";
+  // In the order of step 8: the current contract hash, then the complete diff from the start revision to a commit of the final candidate.
   if (review.revision !== contract.revision || review.contractSha256 !== basis.contractSha256) return "review covers an earlier revision";
   if (review.startRevision !== basis.startRevision) return "review does not cover the complete diff";
+  if (review.candidate !== candidate || basis.candidateOfRevision(review.endRevision) !== candidate) return "review covers an earlier candidate";
   const open = review.findings.find((f) => f.severity === "blocking" && f.status === "open");
   if (open !== undefined) return `blocking finding ${open.id} is open`;
   // A blocking finding is disposed of only by the owner's quoted decision.
@@ -177,8 +177,7 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
   if (contract !== undefined && report !== undefined) {
     // Check rule 6: a brief is held to the contract text whose hash it carries when that is the current text.
     for (const file of records.briefs.values()) {
-      const current = file.brief.meta.get("grace5:contract-sha256") === report.sha256;
-      if (!current && file.revision !== contract.revision) continue;
+      if (file.brief.meta.get("grace5:contract-sha256") !== report.sha256) continue;
       for (const defect of briefDefects(file.brief, { contract, sha256: report.sha256, words: report.words })) defects.push(`${file.file}: ${defect}`);
     }
     // Check rule 7.
@@ -232,23 +231,24 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
 
   const obligation = ((): string | undefined => {
     if (malformed !== undefined || contract === undefined || report === undefined) return `change is malformed: ${malformed ?? "contract.xml could not be read"}`;
-    // Step 1.
+    // Step 1: no blocking defect of check first, then the approval.
+    if (blocking[0] !== undefined) return `change has defects: ${blocking[0]}`;
     const unauthorized = authorizationObligation(authorization, contract.revision);
     if (unauthorized !== undefined) return unauthorized;
-    if (blocking[0] !== undefined) return `change has defects: ${blocking[0]}`;
+    // A missing or wrong Bound of the current approval is already a defect of check (rule 7), so this is a second guard.
     const unbound = contract.checks.find((check) => !(approval?.bound.some((b) => b.check === check.id && b.definitionSha256 === check.definitionSha256) ?? false));
     if (unbound !== undefined) return `approval does not bind check ${unbound.id}`;
     // Step 2.
     if (brief === undefined) return `no brief for revision ${String(contract.revision)}`;
     if (brief.brief.meta.get("grace5:contract-sha256") !== report.sha256 || brief.sha256 !== approval?.briefSha256) return "brief does not match the approval";
-    // Step 3.
+    // Step 3: a start run whose source revision resolves in the repository.
     if (startRun === undefined) return "no start run";
-    // Step 4.
     if (source === undefined) return "not a git repository";
     if (source.revision === undefined) return "no source revision";
+    if (startUnresolved) return "start revision cannot be resolved";
+    // Step 4.
     if (source.dirty.length > 0) return "working tree is dirty";
     // Step 5.
-    if (startUnresolved) return "start revision cannot be resolved";
     if (protectedTouched[0] !== undefined) return `protected path touched: ${protectedTouched[0]}`;
     // Steps 6 and 7.
     for (const manual of [false, true]) {

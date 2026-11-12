@@ -270,6 +270,8 @@ async function runInner(options: RunOptions): Promise<number> {
   const contract = state.contract;
   if (state.closed) return refuse("change is closed");
   if (state.malformed !== undefined || contract === undefined || state.report === undefined) return refuse(`change is malformed: ${state.malformed ?? ""}`);
+  // Every blocking defect of check holds a run (commands.md, Details settled in implementation).
+  if (state.blocking[0] !== undefined) return refuse(`change has defects: ${state.blocking[0]}`);
   const source = state.source;
   if (source === undefined) return refuse("not a git repository");
   if (source.revision === undefined || source.candidate === undefined) return refuse("no source revision");
@@ -278,8 +280,6 @@ async function runInner(options: RunOptions): Promise<number> {
     if (state.authorization === "approved") return refuse("approval does not authorize execution");
     return refuse(`no approval for revision ${String(contract.revision)}`);
   }
-  // Defects hold a run of an approved revision; while a revision awaits approval its brief may lag, and the bound checks still run (authorization.md).
-  if (state.authorization === "approved for execution" && state.blocking[0] !== undefined) return refuse(`change has defects: ${state.blocking[0]}`);
   if (options.start && state.startRun !== undefined) return refuse(`a start run exists: run-${String(state.startRun.n)}`);
   if (!options.start && state.startRun === undefined) return refuse("no start run");
 

@@ -38,22 +38,84 @@ function evidenced(def: ContractDef): { s: Scenario; startHead: string } {
   return { s, startHead };
 }
 
+/** Rewrites history: one orphan commit holds the same tree, the old branch and its objects are gone. */
+function loseHistory(s: Scenario, startHead: string): void {
+  const branch = s.git("rev-parse", "--abbrev-ref", "HEAD").trim();
+  s.git("checkout", "-q", "--orphan", "rewritten");
+  s.git("add", "-A");
+  s.git("commit", "-q", "-m", "history rewritten");
+  s.git("branch", "-D", branch);
+  s.git("reflog", "expire", "--expire=now", "--all");
+  s.git("gc", "-q", "--prune=now");
+  const probe = spawnSync("git", ["cat-file", "-e", `${startHead}^{commit}`], { cwd: s.repo, encoding: "utf8" });
+  expect(probe.status).not.toBe(0);
+}
+
 test(
-  "RV-01 unresolvable start revision refuses close",
+  "FS-15 unresolvable start revision is reported before a dirty tree",
+  () => {
+    const { s, startHead } = evidenced({ id: "C-0310-lost-and-dirty", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
+    loseHistory(s, startHead);
+    s.writeReview();
+    // And the tree is dirty as well: an untracked source file and an edited tracked one.
+    s.write("stray.txt", "left lying around\n");
+    s.write("src/other.txt", "another tracked file\nedited and not committed\n");
+    expect(hasLine(s.status(), /^candidate: [0-9a-f]{64} \(dirty\)$/)).toBe(true);
+
+    const close = s.close();
+    expectRefusal(s, close, "start revision cannot be resolved");
+    expect(close.out).not.toContain("working tree is dirty");
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "FS-18 a check the review says does not discriminate refuses close",
+  () => {
+    const { s } = evidenced({ id: "C-0311-adequacy", checks: [automated("CK1"), automated("CK2")] });
+    s.writeReview({ notDiscriminating: ["CK2"] });
+    expect(hasLine(s.status(), "next: check CK2 does not discriminate")).toBe(true);
+    expectRefusal(s, s.close(), "check CK2 does not discriminate");
+
+    s.writeReview();
+    expect(s.close().code).toBe(0);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "RV-10 run refuses a change whose approved brief has a fidelity defect",
+  () => {
+    const s = new Scenario({ id: "C-0312-run-defect", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
+    s.takeHashes();
+    s.writeBrief({ omitProtected: ["src/secret/**"] });
+    s.writeApproval();
+    s.commit("prepare with a defective brief");
+    expect(hasLine(s.status(), "authorization: approved for execution")).toBe(true);
+
+    const start = s.start();
+    expect(start.code).toBe(1);
+    expect(hasLine(start, /^refused: change has defects: .*brief-1\.html: protected path src\/secret\/\*\* is missing/)).toBe(true);
+    // A refused invocation writes no receipt.
+    expect(s.runNumbers()).toEqual([]);
+
+    // Control: with the complete brief, and an approval of that page, the same change starts.
+    s.writeBrief();
+    s.writeApproval();
+    const ok = s.start();
+    expect(ok.code).toBe(0);
+    expect(hasLine(ok, "run 1: CK1 passed")).toBe(true);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "FS-15 unresolvable start revision refuses close (RV-01)",
   () => {
     const { s, startHead } = evidenced({ id: "C-0301-lost-start", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
     const candidate = s.computeCandidate();
 
-    // History is rewritten: one orphan commit holds the same tree, the old branch and its objects are gone.
-    const branch = s.git("rev-parse", "--abbrev-ref", "HEAD").trim();
-    s.git("checkout", "-q", "--orphan", "rewritten");
-    s.git("add", "-A");
-    s.git("commit", "-q", "-m", "history rewritten");
-    s.git("branch", "-D", branch);
-    s.git("reflog", "expire", "--expire=now", "--all");
-    s.git("gc", "-q", "--prune=now");
-    const probe = spawnSync("git", ["cat-file", "-e", `${startHead}^{commit}`], { cwd: s.repo, encoding: "utf8" });
-    expect(probe.status).not.toBe(0);
+    loseHistory(s, startHead);
     // The source tree, and so the candidate and the evidence on it, are what they were.
     expect(s.computeCandidate()).toBe(candidate);
     expect(attr(s.receipt(1), "Run", "source-revision")).toBe(startHead);
@@ -67,7 +129,7 @@ test(
 );
 
 test(
-  "RV-02 review must cover the complete diff",
+  "FS-16 review must cover the complete diff (RV-02)",
   () => {
     const { s, startHead } = evidenced({ id: "C-0302-coverage", checks: [automated("CK1")] });
     expect(s.head()).not.toBe(startHead);
@@ -94,7 +156,7 @@ test(
 );
 
 test(
-  "RV-03 owner-disposed needs the owner's words",
+  "FS-17 owner-disposed needs the owner's words (RV-03)",
   () => {
     const { s } = evidenced({ id: "C-0303-disposed", checks: [automated("CK1")] });
     s.writeReview({ findings: [{ id: "F1", severity: "blocking", status: "owner-disposed", ownerDecision: false }] });
@@ -137,7 +199,7 @@ test(
 );
 
 test(
-  "RV-05 violated rule refuses close",
+  "FS-18 violated rule refuses close (RV-05)",
   () => {
     const def: ContractDef = { id: "C-0305-rule", rule: "docs/rules.md#R-1", checks: [automated("CK1")] };
     const s = new Scenario(def);

@@ -202,20 +202,23 @@ Usage:
   grace5 [--root <dir>] close [change]
 
 Checks these in order and refuses at the first unmet one, naming it:
-  1. The contract is valid and its hash equals the hash in the current revision's approval;
-     that approval is approved, authorizes execution and binds every check.
+  1. check reports no defect that blocks, and the contract's hash equals the hash in the
+     current revision's approval; that approval is approved, authorizes execution and binds
+     every check.
   2. A brief exists for the current revision with the same contract hash, and its own hash
      equals the approval's brief-sha256.
-  3. A start run exists.
+  3. A start run exists and its source revision can be resolved in the repository.
   4. The working tree has no dirty source path.
   5. The complete diff from the start revision touches no protected path.
   6. Every required automated and trace check: the current result is passed, clean, on the
      final candidate, with the current definition hash.
   7. Every required manual check: the current result is a passed observation, recorded clean
      on the final candidate with the current definition hash, a build and an environment.
-  8. The current review is completed, names the final candidate and the current revision, has
-     no open blocking finding, has an Adequacy with discriminates="true" for every required
-     check, and has no Rule with verdict violated.
+  8. The current review is completed; carries the current contract hash; covers the complete
+     diff, its start-revision being the start run's revision and its end-revision a commit
+     that carries the final candidate; has no blocking finding that is open or that is
+     owner-disposed without the owner's quoted decision; has an Adequacy with
+     discriminates="true" for every required check; and has no Rule with verdict violated.
 
 Then it writes records/close.xml naming the run that satisfied each check. A closed change
 refuses further runs and a second close.
