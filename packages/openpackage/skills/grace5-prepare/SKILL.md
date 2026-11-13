@@ -15,7 +15,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 ## Contract
 
-- Create the change with `grace5 init <id>`; the id must be new, since `init` refuses one that exists open or under `.grace5/changes/closed/`. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first (`upgrade.md`). Write `contract.xml` to `schemas/contract.xsd`: eight sections in fixed order, described in `method.md`.
+- Create the change with `grace5 init <id>`; the id must be new, since `init` refuses one that exists open or under `.grace5/changes/closed/`. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first, which proceeds past an open change no step writes, and when it refuses because a step touches an open change, that change is closed with the previous kernel (run from a checkout at the previous tag) or abandoned (`upgrade.md`). Write `contract.xml` to `schemas/contract.xsd`: eight sections in fixed order, described in `method.md`.
 - State the behavioural delta once, in Change. Cite a standing rule by path in `rule`; never recopy its text. No tasks, no sequence, no pre-written code.
 - Affected names what may be written, and Protected what must not be (`authorization.md`).
 - Make each check decisive: it must fail if the behaviour is broken. `grace5-review` states the question every required check is judged by; write checks that survive it.

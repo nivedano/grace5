@@ -4,13 +4,13 @@ Terminal evidence must belong to the final candidate. This file defines what a c
 
 ## The rule
 
-Source is every path git tracks at a revision, except the GRACE 5 change directories: `.grace5/changes/**`. The exclusion covers `.grace5/changes/closed/`, where `close` moves a change, so the move and the closed changes are outside the candidate and the dirty state like the open ones. The version pin `.grace5/kernel-version` is tracked outside the change directories and is therefore source, which is safe because `upgrade` refuses while any change is open, so a pin change never invalidates a change's evidence (`upgrade.md`). The kernel requires a git repository.
+Source is every path git tracks at a revision, except the GRACE 5 change directories, `.grace5/changes/**`, and the version pin, `.grace5/kernel-version`. The exclusion covers `.grace5/changes/closed/`, where `close` moves a change, so the move and the closed changes are outside the candidate and the dirty state like the open ones. The pin is excluded so that writing it, which is what `upgrade` does at every link, changes no change's candidate and no dirty state: a change may therefore span kernel versions, and the kernel each receipt was recorded with is read from the receipt, not from the candidate (`upgrade.md`). Every other path an upgrade writes outside the change directories is source and makes the evidence of every open change history, which is why `upgrade` refuses such a write while changes are open unless told to accept the loss. The kernel requires a git repository.
 
 | Term | Definition |
 |---|---|
 | Source revision | The commit `HEAD` names when a command runs. |
 | Dirty | `git status --porcelain` lists at least one source path, untracked files included, ignored files excluded. |
-| Candidate | SHA-256 of the lines `<mode> <object> <path>` built from `git ls-tree -r <revision>`, one space between fields, each line ended by a line feed, sorted by the bytes of the path, with every path under `.grace5/changes/` removed. Two revisions with the same source tree are the same candidate. |
+| Candidate | SHA-256 of the lines `<mode> <object> <path>` built from `git ls-tree -r <revision>`, one space between fields, each line ended by a line feed, sorted by the bytes of the path, with every path under `.grace5/changes/` and the path `.grace5/kernel-version` removed. Two revisions with the same source tree are the same candidate. |
 
 Dirty state is what git reports: a file git is told to ignore, or to assume unchanged, is invisible to it and to the kernel, and keeping build inputs out of those is the project's responsibility. Every run receipt records `source-revision`, `dirty` and `candidate`. A receipt taken dirty is evidence for iteration only. `close` computes the candidate of a clean `HEAD` and accepts only results recorded clean on that candidate.
 
@@ -28,6 +28,8 @@ The exclusion is by path and nothing else: whatever is placed under `.grace5/cha
 | `notes.md` is edited and committed | Same | None. |
 | The review record is written and committed | Same | None. |
 | Another change's records are committed on the same branch | Same | None. |
+| `upgrade` writes the pin, before or after it is committed | Same | None. The result still counts; `status` names the kernel it was recorded with. |
+| `upgrade` appends the ignore line or refreshes an installed skill | Different | Every result is history, which is why `upgrade` refuses that write while changes are open unless `--accept-evidence-loss` is given. |
 | A test file is edited and committed | Different | Every result is of an earlier candidate; `close` refuses until the required checks are rerun, manual observations included. |
 | A product file is edited and left uncommitted | Same revision, dirty | A new run records `dirty="true"`; `close` refuses a dirty tree. |
 | A check's command is amended in a new approved revision | Same | That check's earlier results have the old definition hash and no longer count; other checks keep theirs. |
