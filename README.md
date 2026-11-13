@@ -16,11 +16,11 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 
 ## Status
 
-Version 0.4.0. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
+Version 0.5.0. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Upgrading
 
-`grace5 status` tells you when the repository state is behind the kernel and names the command. `grace5 upgrade --plan` shows the steps the kernel will apply, in plain words, the source paths it would write and the open changes it leaves untouched. `grace5 upgrade` applies them, and you commit the result. Open changes do not stop it unless a step would write one of them, or a source write is pending that would make their evidence history; `upgrade.md` names the ways out.
+`grace5 status` tells you when the repository state is behind the kernel and names the command. `grace5 upgrade --plan` shows the steps the kernel will apply, in plain words, and the open changes it leaves untouched. `grace5 upgrade` applies them, and you commit the result. Everything it writes is kernel-managed, the state under `.grace5/` and the installed `grace5-*` skills, which no change's candidate or diff reads, so open changes do not stop it unless a step would write one of them; `upgrade.md` names the ways out.
 
 ## Toolchain
 

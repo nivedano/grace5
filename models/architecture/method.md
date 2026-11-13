@@ -13,7 +13,7 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 | Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` while the change is open, and under `.grace5/changes/closed/<id>/` once `close` has moved it (`commands.md`) |
 | Records | `brief-<rev>.html`, `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/` |
 | Commands | `grace5 init`, `check`, `run`, `status`, `close`, `upgrade`; `--help` and `--version` |
-| State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, and the migration steps `upgrade` composes from it to the kernel's version (`upgrade.md`) |
+| State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, `.grace5/.gitignore`, the local ignore file that keeps the run logs out of git, and the migration steps `upgrade` composes from the pin to the kernel's version (`upgrade.md`) |
 | Skills | prepare, execute, review, in `skills/`; the harness packages in `packages/` are generated from them and never edited |
 | Tools of this repository | `src/tools/`: the package generator, the CLI reference generator, the example verifier and the upgrade verifier (`upgrade-verify.ts`, which upgrades a clone of this repository at the previous version's tag); not part of the installed CLI |
 | Documents | this method and its topic files (`commands.md`, `authorization.md`, `brief.md`, `source-identity.md`, `trace-provenance.md`, `evidence-records.md`, `upgrade.md`), the schemas in `schemas/`, the brief template in `templates/`, the worked examples in `examples/`, `conformance.md`, `rationale-ledger.md`, `retirement.md`, `m2-proposal.md` (a proposal to the measurement method, not part of the kernel), `cli-reference.md` generated from the help text |
@@ -76,4 +76,4 @@ When a change crosses a boundary between two components, the contract names the 
 | Overlap information for shared worktrees | Recorded isolation-failure events in a pilot. |
 | Formal-methods pilots | Never in the schema; external and bounded only. |
 
-Every later change to GRACE 5 is a change in its own repository whose Problem cites an explicit owner requirement, an invariant, or an observed failure, and which adds or amends one ledger entry. A change that alters the state layout, the ignore lines or the skills ships its migration step in the same change (`upgrade.md`).
+Every later change to GRACE 5 is a change in its own repository whose Problem cites an explicit owner requirement, an invariant, or an observed failure, and which adds or amends one ledger entry. A change that alters the state layout, the local ignore file or the skills ships its migration step in the same change (`upgrade.md`).
