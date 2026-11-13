@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0008-approval-executes" revision="1" contract-sha256="04d08fb73f65ad99afc952426130d686feb199649ba52e6d2d27b1625539ca93" brief-sha256="8f2780d6380bba8dab4c8dbe30d504a70a9e46abd3d12b3e2c4df25ccaf83939" date="2026-11-14" owner="nivedano" decision="approved" executes="true" recorded-by="Claude Fable 5.1 (lead agent, author of the contract and the brief)">
+  <Statement>Approved</Statement>
+  <Source>The owner's answer to the owner-gate question for C-0008-approval-executes revision 1 in the Claude Code session of 2026-11-14, asked through the question tool with the path of records/brief-1.html; the owner selected the option "Approved". Under the owner's ruling of 2026-11-13 an approval authorizes execution, so executes is recorded true; the brief was written by the author (writer self) on the owner's instruction to take the cheap path for small changes.</Source>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="ec4431d09e468bedf3067d6144afb26f6dfb3b2ca074bd57dd46f0dbaf0dd019"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="252635bbd9ad256874f746d138d2029349b93c6aa5652a663d141059be738291"/>
+  <Bound check="CK6" definition-sha256="16fc38ac22c8ab0d04e6866896dacf8e5936c6034bfd6edccd57466a915c73c0"/>
+</Approval>

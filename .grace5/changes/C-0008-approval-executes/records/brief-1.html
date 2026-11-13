@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0008-approval-executes revision 1</title>
+<meta name="grace5:change" content="C-0008-approval-executes">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="04d08fb73f65ad99afc952426130d686feb199649ba52e6d2d27b1625539ca93">
+<meta name="grace5:date" content="2026-11-14">
+<meta name="grace5:writer" content="self">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="780">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>An approval authorizes execution; holding a change for a batch is not a kernel state</h1>
+  <p class="lead">Brief for approval. Change <code>C-0008-approval-executes</code>, revision 1, 2026-11-14. Full brief, written by: the author (self), on the owner's instruction to take the cheap path for small changes.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>When you approve a change, it can be executed. There is no second decision and no second status: the values "approved" and "approved for execution" become one, "approved".</li>
+        <li>The refusal "approval does not authorize execution" disappears. A run is refused for lack of an approval and for nothing else about the approval.</li>
+        <li>"Approved, hold" or any wording that defers the start is still an approval; the agent does not start until you start the change or a batch, and nothing about the hold is recorded anywhere.</li>
+        <li>Records already written keep their executes flag and Execution element and still validate; the kernel ignores them. The two firmware changes that stand refused today become runnable as they are, without touching their records, once the firmware takes this version.</li>
+        <li>The brief's closing line and the prepare skill ask for one statement: approve, or reject with the reason. The execute skill requires the state "approved".</li>
+        <li>Version 0.6.0, with an upgrade step that refreshes the installed skills and nothing else.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The kernel sources type-check after the status value, the flag and the Execution handling are removed.</td><td class="limits">Nothing about behaviour; the suite does that.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Conformance suite</span><b>CK2</b> automated</td><td class="shows">A change with an approval runs and closes whether its record carries executes true, executes false, an Execution element or none; the removed phrase and status value are never printed; every earlier case still passes.</td><td class="limits">Whether the two firmware records behave the same: they are read by the code paths the cases exercise, but no test reads them.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Examples and old records validate</span><b>CK3</b> automated</td><td class="shows">Every worked example, whose approval records carry the attribute, still validates against the amended schema and passes the fidelity rules.</td><td class="limits">It reads the examples under models/architecture, not this repository's six closed changes; the suite's old-record case covers those shapes.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and reference without drift</span><b>CK4</b> automated</td><td class="shows">The generated packages carry 0.6.0 and the two skills' new sentences, and the CLI reference matches the amended help text.</td><td class="limits">Nothing about what the skills say being right; that is the review's reading.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Kernel reports 0.6.0, pin 0.6.0</span><b>CK5</b> automated</td><td class="shows">The kernel prints grace5 0.6.0 and this repository's pin reads 0.6.0.</td><td class="limits">Nothing beyond the two strings.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Upgrade of a clone from 0.2.0</span><b>CK6</b> automated</td><td class="shows">A clone at v0.2.0 with an open change upgrades through every step to 0.6.0, keeps every change and hash, and leaves the open change's candidate unchanged.</td><td class="limits">The clone's approval records all carry the attribute; a record without it is exercised by CK2 only.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Approved means it can be executed; "do not execute now" means hold it for a batch, a scheduling instruction and never a recorded state. Your ruling of 2026-11-13.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Old approval records are not rewritten and keep validating; the kernel reads every approval as authorization. A pilot takes the rule with grace5 upgrade.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Cheap path, as you asked on 2026-11-13: the brief and the review are written by the lead and marked self; no subagent.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Version 0.6.0, tagged at close; executed on master at home while the other session's draft C-0007-orchestrate-skill stays open and protected; no branch.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>An approval worded as a hold is indistinguishable in the records from one meant to start now; only the conversation says which. An orchestrated run that takes every approved change would take a held one unless you name the batch.</li>
+        <li>This brief and the review are written by the author. Nobody independent read the contract before you, and the measurement will count both as self.</li>
+        <li>The firmware runs this working tree through the shared checkout; while the change executes it may see a half-built kernel, as with the previous ones.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>One statement on this page: approve, or reject with the reason.</li>
+        <li>After the tag, your firmware session runs grace5 upgrade; nothing else is needed for the two refused changes.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the kernel sources and tests, the skills and their generated packages, the method documents including the approval schema, package.json, both READMEs and the pin. Under K1 what an approval binds is unchanged; under K2 no record is rewritten and every old record validates; under K3 the ledger entry L-05 is amended and none added; under K4 the surface only shrinks.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no record of a hold; the kernel does not know whether an approved change waits for a batch.</li>
+        <li>N2: the orchestrated run, defined by another change, which selects on approval alone once this is in.</li>
+        <li>N3: upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on your flag.</li>
+        <li>N4: reading or converting GRACE 4 state.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected=".grace5/changes/C-0007-orchestrate-skill/**">.grace5/changes/C-0007-orchestrate-skill/**</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li><span>None</span><span>No independent reading was made; the author wrote this brief from the contract.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 780 words against a target of 600, 6 checks against 8. The excess is the Change section, which lists every place the second decision is removed from.</p>
+  <p>This brief describes contract text with SHA-256 <code>04d08fb73f65ad99afc952426130d686feb199649ba52e6d2d27b1625539ca93</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>
