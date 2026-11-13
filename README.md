@@ -12,11 +12,11 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 | `src/` | The kernel CLI `grace5` (Bun, TypeScript), its conformance suite and its tools |
 | `skills/` | The three skills: prepare, execute, review |
 | `packages/` | Harness packages generated from `skills/`; never edited by hand |
-| `.grace5/` | This repository's own GRACE 5 state: its changes, briefs, receipts and records |
+| `.grace5/` | This repository's own GRACE 5 state: the open changes under `.grace5/changes/`, the closed ones under `.grace5/changes/closed/`, each with its briefs, receipts and records |
 
 ## Status
 
-Version 0.1.0. The kernel implements the method and is closed on itself: its first change, under `.grace5/changes/`, was prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
+Version 0.2.0. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Toolchain
 

@@ -10,7 +10,7 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 
 | Kind | Items |
 |---|---|
-| Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` |
+| Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` while the change is open, and under `.grace5/changes/closed/<id>/` once `close` has moved it (`commands.md`) |
 | Records | `brief-<rev>.html`, `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/` |
 | Commands | `grace5 init`, `check`, `run`, `status`, `close`; `--help` and `--version` |
 | Skills | prepare, execute, review, in `skills/`; the harness packages in `packages/` are generated from them and never edited |
@@ -55,9 +55,9 @@ A check is required unless it says `required="false"`. Markers are plain substri
 3. Execute. One change per worktree. `grace5 run --start` records the start revision, the pre-existing dirty paths (identified, never adopted) and the starting state of the automated checks, failures included (`commands.md`); a check that starts red is a recorded observation and often the reason for the change. The agent then works inside Affected, runs targeted checks with `grace5 run --check <id>`, and commits with a `Change: <id>` trailer.
 4. Final evidence. At a clean source revision `grace5 run` executes every required automated and trace check, and manual observations are recorded with `grace5 run --check <id> --observe`. What counts as source, and why writing a record never forces a rerun, is in `source-identity.md`.
 5. Review. An independent reviewer reads the complete diff from the start revision against the contract and the cited rules, and writes `records/review-<n>.xml`: findings, per-check adequacy, rule verdicts, and a statement of independence. A small change may be self-reviewed, and the record says so.
-6. Close. `grace5 close` verifies the verdicts on the final candidate and writes `close.xml`, or refuses and names the exact unmet obligation. Which record supersedes which is in `evidence-records.md`.
+6. Close. `grace5 close` verifies the verdicts on the final candidate and writes `close.xml`, or refuses and names the exact unmet obligation; then it moves the change directory under `.grace5/changes/closed/`, so the open changes stay in view. Which record supersedes which is in `evidence-records.md`.
 
-`grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. A malformed change is reported as malformed and never hides a valid one.
+`grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. Without an id it lists the open changes and counts the closed ones. A malformed change is reported as malformed and never hides a valid one.
 
 A material revision of behaviour, boundary, constraints or checks increments `revision`, gets a difference-only brief and a new approval; git preserves the previous revision. Until it is approved, only the checks whose definitions the last approval bound may run.
 

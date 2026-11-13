@@ -2,9 +2,13 @@
 
 What each of the five commands does, to the level an implementer needs. The reference of flags, `cli-reference.md`, is generated from the help text; this file states behaviour. Every command takes the change id, or finds the single change directory when only one is open. Exit status is 0 on success and nonzero when the command refuses or finds a defect; a refusal names the unmet obligation on one line.
 
+## Where a change lives
+
+An open change is the directory `.grace5/changes/<id>/`. `close` moves the whole directory to `.grace5/changes/closed/<id>/` as its last step, so the open changes stay in view. A change id is unique across the two locations, and every command that takes an id looks for it directly under `.grace5/changes/` first and under `closed/` second; the bare number resolves in both. Closed means `records/close.xml` exists, in either location: a change under `closed/` is read by `status` and `check`, and `run` and `close` refuse it with `change is closed`. A directory under `closed/` without `records/close.xml` is malformed, and its first error names the missing close record. A change that has `close.xml` and was not moved, as a repository has until it takes the version that moves, is closed all the same: `run` and `close` refuse it and the listing counts it. Nothing moves a change back.
+
 ## init
 
-Creates `.grace5/changes/` and `.grace5/README.md`, a short entry point that links the project documents and rule files it finds (README, AGENTS.md, CLAUDE.md, docs and models directories). It overwrites nothing: an existing file is reported and left alone. With a change id it also creates that change directory with a contract template.
+Creates `.grace5/changes/` and `.grace5/README.md`, a short entry point that links the project documents and rule files it finds (README, AGENTS.md, CLAUDE.md, docs and models directories). It overwrites nothing: an existing file is reported and left alone. With a change id it also creates that change directory with a contract template; an id that already has a directory, open or under `closed/`, is refused with the location on one line, and nothing is written.
 
 ## check
 
@@ -38,11 +42,11 @@ A command is executed through the platform shell (`sh -c`, or `cmd /d /s /c` on 
 
 Reads everything and changes nothing. For the selected change it reports: the contract revision and whether it is valid; the authorization state (unapproved, approved, approved for execution, rejected, altered after approval); the start revision; the current candidate and whether the tree is dirty; changed files outside `Path` and any inside `Protected`; per check the current result, whether it is on the current candidate, and whether it would count at close; the current review and its open findings; runs that were interrupted; and one line naming the next unresolved obligation, which is the first step `close` would refuse at.
 
-Without a change id it lists every change with one line each. A change that fails validation is listed as malformed with its first error, and the others are reported normally. The gate is strict: `close` and `run` refuse a malformed change; `status` only describes it.
+Without a change id it lists every open change with one line each, in either location, and ends with one line counting the closed changes, moved under `closed/` or not. With `--all`, a flag of the listing only, it also lists every closed change on one line before the count. A change that fails validation is listed as malformed with its first error wherever it lives, is never counted as closed, and the others are reported normally. The gate is strict: `close` and `run` refuse a malformed change; `status` only describes it.
 
 ## close
 
-Applies the eight steps of `evidence-records.md` and writes `close.xml`, or refuses at the first unmet step. A closed change refuses further runs.
+Applies the eight steps of `evidence-records.md` and writes `close.xml`, or refuses at the first unmet step. Then, as a ninth step that is never a closing condition, it moves the change directory to `.grace5/changes/closed/<id>/`, untracked logs included, and prints the new path of `close.xml`. If the move fails, the change is closed where it stands, the failure is reported on one line and the printed path is the actual one. A closed change refuses further runs.
 
 ## Output conventions
 
@@ -52,8 +56,9 @@ Output is plain text, one fact per line, stable enough to grep. The invocation i
 |---|---|
 | `check` | `contract-sha256: <hash>`, `definition <id>: <hash>` per check, `words: <n> (target 600)`, `checks: <n> (target 8)`, and `defect: <text>` per defect. A brief defect names the file and the omitted item, for example `defect: brief-1.html: protected path src/x/** is missing`. |
 | `run` | `run <n>: <check> <verdict>` per result with the reason after a colon when there is one, then `receipt: <path>`. A refused invocation prints `refused: <reason>` and writes no receipt. |
-| `status` | `change:`, `revision:`, `authorization:` (`unapproved`, `approved`, `approved for execution`, `rejected` or `altered after approval`), `start:`, `candidate: <hash> (clean)` or `(dirty)`, `outside: <path>` and `protected: <path>` per file, `check <id>: <verdict>` followed by `, counts` or `, does not count: <reason>`, `review:`, `interrupted: run-<n>`, `closed:` when closed, and last `next: <obligation>`. In the listing, one line per change: `<id>: <authorization>, next: <obligation>` or `<id>: malformed: <first error>`. |
-| `close` | `closed: <path of close.xml>`, or `refused: <obligation>`. |
+| `status` | `change:`, `revision:`, `authorization:` (`unapproved`, `approved`, `approved for execution`, `rejected` or `altered after approval`), `start:`, `candidate: <hash> (clean)` or `(dirty)`, `outside: <path>` and `protected: <path>` per file, `check <id>: <verdict>` followed by `, counts` or `, does not count: <reason>`, `review:`, `interrupted: run-<n>`, `closed: <path of close.xml>` when closed, and last `next: <obligation>`. In the listing, one line per open change, `<id>: <authorization>, next: <obligation>` or `<id>: malformed: <first error>`, then with `--all` one line `<id>: closed` per closed change, and last `closed changes: <n>`. |
+| `close` | `closed: <path of close.xml>`, the path under `closed/` once moved, or `refused: <obligation>`; `not moved: <reason>` when the record was written and the move failed. |
+| `init` | `created: <path>` and `exists: <path>` per entry, or `refused: change <id> exists at <path>/`. |
 
 The reasons use fixed phrases, so a reader and a test can rely on them: `no approval for revision <n>`, `contract altered after approval`, `approval does not authorize execution`, `no brief for revision <n>`, `brief does not match the approval`, `no start run`, `working tree is dirty`, `protected path touched: <path>`, `check <id>: no result`, `check <id>: current result is <verdict>`, `check <id>: recorded on an earlier candidate`, `check <id>: recorded dirty`, `check <id>: definition changed since the result`, `no review`, `review is incomplete`, `review covers an earlier candidate`, `blocking finding <id> is open`, `no adequacy statement for check <id>`, `check <id> does not discriminate`, `rule violated: <rule>`, and for refused results `amended in unapproved revision`, `live provenance missing`, `origin is <origin>, check requires <origin>`, `device mismatch`, `build mismatch`, `identity missing`, and also `change is malformed: <error>`, `change is closed`, `a start run exists: run-<n>`, `review covers an earlier revision`, `review does not cover the complete diff`, `start revision cannot be resolved`, `blocking finding <id> is disposed without an owner decision`, `change has defects: <first defect>`, `not a git repository`, `no source revision`. A missing origin is written `origin is unattributed, check requires <origin>`.
 
@@ -70,5 +75,6 @@ The reasons use fixed phrases, so a reader and a test can rely on them: `no appr
 - The brief hash is over the raw bytes of the page; only the contract reads CRLF as LF.
 - `Result/@log` is relative to the change directory; printed paths are relative to the root.
 - `status` shows uncommitted writes to protected and outside paths as well as committed ones, and reuses the close phrases after `does not count:`.
+- The move at close is a filesystem rename of the change directory; git sees it as deletions and untracked additions under `.grace5/changes/`, which are not source (`source-identity.md`), and the agent commits the move with the records. An id with a directory in both locations is malformed; the open one is read.
 - On Windows a run can only be interrupted by killing it, so the interrupted receipt is written on POSIX systems only; the log directory without a receipt is the record everywhere.
 - Validation is by the published XSD files through xmllint; the kernel then reads the validated text with its own small XML reader, which supports elements, attributes, text and the XML declaration only. Where the two could disagree, a DOCTYPE, a CDATA section, a processing instruction or another encoding, the reader throws and the change is reported malformed, so a disagreement fails closed. Schema defaults (`required="true"`, `cwd="."`, `min="1"`, `start="false"`) and the change id pattern of `common.xsd` are restated in code and must be kept equal to the schemas by hand; `init` validates the id it is given against that copy before any schema is involved (accepted design, review finding F13 of C-0001-kernel).

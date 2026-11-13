@@ -1,6 +1,6 @@
 # Conformance cases
 
-The kernel's conformance suite has at least one test per case below. A test fails when the kernel does not show the required behaviour. The first group is the fake-success set: states that look like success and are not. The second is the failure set: things that go wrong and must be recorded as what they are.
+The kernel's conformance suite has at least one test per case below. A test fails when the kernel does not show the required behaviour. The first group is the fake-success set: states that look like success and are not. The second is the failure set: things that go wrong and must be recorded as what they are. The third is the closed set: what the move under `closed/` must and must not change.
 
 ## Fake success
 
@@ -38,5 +38,15 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | FL-07 | The complete diff touches a protected path. | `status` reports it; `close` refuses. |
 | FL-08 | The contract was edited after approval without a new revision. | Reported as altered after approval; treated as unapproved. |
 | FL-09 | A command exceeds its budget. | Killed and recorded `cancelled`. |
+
+## Closed changes
+
+| Id | Case | Required behaviour |
+|---|---|---|
+| CL-01 | A change closes. | `close.xml` is written first; then the whole directory, untracked logs included, moves to `.grace5/changes/closed/<id>/` and `close` prints that path. The moved change validates unchanged: `check` reports the same hashes and no defect, `status` reports it closed with the new path, and the candidate is unchanged. |
+| CL-02 | A closed change is given to `run` or `close`, under `closed/` or as a sibling with `close.xml` not yet moved. | Refused with `change is closed`; no receipt is written. `status` and `check` read it in either location, by id or bare number. |
+| CL-03 | A directory under `closed/` has no `records/close.xml`. | Reported malformed, the first error naming the missing close record; `run` and `close` refuse it as malformed; it is not counted as closed; every other change is unaffected. |
+| CL-04 | `init` is given an id that has a directory, open or under `closed/`. | Refused on one line naming the location; nothing is written. |
+| CL-05 | The listing is read with closed changes present, moved or not. | Open changes one line each, no line for a closed change, and last `closed changes: <n>` counting every closed change; with `--all` one `<id>: closed` line per closed change before the count. `--all` with a change id, or on another command, is a usage error. |
 
 Every receipt field listed in `evidence-records.md` is asserted present by at least one test.

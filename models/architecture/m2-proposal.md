@@ -2,7 +2,7 @@
 
 This is a proposal for the control center's METHOD.md (M1) to adopt; M2 is not defined here and is defined only when that file adopts it, before any pilot exposure and before any comparison. It covers what a GRACE 5 pilot needs beyond M1 (consensus section 7) from records alone, and names each gap. M1's planned additions already reserve M2 for a GRACE 4 scenario-evidence metric, so adoption must merge the two or renumber one.
 
-The unit of exposure stays the change: a `C-NNNN` bundle with a `contract.xml`; closed means `close.xml` exists.
+The unit of exposure stays the change: a `C-NNNN` bundle with a `contract.xml`; closed means `close.xml` exists. A reader finds a bundle at `.grace5/changes/<id>/` while it is open and at `.grace5/changes/closed/<id>/` once `grace5 close` has moved it, and reads both locations; a bundle with `close.xml` that was not moved is closed all the same.
 
 ## 1. What M2 adds to M1
 

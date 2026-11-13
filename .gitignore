@@ -11,3 +11,4 @@ models/decisions/2026-11-12-plan.md
 
 # GRACE 5 run logs: receipts carry their hashes; logs stay local.
 .grace5/changes/*/records/logs/
+.grace5/changes/closed/*/records/logs/

@@ -48,4 +48,4 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 - When `next:` names the review, hand over as `grace5-review` describes.
 - A blocking finding fixed in code changes the candidate: repeat final evidence, then request a new review.
-- Run `grace5 close <id>` last. A refusal names the one unmet obligation; meet it and run again. Commit `close.xml`.
+- Run `grace5 close <id>` last. A refusal names the one unmet obligation; meet it and run again. On success it writes `close.xml`, moves the whole change directory to `.grace5/changes/closed/<id>/` and prints `closed:` with the new path. Commit the move with `close.xml`; a closed change is read there by `status` and `check` and refuses `run` and `close`.
