@@ -25,10 +25,12 @@ Global options:
   --version      Print the kernel name and version.
 
 The change:
-  A change is named by its directory under .grace5/changes/, for example C-0007-empty-export;
-  the bare number C-0007 is accepted when it names one change. When no change is named, check,
-  run and close select the single open change (one without close.xml) and fail when there is
-  none or more than one. status without a change lists every change.
+  A change is named by its directory, for example C-0007-empty-export; the bare number C-0007
+  is accepted when it names one change. An open change lives under .grace5/changes/; close
+  moves a closed one (one with records/close.xml) under .grace5/changes/closed/, and every
+  command finds a change in either place. When no change is named, check, run and close
+  select the single open change and fail when there is none or more than one. status without
+  a change lists the open changes and counts the closed ones (--all lists them too).
 
 Output:
   Plain text, one fact per line. Paths are relative to the root, with forward slashes.
@@ -50,17 +52,20 @@ Usage:
 Creates .grace5/changes/ and .grace5/README.md, a short entry point that links the project
 documents and rule files found in the root (README, AGENTS.md, CLAUDE.md, docs/, models/).
 With a change id (C-NNNN with an optional lower-case slug) it also creates
-.grace5/changes/<change>/, its records/ directory and a contract.xml template.
+.grace5/changes/<change>/, its records/ directory and a contract.xml template. A change id
+is unique across open and closed changes: an id that already has a directory under
+.grace5/changes/ or .grace5/changes/closed/ is refused.
 
 It overwrites nothing: an existing file or directory is reported and left alone.
 
 Output:
-  created: <path>   for each file or directory created
-  exists: <path>    for each one already present
+  created: <path>    for each file or directory created
+  exists: <path>     for each one already present
+  refused: <reason>  the change id exists, open or closed; nothing is written
 
 Exit status:
   0  success
-  1  the root is not a directory
+  1  the root is not a directory, or the change id exists
   2  a usage error, such as a malformed change id
 ```
 
@@ -177,6 +182,7 @@ grace5 status: report the state of a change, changing nothing
 
 Usage:
   grace5 [--root <dir>] status [change]
+  grace5 [--root <dir>] status --all
 
 With a change, one fact per line:
   change: <id>
@@ -194,15 +200,20 @@ With a change, one fact per line:
                                       count at close; "no result" when it has none
   review: <current review>            its status, candidate and open findings, or none
   interrupted: run-<n>                per interrupted run
-  closed: <path of close.xml>         only when closed
+  closed: <path of close.xml>         only when closed; under .grace5/changes/closed/ once moved
   next: <obligation>                  the first step close would refuse at; "close" when
                                       every step is met
 
 Changed files are the difference from the start revision to HEAD, plus uncommitted work.
 
-Without a change, one line per change:
+Without a change, one line per open change, then one line counting the closed ones:
   <id>: <authorization>, next: <obligation>
-  <id>: malformed: <first error>
+  <id>: malformed: <first error>      in either location; a directory under closed/ without
+                                      records/close.xml is malformed
+  closed changes: <n>                 every change whose records/close.xml exists, moved or not
+
+  --all   also lists every closed change, one line each before the count:
+  <id>: closed
 
 Exit status:
   0  the state was reported, whatever it is
@@ -238,12 +249,14 @@ Checks these in order and refuses at the first unmet one, naming it:
      owner-disposed without the owner's quoted decision; has an Adequacy with
      discriminates="true" for every required check; and has no Rule with verdict violated.
 
-Then it writes records/close.xml naming the run that satisfied each check. A closed change
-refuses further runs and a second close.
+Then it writes records/close.xml naming the run that satisfied each check, and as a ninth
+step, never a closing condition, moves the whole change directory, untracked logs included,
+to .grace5/changes/closed/<change>/. A closed change refuses further runs and a second close.
 
 Output:
-  closed: <path of close.xml>
+  closed: <path of close.xml>   .grace5/changes/closed/<change>/records/close.xml once moved
   refused: <obligation>
+  not moved: <reason>           the change is closed where it stands; the closed: line says where
 
 Exit status:
   0  close.xml was written

@@ -2,6 +2,7 @@
 
 import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { locateChange } from "../state";
 
 const CHANGE_ID = /^C-[0-9]{4}(-[a-z0-9]+)*$/;
 
@@ -46,7 +47,7 @@ function readme(root: string): string {
   return [
     "# .grace5",
     "",
-    "GRACE 5 state of this repository: one directory per change under `changes/`, each holding `contract.xml`, an optional `notes.md` and `records/` (brief, approval, run receipts, review, close).",
+    "GRACE 5 state of this repository: one directory per open change under `changes/`, each holding `contract.xml`, an optional `notes.md` and `records/` (brief, approval, run receipts, review, close); `grace5 close` moves a closed change to `changes/closed/`.",
     "",
     "The commands are `grace5 init`, `check`, `run`, `status` and `close`; `grace5 --help` describes them.",
     "",
@@ -64,6 +65,12 @@ export function initCommand(root: string, change: string | undefined): number {
   }
   if (!existsSync(root) || !statSync(root).isDirectory()) {
     console.error(`refused: ${root} is not a directory`);
+    return 1;
+  }
+  // A change id is unique across open and closed (commands.md): an existing directory in either place refuses the id.
+  const existing = change === undefined ? undefined : locateChange(root, change);
+  if (existing !== undefined) {
+    console.error(`refused: change ${change ?? ""} exists at ${existing.path}/`);
     return 1;
   }
   const report = (path: string, created: boolean): void => console.log(`${created ? "created" : "exists"}: ${path}`);

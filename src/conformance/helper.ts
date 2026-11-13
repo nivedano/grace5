@@ -460,8 +460,18 @@ export class Scenario {
     return this.def.revision ?? 1;
   }
 
+  /** The open location of this change, or the closed one once `close` has moved it (commands.md). */
   get changeDir(): string {
+    const open = this.openChangeDir;
+    return fs.existsSync(open) || !fs.existsSync(this.closedChangeDir) ? open : this.closedChangeDir;
+  }
+
+  get openChangeDir(): string {
     return path.join(this.repo, ".grace5", "changes", this.id);
+  }
+
+  get closedChangeDir(): string {
+    return path.join(this.repo, ".grace5", "changes", "closed", this.id);
   }
 
   get recordsDir(): string {

@@ -8,6 +8,11 @@ import { matchesAny, readContract, type Check, type Contract, type ContractRepor
 import { candidateOf, changedBetween, CHANGES_DIR, dirtyPaths, headRevision, openGit, type Git } from "./git";
 import { loadRecords, type Approval, type BriefFile, type ChangeRecords, type Review, type RunRecord, type RunResult } from "./records";
 
+/** The directory under `.grace5/changes/` that `close` moves a change into (commands.md). */
+export const CLOSED_DIR = "closed";
+/** Why a directory under closed/ without its close record is malformed. */
+export const CLOSE_RECORD_MISSING = `records/close.xml is missing: a change under ${CHANGES_DIR}${CLOSED_DIR}/ must carry it`;
+
 export type Authorization = "unapproved" | "approved" | "approved for execution" | "rejected" | "altered after approval";
 
 export interface SourceState {
@@ -33,6 +38,8 @@ export interface ChangeState {
   /** Path of the change directory relative to the root, forward slashes. */
   readonly path: string;
   readonly dir: string;
+  /** The change directory is under `.grace5/changes/closed/`. */
+  readonly inClosedDir: boolean;
   readonly report: ContractReport | undefined;
   readonly contract: Contract | undefined;
   readonly records: ChangeRecords;
@@ -69,10 +76,41 @@ export function changesDir(root: string): string {
   return join(root, ".grace5", "changes");
 }
 
-export function listChanges(root: string): string[] {
-  const dir = changesDir(root);
+export function closedDir(root: string): string {
+  return join(changesDir(root), CLOSED_DIR);
+}
+
+function subdirectories(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir).filter((name) => statSync(join(dir, name)).isDirectory()).sort();
+}
+
+/** Ids of the change directories directly under `.grace5/changes/`; `closed/` itself is not one. */
+export function listChanges(root: string): string[] {
+  return subdirectories(changesDir(root)).filter((name) => name !== CLOSED_DIR);
+}
+
+/** Ids of the change directories under `.grace5/changes/closed/`. */
+export function listClosedChanges(root: string): string[] {
+  return subdirectories(closedDir(root));
+}
+
+export interface Location {
+  readonly dir: string;
+  /** Relative to the root, forward slashes, no trailing slash. */
+  readonly path: string;
+  readonly inClosedDir: boolean;
+  /** The id has a directory in both places; the open one is read and the change is malformed. */
+  readonly duplicate: boolean;
+}
+
+/** Where a change id lives: directly under `.grace5/changes/` first, then under `closed/`. Undefined when it is in neither. */
+export function locateChange(root: string, id: string): Location | undefined {
+  const open = existsSync(join(changesDir(root), id));
+  const closed = existsSync(join(closedDir(root), id));
+  if (!open && !closed) return undefined;
+  if (open) return { dir: join(changesDir(root), id), path: `${CHANGES_DIR}${id}`, inClosedDir: false, duplicate: closed };
+  return { dir: join(closedDir(root), id), path: `${CHANGES_DIR}${CLOSED_DIR}/${id}`, inClosedDir: true, duplicate: false };
 }
 
 export function readSource(root: string): SourceState | undefined {
@@ -160,7 +198,8 @@ function reviewObligation(review: Review | undefined, basis: ReviewBasis): strin
 
 /** Evaluates one change. Reads everything and changes nothing. */
 export async function evaluate(root: string, id: string, sharedSource?: SourceState | undefined): Promise<ChangeState> {
-  const dir = join(changesDir(root), id);
+  const location = locateChange(root, id) ?? { dir: join(changesDir(root), id), path: `${CHANGES_DIR}${id}`, inClosedDir: false, duplicate: false };
+  const dir = location.dir;
   const contractPath = join(dir, "contract.xml");
   const report = existsSync(contractPath) ? await readContract(readFileSync(contractPath), { root }) : undefined;
   const records = await loadRecords(dir, id);
@@ -168,9 +207,13 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
 
   const contractDefects: string[] = report === undefined ? ["contract.xml is missing"] : [...report.defects];
   if (contract !== undefined && contract.id !== id) contractDefects.push(`contract.xml: id ${contract.id} is not the directory name ${id}`);
-  const malformed = contractDefects[0] ?? records.defects[0];
+  // The layout rules of commands.md: a directory under closed/ carries its close record, and an id lives in one place.
+  const locationDefects: string[] = [];
+  if (location.inClosedDir && !records.closeExists) locationDefects.push(CLOSE_RECORD_MISSING);
+  if (location.duplicate) locationDefects.push(`the change exists under both ${CHANGES_DIR} and ${CHANGES_DIR}${CLOSED_DIR}/`);
+  const malformed = contractDefects[0] ?? locationDefects[0] ?? records.defects[0];
   const unusedDefects = (report?.unused ?? []).map((check) => `check ${check} serves no criterion (unused)`);
-  const defects: string[] = [...contractDefects, ...unusedDefects, ...records.defects];
+  const defects: string[] = [...contractDefects, ...locationDefects, ...unusedDefects, ...records.defects];
 
   const approval = contract === undefined ? undefined : records.approvals.get(contract.revision);
   const brief = contract === undefined ? undefined : records.briefs.get(contract.revision);
@@ -274,8 +317,9 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
 
   return {
     id,
-    path: `${CHANGES_DIR}${id}`,
+    path: location.path,
     dir,
+    inClosedDir: location.inClosedDir,
     report,
     contract,
     records,
@@ -308,17 +352,23 @@ export function nextOf(state: ChangeState): string {
 
 export type Selection = { readonly id: string } | { readonly error: string; readonly usage: boolean };
 
-/** The named change, or the single open change when none is named (commands.md). */
+/** Whether a change directly under `.grace5/changes/` is open: its close record does not exist. */
+export function isOpen(root: string, id: string): boolean {
+  return !existsSync(join(changesDir(root), id, "records", "close.xml"));
+}
+
+/** The named change, found in either location, or the single open change when none is named (commands.md). */
 export function selectChange(root: string, named: string | undefined): Selection {
   const all = listChanges(root);
   if (named !== undefined) {
-    if (all.includes(named)) return { id: named };
-    const prefixed = all.filter((id) => id.startsWith(`${named}-`));
+    const everywhere = [...new Set([...all, ...listClosedChanges(root)])].sort();
+    if (everywhere.includes(named)) return { id: named };
+    const prefixed = everywhere.filter((id) => id.startsWith(`${named}-`));
     const only = prefixed[0];
     if (prefixed.length === 1 && only !== undefined) return { id: only };
-    return { error: `change ${named} not found under ${CHANGES_DIR}`, usage: false };
+    return { error: `change ${named} not found under ${CHANGES_DIR} or ${CHANGES_DIR}${CLOSED_DIR}/`, usage: false };
   }
-  const open = all.filter((id) => !existsSync(join(changesDir(root), id, "records", "close.xml")));
+  const open = all.filter((id) => isOpen(root, id));
   const single = open[0];
   if (open.length === 1 && single !== undefined) return { id: single };
   if (open.length === 0) return { error: `no open change under ${CHANGES_DIR}; name one`, usage: true };

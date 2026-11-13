@@ -1,8 +1,10 @@
 // grace5 close (evidence-records.md, "What close verifies"): writes close.xml or refuses at the first unmet step.
 
+import { existsSync, mkdirSync, renameSync } from "node:fs";
 import { join } from "node:path";
+import { CHANGES_DIR } from "../git";
 import { closeNode, kernelName, writeRecord, type CloseRecord } from "../records";
-import { evaluate, selectChange } from "../state";
+import { CLOSED_DIR, closedDir, evaluate, selectChange } from "../state";
 
 function refuse(reason: string): number {
   console.error(`refused: ${reason}`);
@@ -46,6 +48,18 @@ export async function closeCommand(root: string, change: string | undefined): Pr
     notRequired: state.checks.filter((c) => !c.check.required).map((c) => ({ check: c.check.id, verdict: c.current?.result.verdict })),
   };
   await writeRecord("close", join(state.dir, "records", "close.xml"), closeNode(record));
-  console.log(`closed: ${state.path}/records/close.xml`);
+  // The ninth step (evidence-records.md, "What closed means"): the change is closed once close.xml exists; the whole
+  // directory, untracked logs included, then moves under closed/. A move that fails leaves a closed change where it is.
+  let path = state.path;
+  const target = join(closedDir(root), state.id);
+  try {
+    if (existsSync(target)) throw new Error(`${CHANGES_DIR}${CLOSED_DIR}/${state.id} already exists`);
+    mkdirSync(closedDir(root), { recursive: true });
+    renameSync(state.dir, target);
+    path = `${CHANGES_DIR}${CLOSED_DIR}/${state.id}`;
+  } catch (error) {
+    console.error(`not moved: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  console.log(`closed: ${path}/records/close.xml`);
   return 0;
 }

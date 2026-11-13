@@ -1,6 +1,6 @@
 // grace5 status (commands.md): reads everything and changes nothing.
 
-import { evaluate, listChanges, nextOf, readSource, selectChange, type ChangeState } from "../state";
+import { evaluate, listChanges, listClosedChanges, nextOf, readSource, selectChange, type ChangeState } from "../state";
 
 function describe(state: ChangeState): string[] {
   const lines: string[] = [`change: ${state.id}`];
@@ -31,7 +31,7 @@ function describe(state: ChangeState): string[] {
   return lines;
 }
 
-export async function statusCommand(root: string, change: string | undefined): Promise<number> {
+export async function statusCommand(root: string, change: string | undefined, all = false): Promise<number> {
   if (change !== undefined) {
     const selection = selectChange(root, change);
     if ("error" in selection) {
@@ -41,16 +41,28 @@ export async function statusCommand(root: string, change: string | undefined): P
     for (const line of describe(await evaluate(root, selection.id))) console.log(line);
     return 0;
   }
-  // The listing: one line per change, a malformed one never hiding the others.
+  // The listing (commands.md): one line per open change, a malformed one never hiding the others; the closed changes,
+  // moved under closed/ or not, are counted on the last line and listed one line each only with --all.
   const source = readSource(root);
-  for (const id of listChanges(root)) {
+  const closedLines: string[] = [];
+  let closed = 0;
+  const ids = [...new Set([...listChanges(root), ...listClosedChanges(root)])].sort();
+  for (const id of ids) {
     try {
       const state = await evaluate(root, id, source);
-      if (state.malformed !== undefined) console.log(`${id}: malformed: ${state.malformed}`);
-      else console.log(`${id}: ${state.authorization}, next: ${nextOf(state)}`);
+      if (state.malformed !== undefined) {
+        const line = `${id}: malformed: ${state.malformed}`;
+        if (state.inClosedDir) closedLines.push(line);
+        else console.log(line);
+      } else if (state.closed) {
+        closed++;
+        if (all) closedLines.push(`${id}: closed`);
+      } else console.log(`${id}: ${state.authorization}, next: ${nextOf(state)}`);
     } catch (error) {
       console.log(`${id}: malformed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
+  for (const line of closedLines) console.log(line);
+  console.log(`closed changes: ${String(closed)}`);
   return 0;
 }
