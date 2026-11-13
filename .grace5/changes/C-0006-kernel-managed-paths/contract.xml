@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0006-kernel-managed-paths" revision="1" title="Everything the kernel manages leaves the candidate and the diff, so an upgrade and a change are unconnected">
+  <Problem>On 2026-11-13 a pilot's upgrade to 0.4.0 wrote its installed grace5-* skill files and the project's .gitignore inside the diff range of an open change that protects .agents/**, so close now refuses "protected path touched" for a write the change never made, and the change's evidence became history. The cause is that the kernel writes files the candidate and the complete diff read: the installed skills and the project's ignore file. The owner requires an upgrade and a change to be unconnected transactions, and ruled that the ignore line lives in a local ignore file.</Problem>
+  <Change>Source excludes everything the kernel manages: the whole .grace5/ directory, and the installed grace5-* skill directories under .agents/skills/ and .claude/skills/ whose names are the packaged skill names; the candidate, the dirty state, the complete diff, the outside listing and the protected-path check all follow, so no write of init, run, close or upgrade changes any change's candidate or appears in its diff. The run-log ignore lines move to a local file .grace5/.gitignore holding "changes/*/records/logs/" and "changes/closed/*/records/logs/", written by init and by the 0.1.0 to 0.2.0 step in place of the project's .gitignore, and by a new 0.4.0 to 0.5.0 step, which touches no change and writes nothing else; a line an earlier version wrote into the project's .gitignore is left alone and documented as removable by hand. With no step able to write source, the source-write refusal, the writes plan line, the --accept-evidence-loss flag and the evidence line are removed; upgrade keeps the refusal for a step that would write an open change's directory, and every step's skill refresh. Because the rule changes, every repository the kernel initialised, this one included, has one candidate under 0.4.0 and another under 0.5.0 for the same tree, since .grace5/README.md alone makes the difference: results and reviews recorded by 0.4.0 on such a tree do not count under 0.5.0 and are redone once; source-identity.md and upgrade.md say so at that boundary, as they do at the previous one. The version becomes 0.5.0; this repository's pin is written to 0.5.0 by this change directly.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/source-identity.md">The exclusion is by exact path prefix: .grace5/ as a whole, and under each skill location only the directories named by the packaged skills; a repository's own skills and every other path stay source.</Constraint>
+    <Constraint id="K2" rule="models/architecture/evidence-records.md">No record is rewritten; closure still means close.xml exists; the close steps keep their order, the protected-path step now reading the diff the amended rule defines.</Constraint>
+    <Constraint id="K3" rule="models/architecture/rationale-ledger.md">L-23 is amended to drop the flag and the source-write refusal from its mechanism and cost; L-09 is amended in its mechanism column to name the kernel-managed exclusion; no entry is added.</Constraint>
+    <Constraint id="K4" rule="AGENTS.md">The surface shrinks by one flag and grows by one state file, the local ignore file .grace5/.gitignore, listed in the method's state row; no command, document or tool is added.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Removing a closed-logs line an earlier version wrote into a project's .gitignore; the kernel writes no project file.</NonGoal>
+    <NonGoal id="N2">Excluding any path the kernel does not write: a repository's own skills under the same locations, docs, models, settings.</NonGoal>
+    <NonGoal id="N3">Upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on the owner's flag.</NonGoal>
+    <NonGoal id="N4">Reading or converting GRACE 4 state.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK2">The candidate, dirty state, complete diff, outside listing and protected-path check ignore writes under .grace5/ and under the installed grace5-* skill directories, and a repository's own skill beside them stays source; each is a conformance case with a test that fails when the kernel lacks it.</Criterion>
+    <Criterion id="A2" checks="CK2">An upgrade with open changes present, installed stale skills and a missing local ignore file proceeds without any flag, leaves every open change's candidate and diff unchanged, and refuses only a step that would write an open change's directory; the flag is a usage error; a conformance case covers each.</Criterion>
+    <Criterion id="A3" checks="CK1 CK3 CK4">The kernel type-checks, the examples still verify, the generated packages carry the version of package.json, and neither they nor the CLI reference drift from their sources.</Criterion>
+    <Criterion id="A4" checks="CK5">The kernel reports grace5 0.5.0 and this repository's pin reads 0.5.0.</Criterion>
+    <Criterion id="A5" checks="CK6">A clone of this repository at tag v0.2.0 with one open change added, upgraded by the new kernel, lists the same changes with the same hashes, carries the pin 0.5.0 and the local ignore file, and leaves the open change's candidate as it was.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/**</Path>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>package.json</Path>
+    <Path>README.md</Path>
+    <Path>.gitignore</Path>
+    <Path>.grace5/README.md</Path>
+    <Path>.grace5/kernel-version</Path>
+    <Path>.grace5/.gitignore</Path>
+    <Name>grace5 CLI</Name>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/decisions/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>CLAUDE.md</Protected>
+    <Protected>.grace5/changes/closed/**</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; process.exit(out === 'grace5 0.5.0' &amp;&amp; pin === '0.5.0' ? 0 : 1)"</Command>
+    </Automated>
+    <Automated id="CK6" budget="300">
+      <Command>bun src/tools/upgrade-verify.ts --with-open-change</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">Everything the kernel manages, .grace5/ and the installed grace5-* skills, is outside the candidate and the diff, so an upgrade and a change are unconnected transactions. Owner, 2026-11-13.</Decision>
+    <Decision id="D2">The run-log ignore lines live in a local .grace5/.gitignore; the kernel writes no project file. Owner, 2026-11-13.</Decision>
+    <Decision id="D3">The --accept-evidence-loss flag and the source-write refusal of 0.4.0 are removed, there being no source write left to accept.</Decision>
+    <Decision id="D4">The version is 0.5.0, tagged v0.5.0 when this change closes; the change executes on master in a temporary clone, because the shared checkout serves a pilot at v0.4.0; the commits are pushed into the shared repository's master, which is not checked out there, and the clone is deleted. No branch is created.</Decision>
+  </Decisions>
+</Contract>

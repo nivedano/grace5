@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0006-kernel-managed-paths revision 1</title>
+<meta name="grace5:change" content="C-0006-kernel-managed-paths">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="f550c4065d21fd421c33426baf57267a969a6360775d29375eb854cb078f3a07">
+<meta name="grace5:date" content="2026-11-13">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="890">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Everything the kernel manages leaves the candidate and the diff, so an upgrade and a change are unconnected</h1>
+  <p class="lead">Brief for approval. Change <code>C-0006-kernel-managed-paths</code>, revision 1, 2026-11-13. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>Source excludes everything the kernel manages: the whole .grace5/ directory, and the installed grace5-* skill directories under .agents/skills/ and .claude/skills/ whose names are the packaged skill names (today grace5-prepare, grace5-execute, grace5-review). Today only .grace5/changes/** and the pin are excluded. The candidate, the dirty state, the complete diff, the outside listing and the protected-path check all follow, so no write of init, run, close or upgrade changes any change&#x27;s candidate or appears in its diff. The pilot&#x27;s &quot;protected path touched&quot; on .agents/** for skill files the upgrade wrote cannot recur.</li>
+        <li>The run-log ignore lines leave the project&#x27;s .gitignore. The kernel writes a local file .grace5/.gitignore holding &quot;changes/*/records/logs/&quot; and &quot;changes/closed/*/records/logs/&quot;, so the logs of open and closed changes are ignored in every initialised repository: init writes it, the 0.1.0 to 0.2.0 step writes it in place of the project&#x27;s .gitignore, and a new 0.4.0 to 0.5.0 step writes it and nothing else, touching no change. A line an earlier version put into a project&#x27;s .gitignore is left where it is and documented as removable by hand. The kernel writes no project file any more.</li>
+        <li>With no step able to write source, 0.4.0&#x27;s source-write refusal, its &quot;writes: &lt;path&gt;&quot; plan line, the <code>--accept-evidence-loss</code> flag and the &quot;evidence of open changes becomes history&quot; line are removed; the flag becomes a usage error. upgrade keeps the refusal, with no override, for a step that would write an open change&#x27;s directory, and every step still refreshes the installed skills.</li>
+        <li>One more one-time cost at the boundary. Because the rule changes, every repository the kernel initialised, this one included, has one candidate under 0.4.0 and another under 0.5.0 for the same tree, since .grace5/README.md alone makes the difference: results and reviews recorded by 0.4.0 do not count under 0.5.0 and are redone once. Every repository with open changes redoes their final evidence once at this boundary, this one and the pilots alike. source-identity.md and upgrade.md say so, as they do for the 0.3.0 to 0.4.0 boundary.</li>
+        <li>The kernel version becomes 0.5.0, tagged v0.5.0 when this change closes. This repository&#x27;s own pin is written to 0.5.0 by the change directly.</li>
+        <li>Ledger entries L-23 (the flag and the source-write refusal dropped) and L-09 (the kernel-managed exclusion named) are amended; no entry is added. No command, document or tool is added; one flag goes and one state file, the local ignore file, comes, listed in the method&#x27;s state row.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The TypeScript type-check (bun run check, that is tsc --noEmit) completes without error on the final tree, the amended source rule, steps and command included. This is the first part of A3.</td><td class="limits">Command completion only. A type-check runs no command and reads no behaviour: nothing about the exclusion, the local ignore file, the removed flag or the new step rests on it.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Conformance suite</span><b>CK2</b> automated</td><td class="shows">The kernel test suite (bun test, up to ten minutes) completes without failure on the final tree, the new and amended tests included. It is the only check named by A1 and A2.</td><td class="limits">A pass shows the tests that exist pass. It does not show that each case A1 and A2 name has a test, nor that such a test would fail if the kernel still read a skill write into a candidate or a diff, still accepted the flag, or excluded a repository&#x27;s own skill beside the packaged ones. A1 names five computations and A2 three conditions at once; whether every pairing is exercised is for the review to read, and the tests and the kernel are written by the same agent.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Example contracts and briefs</span><b>CK3</b> automated</td><td class="shows">The example verifier completes: the worked example contracts under models/architecture/examples validate, their briefs pass the fidelity rules, and the defective brief is still reported.</td><td class="limits">It covers the examples only. It reads nothing under .grace5/changes/, exercises no upgrade, and says nothing about source-identity.md, upgrade.md, commands.md or the ledger this change edits.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and CLI reference without drift</span><b>CK4</b> automated</td><td class="shows">The package tool reproduces packages/** and models/architecture/cli-reference.md byte for byte from skills/, package.json and the help text, so the generated packages carry the version package.json holds and neither they nor the CLI reference drift from their sources.</td><td class="limits">It does not show that the version is 0.5.0 (CK5 does), that the help text no longer names the flag, or that the skill text describes the exclusion correctly; it shows only that packages equal skills and the reference equals the help text.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Kernel says 0.5.0 and this repository is pinned 0.5.0</span><b>CK5</b> automated</td><td class="shows">bun src/cli.ts --version prints exactly <code>grace5 0.5.0</code>, and .grace5/kernel-version in this repository reads 0.5.0. The kernel takes the number from package.json, so a pass shows package.json says 0.5.0 too.</td><td class="limits">The pin here is written by the change directly, not by the command, so a pass says nothing about upgrade or the new step. It does not show that a v0.5.0 tag exists or points at the closing commit; the kernel does not tag.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Clone at v0.2.0 with an open change upgrades without loss</span><b>CK6</b> automated</td><td class="shows">The upgrade verifier src/tools/upgrade-verify.ts, amended for 0.5.0, completes: it clones this repository at the tag v0.2.0, adds one open change beside the three closed ones, runs the new kernel&#x27;s upgrade through four steps, and finds the same changes with the same contract and definition hashes, the pin 0.5.0, the local ignore file .grace5/.gitignore, and the open change&#x27;s candidate equal to what it was before.</td><td class="limits">The clone has no installed skills and its project .gitignore already carries the old line, so the skill exclusion is never exercised there and the old line is simply left, as N1 says. The clone has never run under 0.4.0, so the one-time boundary cost is not shown. The tool today asserts the old line is in the project .gitignore once; the contract does not say what the amended tool asserts about either ignore file. Same author as the command it verifies; nothing about a pilot repository.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Everything the kernel manages, the .grace5/ directory and the installed grace5-* skills, is outside the candidate and the diff, so an upgrade and a change are unconnected transactions. You ruled on 2026-11-13.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The run-log ignore lines live in a local file, .grace5/.gitignore; the kernel writes no project file. Ruled 2026-11-13.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The <code>--accept-evidence-loss</code> flag and the source-write refusal that 0.4.0 introduced are removed, since no source write is left to accept.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The version is 0.5.0, tagged v0.5.0 when this change closes. The change executes on master in a temporary clone, because the shared checkout serves a pilot at v0.4.0; the commits are pushed into the shared repository&#x27;s master, which is not checked out there, and the clone is deleted. No branch is created.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The boundary costs every repository its open evidence once more, and the contract says so plainly. The pilot whose lost evidence is this change&#x27;s Problem loses it one last time when it takes 0.5.0, and this repository redoes the final run and review of this change under 0.5.0.</li>
+        <li>What the kernel does not read, it cannot guard. .grace5/README.md, the local ignore file, the pin and every installed grace5-* skill file can be edited by hand without dirtying the tree, changing a candidate or appearing in a diff; a Protected glob over them, like the pilot&#x27;s .agents/**, is never reported for those directories. A repository&#x27;s own directory that happens to bear a packaged name is excluded by name alone (K1).</li>
+        <li>The protected-path rule narrows silently. .grace5/changes/closed/** was already held by review alone; the installed skill directories join it. Nothing in the contract has status say which protected globs it cannot see.</li>
+        <li>Only CK2 reads behaviour, and the same agent writes the tests, the kernel and the CK6 tool. A1 and A2 are each one sentence covering several cases; a missing pairing turns CK2 green without the behaviour.</li>
+        <li>The write boundary is nearly the whole repository: the kernel, the skills, the packages, every method document except the schemas, package.json, README.md, this repository&#x27;s .gitignore, both state files and the new local ignore file. Five protected paths and the review are the boundary.</li>
+        <li>The work is done in a temporary clone (D4); until the push into the shared repository&#x27;s master succeeds, the commits and records exist only there. The v0.5.0 tag is made by hand at close; no check shows it exists.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Confirm from memory that D1 to D4 are the four rulings you made during preparation, and that no other was made.</li>
+        <li>Accept that every repository with open changes, this one included, redoes their final evidence once when it takes 0.5.0, and that after that the kernel&#x27;s own writes never touch a change&#x27;s evidence again.</li>
+        <li>Accept that the kernel stops guarding what it manages: edits under .grace5/ and to installed skills are invisible to candidate, dirty state and diff.</li>
+        <li>Later, give the flag for each pilot repository to run the upgrade (N3); the step needs no flag and writes no project file.</li>
+        <li>At close, make or confirm the v0.5.0 tag; the kernel will not.</li>
+        <li>No manual check, no bench session and no device is required. Every check is automated.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the kernel, its source rule, its steps, tests and the upgrade verifier (src/**), the three skills (skills/**), the generated packages (packages/**, by the package tool), the method documents, the conformance list, the ledger and the CLI reference (models/architecture/**, the schemas excepted), package.json, README.md, this repository&#x27;s .gitignore, .grace5/README.md, the pin .grace5/kernel-version and the new local ignore file .grace5/.gitignore. The named surface is the grace5 CLI.</li>
+        <li>Under K1 the exclusion is by exact path prefix: .grace5/ as a whole, and under each skill location only the directories named by the packaged skills; a repository&#x27;s own skills and every other path stay source. Under K2 no record is rewritten, closure still means close.xml exists, and the close steps keep their order, the protected-path step reading the diff the amended rule defines. Under K3 L-23 drops the flag and the source-write refusal from its mechanism and cost, L-09 names the kernel-managed exclusion in its mechanism column, and no entry is added. Under K4 the surface shrinks by one flag and grows by one state file, the local ignore file .grace5/.gitignore, listed in the method&#x27;s state row; no command, document or tool is added.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: removing a closed-logs line an earlier version wrote into a project&#x27;s .gitignore; the kernel writes no project file, so the line stays until someone removes it by hand.</li>
+        <li>N2: excluding any path the kernel does not write: a repository&#x27;s own skills under the same locations, docs, models, settings all stay source.</li>
+        <li>N3: upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on your flag.</li>
+        <li>N4: reading or converting GRACE 4 state.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>K4 said no state file is added while the Change had the kernel write a new ignore file into the state. Resolved: K4 now says the surface grows by one state file, the local ignore file .grace5/.gitignore, listed in the method&#x27;s state row; the file also moved up from .grace5/changes/ and now ignores the logs of open and closed changes alike, and the boundary sentence names every initialised repository outright.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 890 words against a target of 600, 6 checks against 8. The 290 words over the target are in the Change, the Acceptance, the Constraints and the Decisions: the contract both removes 0.4.0&#x27;s mechanism, naming the refusal, plan line, flag and evidence line it takes away, and defines the new exclusion with its local ignore file, its new step, its treatment of the old line and its one-time boundary cost; A1 and A2 enumerate the computations and conditions the conformance cases must cover; and D4 restates where the change executes and why.</p>
+  <p>This brief describes contract text with SHA-256 <code>f550c4065d21fd421c33426baf57267a969a6360775d29375eb854cb078f3a07</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>
