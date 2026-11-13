@@ -11,7 +11,7 @@ function refuse(reason: string): number {
   return 1;
 }
 
-export async function upgradeCommand(root: string, plan: boolean, acceptEvidenceLoss: boolean): Promise<number> {
+export async function upgradeCommand(root: string, plan: boolean): Promise<number> {
   if (openGit(root) === undefined) return refuse("not a git repository");
   let pin: string | undefined;
   try {
@@ -28,5 +28,5 @@ export async function upgradeCommand(root: string, plan: boolean, acceptEvidence
     return 0;
   }
   // The open changes are the chain's business (upgrade.md): it refuses only those a step would write.
-  return applyUpgrade({ root, version, steps: STEPS, plan, acceptEvidenceLoss, print: (line) => console.log(line), refuse: (reason) => console.error(`refused: ${reason}`) });
+  return applyUpgrade({ root, version, steps: STEPS, plan, print: (line) => console.log(line), refuse: (reason) => console.error(`refused: ${reason}`) });
 }

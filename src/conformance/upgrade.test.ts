@@ -1,28 +1,31 @@
-// Conformance cases UP-01 .. UP-17 of models/architecture/conformance.md: the version pin, the refusals and grace5 upgrade.
-// UP-06, UP-08 and UP-13 also drive the chain runner with injected steps, because the kernel's own steps cannot be made
-// to fail at the second link, to alter a contract from outside, or to write an open change.
+// Conformance cases UP-01 .. UP-18 of models/architecture/conformance.md: the version pin, the refusals, grace5 upgrade,
+// and the kernel-managed paths outside the candidate. UP-06, UP-08 and UP-13 also drive the chain runner with injected
+// steps, because the kernel's own steps cannot be made to fail at the second link, to alter a contract from outside, or
+// to write an open change.
 
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { applyUpgrade } from "../upgrade/chain";
 import { STEPS, type Step } from "../upgrade/steps";
-import { HEX64, PIN_PATH, REPO_ROOT, TEST_TIMEOUT, attr, automated, contractXml, disposeAll, hasLine, kernelVersion, prepared, sha256, type CliResult, type ContractDef, type Scenario } from "./helper";
+import { HEX64, LOCAL_IGNORE_PATH, LOCAL_IGNORE_TEXT, PIN_PATH, REPO_ROOT, TEST_TIMEOUT, attr, automated, contractXml, disposeAll, hasLine, kernelVersion, prepared, sha256, type CliResult, type ContractDef, type Scenario } from "./helper";
 
 afterAll(() => disposeAll());
 
 const VERSION = kernelVersion();
-const IGNORE_LINE = ".grace5/changes/closed/*/records/logs/";
+/** The line the 0.2.0 to 0.4.0 kernels wrote into a project's .gitignore; this kernel leaves it alone wherever it finds it. */
+const OLD_PROJECT_IGNORE_LINE = ".grace5/changes/closed/*/records/logs/";
 const PACKAGED_SKILLS = path.join(REPO_ROOT, "packages", "skills");
+const LOCAL_IGNORE_STEP = `step: 0.4.0 -> 0.5.0: write the local ignore file ${LOCAL_IGNORE_PATH}`;
 
 const behind = (pin: string): string => `refused: repository state is at ${pin}, kernel is ${VERSION}: run grace5 upgrade`;
 const ahead = (pin: string): string => `refused: repository state is at ${pin}, kernel is ${VERSION}: kernel too old`;
 const unreadable = (reason: string): string => `refused: repository pin is unreadable: ${PIN_PATH} is not a version: ${reason}`;
 const closedPath = (id: string): string => `.grace5/changes/closed/${id}`;
 
-/** An injected step for the chain runner: one that declares no writes unless the case says otherwise. */
-function fixtureStep(step: Omit<Step, "touches" | "writes"> & Partial<Pick<Step, "touches" | "writes">>): Step {
-  return { touches: () => [], writes: () => [], ...step };
+/** An injected step for the chain runner: one that touches no change unless the case says otherwise. */
+function fixtureStep(step: Omit<Step, "touches"> & Partial<Pick<Step, "touches">>): Step {
+  return { touches: () => [], ...step };
 }
 
 /** The `candidate:` line of `status <id>`. */
@@ -50,11 +53,12 @@ function closeSecond(s: Scenario, def: ContractDef): void {
   closeFully(s);
 }
 
-/** A repository as the 0.1.0 kernel left it: the closed change a sibling under .grace5/changes/, no pin, no ignore line. */
+/** A repository as the 0.1.0 kernel left it: the closed change a sibling under .grace5/changes/, no pin, no ignore file anywhere. */
 function asVersion010(s: Scenario): void {
   fs.renameSync(s.closedChangeDir, s.openChangeDir);
   s.pin(undefined);
   fs.rmSync(path.join(s.repo, ".gitignore"), { force: true });
+  fs.rmSync(path.join(s.repo, LOCAL_IGNORE_PATH), { force: true });
 }
 
 /** The versions a plan or an applied chain walks through, read from its step and bump lines; must start at `from` and end at the kernel's version. */
@@ -156,23 +160,26 @@ test(
     expect(hasLine(plan, /^step: 0\.1\.0 -> 0\.2\.0: .*closed.*$/)).toBe(true);
     expect(hasLine(plan, /^step: 0\.2\.0 -> 0\.3\.0: .*kernel-version.*$/)).toBe(true);
     expect(hasLine(plan, "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0")).toBe(true);
+    expect(hasLine(plan, LOCAL_IGNORE_STEP)).toBe(true);
     const versions = versionsOf(plan);
     expect(versions[0]).toBe("0.1.0");
     expect(versions.at(-1)).toBe(VERSION);
     expect(plan.out).not.toContain("pinned:");
     expect(plan.out).not.toContain("upgraded:");
+    expect(plan.out).not.toContain("writes:");
 
     expect(s.porcelain()).toBe(before);
     expect(s.readPin()).toBeUndefined();
     expect(fs.existsSync(s.openChangeDir)).toBe(true);
     expect(fs.existsSync(s.closedChangeDir)).toBe(false);
     expect(s.exists(".gitignore")).toBe(false);
+    expect(s.exists(LOCAL_IGNORE_PATH)).toBe(false);
   },
   TEST_TIMEOUT,
 );
 
 test(
-  "UP-04 upgrade on a repository without a pin runs the chain from 0.1.0: closed siblings move under closed/ with their logs, the ignore line is appended, the pin is written after each step",
+  "UP-04 upgrade on a repository without a pin runs the chain from 0.1.0: closed siblings move under closed/ with their logs, the local ignore file is written and no project file, the pin is written after each step",
   () => {
     const s = prepared({ id: "C-0506-sibling", checks: [automated("CK1")] });
     const sibling = s.id;
@@ -186,6 +193,7 @@ test(
     fs.renameSync(path.join(s.repo, closedPath(sibling)), path.join(s.repo, ".grace5", "changes", sibling));
     s.pin(undefined);
     fs.rmSync(path.join(s.repo, ".gitignore"), { force: true });
+    fs.rmSync(path.join(s.repo, LOCAL_IGNORE_PATH), { force: true });
     expect(fs.existsSync(path.join(s.repo, ".grace5", "changes", sibling, "records", "logs", "run-2", "CK1.log"))).toBe(true);
     const siblingBefore = s.check(sibling);
     expect(siblingBefore.code).toBe(1);
@@ -208,8 +216,12 @@ test(
     expect(fs.existsSync(path.join(s.repo, closedPath(sibling), "records", "close.xml"))).toBe(true);
     expect(fs.existsSync(path.join(s.repo, closedPath(sibling), "records", "logs", "run-2", "CK1.log"))).toBe(true);
     expect(fs.existsSync(path.join(s.repo, closedPath(moved), "records", "close.xml"))).toBe(true);
-    expect(s.read(".gitignore")).toBe(`${IGNORE_LINE}\n`);
+    // The run-log ignore lines live in the local ignore file; the kernel writes no project file.
+    expect(s.read(LOCAL_IGNORE_PATH)).toBe(LOCAL_IGNORE_TEXT);
+    expect(s.exists(".gitignore")).toBe(false);
     expect(s.readPin()).toBe(`${VERSION}\n`);
+    // Git honours the local file: the untracked logs under the moved change are ignored, so none is listed as new.
+    expect(s.porcelain().split("\n").filter((l) => l.startsWith("??") && l.includes("records/logs/"))).toEqual([]);
 
     const listing = s.cli(["status", "--all"]);
     expect(listing.lines[0]).toBe(`kernel: ${VERSION}, state: ${VERSION}`);
@@ -232,15 +244,18 @@ test(
     closeFully(s);
     const before = s.check();
     expect(HEX64.test(before.contractSha)).toBe(true);
-    // Already in the 0.2.0 shape, as this repository was at v0.2.0: moved, the ignore line present, no pin.
-    s.write(".gitignore", `node_modules/\n${IGNORE_LINE}\n`);
+    // Already in shape: moved, the local ignore file present, the line an earlier kernel wrote into the project's
+    // .gitignore still there, no pin. The project file is left byte for byte as it is.
+    s.write(".gitignore", `node_modules/\n${OLD_PROJECT_IGNORE_LINE}\n`);
+    s.write(LOCAL_IGNORE_PATH, LOCAL_IGNORE_TEXT);
     s.pin(undefined);
     s.commit("the 0.2.0 shape without a pin");
 
     const first = s.cli(["upgrade"]);
     expect(first.code).toBe(0);
     expect(first.lines.at(-1)).toBe(`upgraded: 0.1.0 -> ${VERSION}`);
-    expect(s.read(".gitignore")).toBe(`node_modules/\n${IGNORE_LINE}\n`);
+    expect(s.read(".gitignore")).toBe(`node_modules/\n${OLD_PROJECT_IGNORE_LINE}\n`);
+    expect(s.read(LOCAL_IGNORE_PATH)).toBe(LOCAL_IGNORE_TEXT);
     expect(fs.existsSync(s.closedChangeDir)).toBe(true);
     expect(s.readPin()).toBe(`${VERSION}\n`);
     expect(s.porcelain()).toBe(`?? ${PIN_PATH}\n`);
@@ -342,7 +357,7 @@ test(
     expect(hasLine(upgrade, "refreshed: .agents/skills/grace5-prepare")).toBe(true);
     expect(upgrade.out).not.toContain("skills: none installed");
     // Two directories refreshed once per step; a pin bump refreshes nothing (F3 of review 1 of C-0004-upgrade-command).
-    expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(3);
+    expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(4);
     expect(upgrade.lines.filter((l) => l.startsWith("refreshed:")).length).toBe(2 * upgrade.lines.filter((l) => l.startsWith("step:")).length);
 
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
@@ -424,24 +439,31 @@ test(
 );
 
 test(
-  "UP-09 init writes the pin with the kernel's version when it creates .grace5/, reports it as existing afterwards, and is refused on a stale pin",
+  "UP-09 init writes the pin with the kernel's version and the local ignore file when it creates .grace5/, reports them as existing afterwards, and is refused on a stale pin",
   () => {
     const s = prepared({ id: "C-0512-init", checks: [automated("CK1")] });
     fs.rmSync(path.join(s.repo, ".grace5"), { recursive: true });
     expect(s.cli(["status"]).lines[0]).toBe(`kernel: ${VERSION}, state: none`);
+    expect(s.exists(".gitignore")).toBe(false);
 
     const created = s.cli(["init"]);
     expect(created.code).toBe(0);
     expect(hasLine(created, `created: ${PIN_PATH}`)).toBe(true);
+    expect(hasLine(created, `created: ${LOCAL_IGNORE_PATH}`)).toBe(true);
     expect(s.readPin()).toBe(`${VERSION}\n`);
+    expect(s.read(LOCAL_IGNORE_PATH)).toBe(LOCAL_IGNORE_TEXT);
+    // No project file: init writes under .grace5/ only.
+    expect(s.exists(".gitignore")).toBe(false);
     expect(s.read(".grace5/README.md")).toContain("kernel-version");
     expect(s.cli(["status"]).lines[0]).toBe(`kernel: ${VERSION}, state: ${VERSION}`);
 
     const again = s.cli(["init", "C-0513-second"]);
     expect(again.code).toBe(0);
     expect(hasLine(again, `exists: ${PIN_PATH}`)).toBe(true);
+    expect(hasLine(again, `exists: ${LOCAL_IGNORE_PATH}`)).toBe(true);
     expect(hasLine(again, "created: .grace5/changes/C-0513-second/contract.xml")).toBe(true);
     expect(s.readPin()).toBe(`${VERSION}\n`);
+    expect(s.read(LOCAL_IGNORE_PATH)).toBe(LOCAL_IGNORE_TEXT);
 
     s.pin("0.2.0");
     const refused = s.cli(["init", "C-0514-third"]);
@@ -496,25 +518,36 @@ test(
 );
 
 test(
-  "UP-12 upgrade proceeds with open changes present when no step writes their directories or any source path, lists them as open, untouched, and the post-upgrade check covers them",
+  "UP-12 upgrade proceeds without a flag with open changes present, stale installed skills and no local ignore file, lists the changes as open, untouched, leaves their candidate, dirty state and evidence as before, and the post-upgrade check covers them; --accept-evidence-loss is a usage error everywhere",
   () => {
-    const s = prepared({ id: "C-0519-closed-beside", checks: [automated("CK1")] });
+    const closed = "C-0519-closed-beside";
+    const s = prepared({ id: closed, checks: [automated("CK1")] });
     closeFully(s);
     s.commit("close the first change");
+    // An open change with a start result, so that there is evidence to keep.
     const open = "C-0520-open";
-    s.write(`.grace5/changes/${open}/contract.xml`, contractXml({ id: open, checks: [automated("CK1")] }));
-    // The 0.2.0 shape: the closed change under closed/, the ignore line present, no pin, no skills installed.
-    s.write(".gitignore", `${IGNORE_LINE}\n`);
+    s.writeContract({ id: open, checks: [automated("CK1")] });
+    s.prepare();
+    expect(s.start().code).toBe(0);
+    // Installed skills, one stale and one already equal to the packaged copy; the closed change under closed/; no pin;
+    // no local ignore file; the project's .gitignore absent.
+    s.write(".claude/skills/grace5-execute/SKILL.md", "old text of the execute skill\n");
+    s.write(".agents/skills/grace5-prepare/SKILL.md", readSkill("grace5-prepare/SKILL.md"));
     s.pin(undefined);
-    s.commit("an open change beside a closed one, state without a pin");
+    fs.rmSync(path.join(s.repo, ".gitignore"), { force: true });
+    fs.rmSync(path.join(s.repo, LOCAL_IGNORE_PATH), { force: true });
+    s.commit("an open change with a result beside a closed one, a stale skill, state without a pin");
     const clean = s.porcelain();
     const contractSha = sha256(s.read(`.grace5/changes/${open}/contract.xml`).replace(/\r\n/g, "\n"));
     const before = candidateLine(s, open);
     expect(before).toMatch(/^candidate: [0-9a-f]{64} \(clean\)$/);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
+    const receiptBefore = s.receipt();
 
     const plan = s.cli(["upgrade", "--plan"]);
     expect(plan.code).toBe(0);
     expect(hasLine(plan, `open, untouched: ${open}`)).toBe(true);
+    expect(hasLine(plan, LOCAL_IGNORE_STEP)).toBe(true);
     expect(plan.out).not.toContain("writes:");
     expect(plan.out).not.toContain("refused:");
     expect(s.porcelain()).toBe(clean);
@@ -523,39 +556,56 @@ test(
     const upgrade = s.cli(["upgrade"]);
     expect(upgrade.code).toBe(0);
     expect(hasLine(upgrade, `open, untouched: ${open}`)).toBe(true);
+    expect(hasLine(upgrade, "refreshed: .claude/skills/grace5-execute")).toBe(true);
+    expect(hasLine(upgrade, "refreshed: .agents/skills/grace5-prepare")).toBe(true);
     expect(upgrade.out).not.toContain("writes:");
     expect(upgrade.out).not.toContain("evidence of open changes");
     expect(upgrade.out).not.toContain("refused:");
     expect(hasLine(upgrade, `checked: ${open}`)).toBe(true);
-    expect(hasLine(upgrade, `checked: ${s.id}`)).toBe(true);
+    expect(hasLine(upgrade, `checked: ${closed}`)).toBe(true);
     expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.1.0 -> ${VERSION}`);
     expect(s.readPin()).toBe(`${VERSION}\n`);
-    // Nothing under the open change was written; the pin is the only new path.
-    expect(s.porcelain()).toBe(`?? ${PIN_PATH}\n`);
+    expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
+    expect(s.read(LOCAL_IGNORE_PATH)).toBe(LOCAL_IGNORE_TEXT);
+    expect(s.exists(".gitignore")).toBe(false);
+    // Git sees the refreshed skill, the local ignore file and the pin; the kernel sees none of them: the candidate is
+    // clean and as before, nothing under the open change was written, and the result still counts.
+    expect(s.porcelain()).toContain(".claude/skills/grace5-execute/SKILL.md");
+    expect(s.porcelain()).toContain(`?? ${PIN_PATH}`);
+    expect(s.porcelain()).toContain(`?? ${LOCAL_IGNORE_PATH}`);
+    expect(s.receipt()).toBe(receiptBefore);
     expect(fs.existsSync(path.join(s.repo, ".grace5", "changes", open, "records", "close.xml"))).toBe(false);
+    const status = s.status();
+    expect(status.lines[0]).toBe(`kernel: ${VERSION}, state: ${VERSION}`);
+    expect(hasLine(status, before)).toBe(true);
+    expect(hasLine(status, "check CK1: passed, counts")).toBe(true);
+    expect(status.out).not.toContain("outside:");
 
     const listing = s.cli(["status", "--all"]);
-    expect(listing.lines[0]).toBe(`kernel: ${VERSION}, state: ${VERSION}`);
-    expect(hasLine(listing, new RegExp(`^${open}: unapproved, next: .+$`))).toBe(true);
-    expect(hasLine(listing, `${s.id}: closed`)).toBe(true);
+    expect(hasLine(listing, new RegExp(`^${open}: approved for execution, next: .+$`))).toBe(true);
+    expect(hasLine(listing, `${closed}: closed`)).toBe(true);
     expect(listing.lines.at(-1)).toBe("closed changes: 1");
-    expect(candidateLine(s, open)).toBe(before);
     const check = s.check(open);
     expect(check.code).toBe(0);
     expect(check.contractSha).toBe(contractSha);
+    // A receipt taken afterwards carries the same candidate, clean.
+    expect(s.run("--check", "CK1").code).toBe(0);
+    expect(`candidate: ${attr(s.receipt(), "Run", "candidate") ?? ""} (clean)`).toBe(before);
+    expect(attr(s.receipt(), "Run", "dirty")).toBe("false");
 
-    // --accept-evidence-loss with nothing to write: the upgrade proceeds as before and states no cost, since none is incurred.
-    s.commit("take the pin");
+    // There is no flag: --accept-evidence-loss is a usage error on upgrade like on every other command, and writes nothing.
+    s.commit("take the upgrade");
     s.pin(undefined);
     s.commit("the pin removed again");
-    const flagged = s.cli(["upgrade", "--accept-evidence-loss"]);
-    expect(flagged.code).toBe(0);
-    expect(hasLine(flagged, `open, untouched: ${open}`)).toBe(true);
-    expect(flagged.out).not.toContain("writes:");
-    expect(flagged.out).not.toContain("evidence of open changes");
-    expect(flagged.lines.at(-1)).toBe(`upgraded: 0.1.0 -> ${VERSION}`);
-    expect(s.porcelain()).toBe(`?? ${PIN_PATH}\n`);
-    expect(candidateLine(s, open)).toBe(before);
+    const taken = s.porcelain();
+    for (const args of [["upgrade", "--accept-evidence-loss"], ["upgrade", "--plan", "--accept-evidence-loss"], ["check", open, "--accept-evidence-loss"], ["status", "--accept-evidence-loss"], ["run", open, "--start", "--accept-evidence-loss"], ["close", open, "--accept-evidence-loss"], ["init", "--accept-evidence-loss"]]) {
+      const usage = s.cli(args);
+      expect(usage.code).toBe(2);
+      expect(usage.out).not.toContain("step:");
+      expect(usage.out).not.toContain("pinned:");
+    }
+    expect(s.porcelain()).toBe(taken);
+    expect(s.readPin()).toBeUndefined();
   },
   TEST_TIMEOUT,
 );
@@ -566,7 +616,7 @@ test(
     const s = prepared({ id: "C-0521-touched", checks: [automated("CK1")] });
     const second = "C-0522-also-touched";
     s.write(`.grace5/changes/${second}/contract.xml`, contractXml({ id: second, checks: [automated("CK1")] }));
-    s.write(".gitignore", `${IGNORE_LINE}\n`);
+    s.write(LOCAL_IGNORE_PATH, LOCAL_IGNORE_TEXT);
     s.pin("0.1.0");
     s.commit("two open changes at an earlier version");
     const clean = s.porcelain();
@@ -581,28 +631,26 @@ test(
       },
       verify() {},
     });
-    for (const acceptEvidenceLoss of [false, true]) {
-      for (const plan of [false, true]) {
-        const lines: string[] = [];
-        const refusals: string[] = [];
-        const code = await applyUpgrade({ root: s.repo, version: VERSION, steps: [touching], plan, acceptEvidenceLoss, print: (line) => lines.push(line), refuse: (reason) => refusals.push(reason) });
-        expect(code).toBe(1);
-        expect(refusals).toEqual([`open changes touched by step 0.1.0 -> ${VERSION}: ${s.id}, ${second}`]);
-        expect(lines).toEqual([]);
-      }
+    for (const plan of [false, true]) {
+      const lines: string[] = [];
+      const refusals: string[] = [];
+      const code = await applyUpgrade({ root: s.repo, version: VERSION, steps: [touching], plan, print: (line) => lines.push(line), refuse: (reason) => refusals.push(reason) });
+      expect(code).toBe(1);
+      expect(refusals).toEqual([`open changes touched by step 0.1.0 -> ${VERSION}: ${s.id}, ${second}`]);
+      expect(lines).toEqual([]);
     }
     expect(s.readPin()).toBe("0.1.0\n");
     expect(s.porcelain()).toBe(clean);
 
-    // The kernel's own steps: the move declares the closed siblings, the pin and skill steps nothing; an open change is never declared.
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], [], []]);
+    // The kernel's own steps: the move declares the closed siblings, the pin, skill and local ignore steps nothing; an open change is never declared.
+    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], [], [], []]);
     s.pin(VERSION);
     closeFully(s);
     s.commit("close the first change");
     fs.renameSync(s.closedChangeDir, s.openChangeDir);
     s.pin(undefined);
     s.commit("the closed change as a sibling, as a 0.1.0 kernel left it");
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], [], []]);
+    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], [], [], []]);
 
     // So the command proceeds: the sibling moves, the open change is untouched.
     const upgrade = s.cli(["upgrade"]);
@@ -618,82 +666,89 @@ test(
 );
 
 test(
-  "UP-14 a source write pending while changes are open is refused naming the paths, proceeds with --accept-evidence-loss printing the evidence line, and the flag is a usage error elsewhere",
+  "UP-14 the kernel-managed paths are outside the candidate, the dirty state and the complete diff: a write under .grace5/ or an installed grace5-* skill directory changes no evidence and is never outside or protected, while a repository's own skill beside them is source",
   () => {
-    const s = prepared({ id: "C-0523-writes", checks: [automated("CK1")] });
-    // The 0.1.0 shape with no ignore line and an installed skill whose text differs from the packaged one; a second
-    // installed skill already equal to the packaged one is not a write.
+    // A change that protects .agents/**, as the pilot of the Problem did; the installed kernel skills live there.
+    const s = prepared({ id: "C-0523-managed", checks: [automated("CK1")], paths: ["src/**"], protectedPaths: [".agents/**"] });
+    s.write(".agents/skills/grace5-prepare/SKILL.md", "old text of the prepare skill\n");
     s.write(".claude/skills/grace5-execute/SKILL.md", "old text of the execute skill\n");
+    s.write(".agents/skills/grace5-mine/SKILL.md", "a skill of this repository, not the kernel's\n");
+    s.write(".grace5/README.md", "# .grace5\n");
+    s.commit("installed skills, a skill of the repository, the state's entry point");
+    expect(s.start().code).toBe(0);
+    const candidate = attr(s.receipt(), "Run", "candidate") ?? "";
+    expect(HEX64.test(candidate)).toBe(true);
+    expect(candidate).toBe(s.computeCandidate());
+    s.commit("the start receipt");
+    const line = `candidate: ${candidate} (clean)`;
+    expect(candidateLine(s)).toBe(line);
+    const settled = s.porcelain();
+
+    // Writes an upgrade makes, left uncommitted: a refreshed skill in each location, a new file under a managed skill
+    // directory, the entry point rewritten, the local ignore file created. Git sees them; the kernel does not.
     s.write(".agents/skills/grace5-prepare/SKILL.md", readSkill("grace5-prepare/SKILL.md"));
-    s.pin("0.1.0");
-    s.commit("an open change, a stale skill, no ignore line");
-    const clean = s.porcelain();
-    const paths = ".claude/skills/grace5-execute/SKILL.md, .gitignore";
+    s.write(".claude/skills/grace5-execute/SKILL.md", readSkill("grace5-execute/SKILL.md"));
+    s.write(".claude/skills/grace5-execute/reference.md", "a file the package may carry one day\n");
+    s.write(".grace5/README.md", "# .grace5\n\nrewritten\n");
+    s.write(LOCAL_IGNORE_PATH, LOCAL_IGNORE_TEXT);
+    expect(s.porcelain()).not.toBe(settled);
+    let status = s.status();
+    expect(hasLine(status, line)).toBe(true);
+    expect(hasLine(status, "check CK1: passed, counts")).toBe(true);
+    expect(status.out).not.toContain("outside:");
+    expect(status.out).not.toContain("protected:");
+    expect(s.run("--check", "CK1").code).toBe(0);
+    expect(attr(s.receipt(), "Run", "candidate")).toBe(candidate);
+    expect(attr(s.receipt(), "Run", "dirty")).toBe("false");
+    // Committed, they change the candidate as little; the complete diff from the start carries them and reports none.
+    s.commit("the kernel-managed writes");
+    expect(s.computeCandidate()).toBe(candidate);
+    status = s.status();
+    expect(hasLine(status, line)).toBe(true);
+    expect(hasLine(status, "check CK1: passed, counts")).toBe(true);
+    expect(status.out).not.toContain("outside:");
+    expect(status.out).not.toContain("protected:");
 
-    for (const args of [["upgrade"], ["upgrade", "--plan"]]) {
-      const refused = s.cli(args);
-      expect(refused.code).toBe(1);
-      expect(hasLine(refused, `refused: open changes present; the upgrade would write: ${paths}`)).toBe(true);
-      expect(refused.out).not.toContain("step:");
-      expect(refused.out).not.toContain("pinned:");
-    }
-    expect(s.readPin()).toBe("0.1.0\n");
-    expect(s.exists(".gitignore")).toBe(false);
-    expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe("old text of the execute skill\n");
-    expect(s.porcelain()).toBe(clean);
+    // The repository's own skill beside them, and any other path, is source: dirty, then a new candidate, reported
+    // protected or outside, and the complete diff refused at close.
+    const before = s.head();
+    s.write(".agents/skills/grace5-mine/SKILL.md", "edited\n");
+    s.write("docs/note.md", "edited\n");
+    status = s.status();
+    expect(hasLine(status, `candidate: ${candidate} (dirty)`)).toBe(true);
+    expect(hasLine(status, "protected: .agents/skills/grace5-mine/SKILL.md")).toBe(true);
+    expect(hasLine(status, "outside: docs/note.md")).toBe(true);
+    s.commit("the repository's own skill and a document");
+    expect(s.computeCandidate()).not.toBe(candidate);
+    status = s.status();
+    expect(hasLine(status, `candidate: ${s.computeCandidate()} (clean)`)).toBe(true);
+    expect(hasLine(status, "check CK1: passed, does not count: recorded on an earlier candidate")).toBe(true);
+    expect(hasLine(status, "protected: .agents/skills/grace5-mine/SKILL.md")).toBe(true);
+    s.writeReview();
+    const refused = s.close();
+    expect(refused.code).toBe(1);
+    expect(hasLine(refused, "refused: protected path touched: .agents/skills/grace5-mine/SKILL.md")).toBe(true);
 
-    // The flag belongs to upgrade alone.
-    for (const args of [["check", s.id, "--accept-evidence-loss"], ["status", "--accept-evidence-loss"], ["run", s.id, "--start", "--accept-evidence-loss"], ["close", s.id, "--accept-evidence-loss"], ["init", "--accept-evidence-loss"]]) {
-      expect(s.cli(args).code).toBe(2);
-    }
-    expect(s.porcelain()).toBe(clean);
-
-    const plan = s.cli(["upgrade", "--plan", "--accept-evidence-loss"]);
-    expect(plan.code).toBe(0);
-    expect(hasLine(plan, "writes: .claude/skills/grace5-execute/SKILL.md")).toBe(true);
-    expect(hasLine(plan, "writes: .gitignore")).toBe(true);
-    expect(hasLine(plan, `open, untouched: ${s.id}`)).toBe(true);
-    expect(plan.out).not.toContain("evidence of open changes");
-    expect(s.porcelain()).toBe(clean);
-
-    const upgrade = s.cli(["upgrade", "--accept-evidence-loss"]);
-    expect(upgrade.code).toBe(0);
-    expect(upgrade.out).not.toContain("refused:");
-    expect(hasLine(upgrade, "writes: .claude/skills/grace5-execute/SKILL.md")).toBe(true);
-    expect(hasLine(upgrade, "writes: .gitignore")).toBe(true);
-    expect(upgrade.lines.filter((l) => l.startsWith("writes:")).length).toBe(2);
-    expect(hasLine(upgrade, `open, untouched: ${s.id}`)).toBe(true);
-    const evidence = upgrade.lines.indexOf(`evidence of open changes becomes history: ${s.id}`);
-    expect(evidence).toBeGreaterThan(-1);
-    expect(evidence).toBeLessThan(upgrade.lines.indexOf("pinned: 0.2.0"));
-    expect(hasLine(upgrade, `checked: ${s.id}`)).toBe(true);
-    expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.1.0 -> ${VERSION}`);
-    expect(s.read(".gitignore")).toBe(`${IGNORE_LINE}\n`);
-    expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
-    expect(s.readPin()).toBe(`${VERSION}\n`);
-    expect(hasLine(s.cli(["status"]), new RegExp(`^${s.id}: approved for execution, next: .+$`))).toBe(true);
-
-    // Without open changes the same writes need no flag (UP-04); with the flag and no open change nothing is announced.
-    s.commit("take the upgrade");
-    closeFully(s);
-    s.write(".claude/skills/grace5-execute/SKILL.md", "stale again\n");
-    s.pin("0.1.0");
-    s.commit("closed, the skill stale again, the state at an earlier version");
-    const again = s.cli(["upgrade", "--accept-evidence-loss"]);
-    expect(again.code).toBe(0);
-    expect(hasLine(again, "writes: .claude/skills/grace5-execute/SKILL.md")).toBe(true);
-    expect(again.out).not.toContain("open, untouched:");
-    expect(again.out).not.toContain("evidence of open changes");
+    // Restored, the tree is the earlier candidate again, and the change closes: the committed writes under the installed
+    // skill directory and under .grace5/ in the diff range are no protected touch.
+    s.git("checkout", before, "--", ".agents/skills/grace5-mine/SKILL.md", "docs/note.md");
+    s.commit("restore the repository's own skill and the document");
+    expect(s.computeCandidate()).toBe(candidate);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
+    s.writeReview();
+    const close = s.close();
+    expect(close.code).toBe(0);
+    expect(hasLine(close, `closed: ${closedPath(s.id)}/records/close.xml`)).toBe(true);
   },
   TEST_TIMEOUT,
 );
 
 test(
-  "UP-15 writing the pin leaves every candidate and the dirty state unchanged: the pin is outside both, so a result recorded before an upgrade still counts after it",
+  "UP-15 writing the pin leaves every candidate and the dirty state unchanged: the pin is a kernel-managed path outside both, so a result recorded before an upgrade still counts after it",
   () => {
     const s = prepared({ id: "C-0524-pin-candidate", checks: [automated("CK1")] });
-    s.write(".gitignore", `${IGNORE_LINE}\n`);
-    s.commit("the ignore line, before the start");
+    s.write(LOCAL_IGNORE_PATH, LOCAL_IGNORE_TEXT);
+    s.commit("the local ignore file, before the start");
     expect(s.start().code).toBe(0);
     const receipt = s.receipt();
     const candidate = attr(receipt, "Run", "candidate") ?? "";
@@ -746,7 +801,7 @@ test(
     s.commit("a pin that is not a version");
     const clean = s.porcelain();
 
-    for (const args of [["check", s.id], ["run", s.id, "--start"], ["close", s.id], ["init", "C-0526-new"], ["init"], ["upgrade"], ["upgrade", "--plan"], ["upgrade", "--accept-evidence-loss"]]) {
+    for (const args of [["check", s.id], ["run", s.id, "--start"], ["close", s.id], ["init", "C-0526-new"], ["init"], ["upgrade"], ["upgrade", "--plan"]]) {
       const refused = s.cli(args);
       expect(refused.code).toBe(1);
       expect(hasLine(refused, unreadable("banana"))).toBe(true);
@@ -818,30 +873,39 @@ test(
 );
 
 test(
-  "UP-18 a result recorded by 0.3.0 on a pinned tree is on an earlier candidate under this kernel, while a result this kernel records on a pinned tree counts after the pin changes",
+  "UP-18 a result recorded by 0.3.0 on a pinned tree, or by 0.4.0 on a tree with .grace5/README.md, is on an earlier candidate under this kernel, while a result this kernel records counts after the pin changes",
   () => {
     const s = prepared({ id: "C-0528-boundary", checks: [automated("CK1")] });
+    // The entry point init writes: under 0.4.0 it was source, under this kernel it is kernel-managed.
+    s.write(".grace5/README.md", "# .grace5\n");
+    s.commit("the state's entry point");
     expect(s.start().code).toBe(0);
     s.commit("the start receipt");
     const current = s.computeCandidate();
-    const underOld = s.computeCandidate("HEAD", true);
-    expect(underOld).not.toBe(current);
+    const under030 = s.computeCandidate("HEAD", "0.3.0");
+    const under040 = s.computeCandidate("HEAD", "0.4.0");
+    expect(under030).not.toBe(current);
+    expect(under040).not.toBe(current);
+    expect(under040).not.toBe(under030);
     const receipt = s.receipt();
     expect(attr(receipt, "Run", "candidate")).toBe(current);
     expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
 
-    // The same receipt as the 0.3.0 kernel would have written it on this tree: its rule hashed the pin into the candidate.
+    // The same receipt as the 0.3.0 kernel would have written it on this tree, whose rule hashed the pin into the
+    // candidate, and as the 0.4.0 kernel would have, whose rule hashed .grace5/README.md in.
     const file = path.join(s.recordsDir, `run-${String(s.latestRun())}.xml`);
-    fs.writeFileSync(file, receipt.replace(`candidate="${current}"`, `candidate="${underOld}"`).replace(`kernel="grace5 ${VERSION}"`, `kernel="grace5 0.3.0"`));
-    const stale = s.status();
-    expect(hasLine(stale, `candidate: ${current} (clean)`)).toBe(true);
-    expect(hasLine(stale, "check CK1: passed, does not count: recorded on an earlier candidate, recorded with grace5 0.3.0")).toBe(true);
-    expect(hasLine(stale, "next: check CK1: recorded on an earlier candidate")).toBe(true);
-    s.writeReview({ candidate: underOld });
-    const close = s.close();
-    expect(close.code).toBe(1);
-    expect(hasLine(close, "refused: check CK1: recorded on an earlier candidate")).toBe(true);
-    expect(s.hasRecord("close.xml")).toBe(false);
+    for (const [kernel, underOld] of [["0.3.0", under030], ["0.4.0", under040]] as const) {
+      fs.writeFileSync(file, receipt.replace(`candidate="${current}"`, `candidate="${underOld}"`).replace(`kernel="grace5 ${VERSION}"`, `kernel="grace5 ${kernel}"`));
+      const stale = s.status();
+      expect(hasLine(stale, `candidate: ${current} (clean)`)).toBe(true);
+      expect(hasLine(stale, `check CK1: passed, does not count: recorded on an earlier candidate, recorded with grace5 ${kernel}`)).toBe(true);
+      expect(hasLine(stale, "next: check CK1: recorded on an earlier candidate")).toBe(true);
+      s.writeReview({ candidate: underOld });
+      const close = s.close();
+      expect(close.code).toBe(1);
+      expect(hasLine(close, "refused: check CK1: recorded on an earlier candidate")).toBe(true);
+      expect(s.hasRecord("close.xml")).toBe(false);
+    }
 
     // Rerun by this kernel: the result counts, and keeps counting when the pin is rewritten, removed and written back by upgrade.
     expect(s.run("--check", "CK1").code).toBe(0);

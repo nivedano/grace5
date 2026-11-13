@@ -1,8 +1,10 @@
 // Verifies the upgrade on a clone of this repository at the tag of the previous version (CK6 of C-0004-upgrade-command):
-// the clone has no pin, so it reads as 0.1.0 and the whole chain runs; afterwards it must carry the kernel's version,
-// list the same changes as closed, and report the same contract and definition hashes as before.
+// the clone has no pin, so it reads as 0.1.0 and the whole chain runs; afterwards it must carry the kernel's version and
+// the local ignore file, list the same changes as closed, report the same contract and definition hashes as before, and
+// leave the project's .gitignore byte for byte as it was (CK6 of C-0006-kernel-managed-paths).
 // With --with-open-change (CK6 of C-0005-upgrade-with-open-changes) an open change is laid out beside the closed ones
-// first; the upgrade must proceed, list it as open and untouched, and leave it open with the candidate it had before.
+// first and a stale grace5-prepare skill is installed and committed; the upgrade must proceed, list the change as open
+// and untouched, refresh the skill, and leave the change open with the candidate it had before either write.
 // The hashes before the upgrade are read with the kernel's own reader, because `check` refuses a stale pin.
 
 import { spawnSync } from "node:child_process";
@@ -12,7 +14,7 @@ import { join, resolve } from "node:path";
 import { kernelVersion } from "../records";
 import { snapshot, snapshotDifference } from "../upgrade/chain";
 import { PIN_PATH, UNPINNED_VERSION } from "../upgrade/pin";
-import { CLOSED_LOGS_IGNORE } from "../upgrade/steps";
+import { LOCAL_IGNORE_LINES, LOCAL_IGNORE_PATH, PACKAGED_SKILLS_DIR } from "../upgrade/steps";
 
 const ROOT = resolve(import.meta.dir, "..", "..");
 const CLI = join(ROOT, "src", "cli.ts");
@@ -20,6 +22,15 @@ const TAG = "v0.2.0";
 /** The open change laid out in the clone with --with-open-change: a valid contract copied from a worked example, no records. */
 const OPEN_CHANGE = "C-0099-open";
 const EXAMPLE_CONTRACT = join(ROOT, "models", "architecture", "examples", "A-small-fix", "contract.xml");
+/** The stale skill installed in the clone with --with-open-change: a kernel-managed path, so outside the candidate. */
+const STALE_SKILL = ".agents/skills/grace5-prepare";
+/** The steps of this kernel's chain from the unpinned state, in order. */
+const STEP_LINES = [
+  "step: 0.1.0 -> 0.2.0: ",
+  "step: 0.2.0 -> 0.3.0: ",
+  "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0",
+  `step: 0.4.0 -> 0.5.0: write the local ignore file ${LOCAL_IGNORE_PATH}`,
+];
 
 interface Output {
   readonly code: number;
@@ -28,7 +39,7 @@ interface Output {
 }
 
 function git(cwd: string, args: readonly string[]): void {
-  const result = spawnSync("git", args, { cwd, encoding: "utf8", windowsHide: true });
+  const result = spawnSync("git", ["-c", "user.name=upgrade-verify", "-c", "user.email=upgrade-verify@example.invalid", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", windowsHide: true });
   if (result.status !== 0) throw new Error(`git ${args.join(" ")} failed: ${(result.stderr ?? "").trim()}`);
 }
 
@@ -48,8 +59,21 @@ function layOutOpenChange(clone: string): void {
   writeFileSync(join(dir, "contract.xml"), example.replace(`<Contract id="${idAttribute[1] ?? ""}"`, `<Contract id="${OPEN_CHANGE}"`));
 }
 
+/** Installs a stale copy of the prepare skill where a pilot keeps it, and commits it, so that the tree itself differs. */
+function installStaleSkill(clone: string): void {
+  const dir = join(clone, STALE_SKILL);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "SKILL.md"), "stale text of the prepare skill, installed by an earlier kernel\n");
+  git(clone, ["add", "--", STALE_SKILL]);
+  git(clone, ["commit", "-q", "-m", `install a stale ${STALE_SKILL}`]);
+}
+
 function candidateLine(root: string, id: string): string | undefined {
   return kernel(root, ["status", id]).lines.find((line) => line.startsWith("candidate: "));
+}
+
+function readIfPresent(file: string): string | undefined {
+  return existsSync(file) ? readFileSync(file, "utf8") : undefined;
 }
 
 async function main(withOpenChange: boolean): Promise<number> {
@@ -66,6 +90,9 @@ async function main(withOpenChange: boolean): Promise<number> {
     git(clone, ["-c", "advice.detachedHead=false", "checkout", "-q", TAG]);
     ok(`cloned ${TAG}`);
     if (existsSync(join(clone, PIN_PATH))) fail(`${TAG} carries a pin; this tool expects the unpinned state`);
+    if (existsSync(join(clone, LOCAL_IGNORE_PATH))) fail(`${TAG} carries ${LOCAL_IGNORE_PATH}; this tool expects it absent`);
+    const projectIgnoreBefore = readIfPresent(join(clone, ".gitignore"));
+    if (projectIgnoreBefore === undefined) fail(`${TAG} has no .gitignore to compare`);
 
     let candidateBefore: string | undefined;
     if (withOpenChange) {
@@ -73,6 +100,11 @@ async function main(withOpenChange: boolean): Promise<number> {
       candidateBefore = candidateLine(clone, OPEN_CHANGE);
       if (candidateBefore !== undefined && /^candidate: [0-9a-f]{64} \(clean\)$/.test(candidateBefore)) ok(`before: ${OPEN_CHANGE} open, ${candidateBefore}`);
       else fail(`status ${OPEN_CHANGE} before the upgrade printed ${candidateBefore ?? "no candidate line"}, expected a clean candidate`);
+      // A stale installed skill, committed: a kernel-managed path, so the candidate must read the same.
+      installStaleSkill(clone);
+      const withSkill = candidateLine(clone, OPEN_CHANGE);
+      if (withSkill === candidateBefore) ok(`${OPEN_CHANGE} candidate unchanged by the committed stale ${STALE_SKILL}`);
+      else fail(`${OPEN_CHANGE} candidate changed from ${candidateBefore ?? "none"} to ${withSkill ?? "none"} when the stale ${STALE_SKILL} was committed`);
     }
 
     const before = await snapshot(clone);
@@ -86,32 +118,42 @@ async function main(withOpenChange: boolean): Promise<number> {
     const expected = `upgraded: ${UNPINNED_VERSION} -> ${version}`;
     if (upgrade.code === 0 && upgrade.lines.includes(expected)) ok(expected);
     else fail(`upgrade exited ${String(upgrade.code)} without the line ${expected}`);
-    // The chain of this kernel is three steps and no bump; the clone has no skills, so each step reports none installed.
-    const stepLines = upgrade.lines.filter((line) => line.startsWith("step: ")).length;
+    // The chain of this kernel is four steps and no bump.
+    const stepLines = upgrade.lines.filter((line) => line.startsWith("step: "));
     const bumpLines = upgrade.lines.filter((line) => line.startsWith("bump: ")).length;
+    const inOrder = stepLines.length === STEP_LINES.length && STEP_LINES.every((prefix, i) => (stepLines[i] ?? "").startsWith(prefix));
+    if (inOrder && bumpLines === 0) ok("plan: four steps ending with the local ignore file, no bump");
+    else fail(`plan has ${String(stepLines.length)} step and ${String(bumpLines)} bump lines, expected the four steps ending with the local ignore file: ${stepLines.join(" | ")}`);
+    if (upgrade.lines.some((line) => line.startsWith("writes:") || line.startsWith("evidence of open changes"))) fail("upgrade printed a writes: or evidence line; neither exists");
     const skillsLines = upgrade.lines.filter((line) => line === "skills: none installed").length;
-    if (upgrade.lines.includes("step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0") && stepLines === 3 && bumpLines === 0) ok("plan: three steps, 0.3.0 -> 0.4.0 refreshes the skills, no bump");
-    else fail(`plan has ${String(stepLines)} step and ${String(bumpLines)} bump lines, expected three steps ending with the skill refresh`);
-    if (skillsLines === stepLines && !upgrade.lines.some((line) => line.startsWith("refreshed:"))) ok(`skills: none installed once per step (${String(skillsLines)})`);
-    else fail(`expected skills: none installed ${String(stepLines)} times and no refreshed: line, got ${String(skillsLines)}`);
+    const refreshedLines = upgrade.lines.filter((line) => line === `refreshed: ${STALE_SKILL}`).length;
     if (withOpenChange) {
+      if (refreshedLines === stepLines.length && skillsLines === 0) ok(`refreshed: ${STALE_SKILL} once per step (${String(refreshedLines)})`);
+      else fail(`expected refreshed: ${STALE_SKILL} ${String(stepLines.length)} times and no skills: none installed line, got ${String(refreshedLines)} and ${String(skillsLines)}`);
+      const installed = readIfPresent(join(clone, STALE_SKILL, "SKILL.md"));
+      const packaged = readFileSync(join(PACKAGED_SKILLS_DIR, "grace5-prepare", "SKILL.md"), "utf8");
+      if (installed === packaged) ok(`${STALE_SKILL}/SKILL.md equals the packaged skill`);
+      else fail(`${STALE_SKILL}/SKILL.md differs from the packaged skill after the upgrade`);
       const untouched = `open, untouched: ${OPEN_CHANGE}`;
       if (upgrade.lines.includes(untouched)) ok(untouched);
       else fail(`upgrade did not print ${untouched}`);
       if (upgrade.lines.includes(`checked: ${OPEN_CHANGE}`)) ok(`checked: ${OPEN_CHANGE}`);
       else fail(`upgrade did not print checked: ${OPEN_CHANGE}`);
-      if (upgrade.lines.some((line) => line.startsWith("writes:") || line.startsWith("evidence of open changes"))) fail("upgrade announced a source write; the clone has none pending");
-    }
+    } else if (skillsLines === stepLines.length && !upgrade.lines.some((line) => line.startsWith("refreshed:"))) ok(`skills: none installed once per step (${String(skillsLines)})`);
+    else fail(`expected skills: none installed ${String(stepLines.length)} times and no refreshed: line, got ${String(skillsLines)}`);
 
     const pinFile = join(clone, PIN_PATH);
-    const pin = existsSync(pinFile) ? readFileSync(pinFile, "utf8") : undefined;
+    const pin = readIfPresent(pinFile);
     if (pin === `${version}\n`) ok(`pin ${PIN_PATH} reads ${version}`);
     else fail(`pin reads ${JSON.stringify(pin ?? "nothing")}, expected ${JSON.stringify(`${version}\n`)}`);
 
-    const ignore = existsSync(join(clone, ".gitignore")) ? readFileSync(join(clone, ".gitignore"), "utf8").split(/\r?\n/) : [];
-    const count = ignore.filter((line) => line.trim() === CLOSED_LOGS_IGNORE).length;
-    if (count === 1) ok(`.gitignore carries ${CLOSED_LOGS_IGNORE} once`);
-    else fail(`.gitignore carries ${CLOSED_LOGS_IGNORE} ${String(count)} times`);
+    const localIgnore = (readIfPresent(join(clone, LOCAL_IGNORE_PATH)) ?? "").split(/\r?\n/).map((line) => line.trim());
+    const missing = LOCAL_IGNORE_LINES.filter((line) => !localIgnore.includes(line));
+    if (missing.length === 0) ok(`${LOCAL_IGNORE_PATH} carries ${LOCAL_IGNORE_LINES.join(" and ")}`);
+    else fail(`${LOCAL_IGNORE_PATH} lacks ${missing.join(", ")}`);
+    const projectIgnoreAfter = readIfPresent(join(clone, ".gitignore"));
+    if (projectIgnoreAfter === projectIgnoreBefore) ok(".gitignore of the project is byte for byte as before");
+    else fail(".gitignore of the project changed; the kernel writes no project file");
 
     const status = kernel(clone, ["status", "--all"]);
     if (status.code !== 0) fail(`status --all exited ${String(status.code)}: ${status.text}`);

@@ -2,10 +2,11 @@
 
 import { spawnSync } from "node:child_process";
 import { sha256Hex } from "./contract";
+import { packagedSkillNames, SKILL_LOCATIONS } from "./upgrade/skills";
 
-export const CHANGES_DIR = ".grace5/changes/";
-/** The version pin (upgrade.md): excluded from the candidate and the dirty state like the change directories. */
-export const PIN_PATH = ".grace5/kernel-version";
+/** The state directory: everything under it is kernel-managed (source-identity.md). */
+export const STATE_DIR = ".grace5/";
+export const CHANGES_DIR = `${STATE_DIR}changes/`;
 
 export interface Git {
   readonly root: string;
@@ -32,9 +33,23 @@ export function headRevision(git: Git): string | undefined {
   return result.ok && /^[0-9a-f]{40}$/.test(revision) ? revision : undefined;
 }
 
-/** Source (source-identity.md): every tracked path except the change directories and the version pin. */
+let managedPrefixes: readonly string[] | undefined;
+
+/**
+ * The kernel-managed path prefixes (source-identity.md): the whole state directory and, under each skill location, the
+ * directories named by the packaged skills, read once per process. A repository's own skill beside them is source.
+ */
+function kernelManagedPrefixes(): readonly string[] {
+  if (managedPrefixes === undefined) {
+    const names = packagedSkillNames();
+    managedPrefixes = [STATE_DIR, ...SKILL_LOCATIONS.flatMap((location) => names.map((name) => `${location}/${name}/`))];
+  }
+  return managedPrefixes;
+}
+
+/** Source (source-identity.md): every tracked path except the kernel-managed ones, matched by exact path prefix. */
 function isSource(git: Git, repoPath: string): boolean {
-  return !repoPath.startsWith(git.prefix + CHANGES_DIR) && repoPath !== git.prefix + PIN_PATH;
+  return !kernelManagedPrefixes().some((prefix) => repoPath.startsWith(git.prefix + prefix));
 }
 
 /** Strips the root's prefix, so paths read relative to the kernel's root; a path outside it keeps a leading `../`. */
@@ -45,7 +60,7 @@ function relative(git: Git, repoPath: string): string {
 
 const candidates = new Map<string, string>();
 
-/** SHA-256 of the lines `<mode> <object> <path>`, sorted by the bytes of the path, change directories and the pin removed. */
+/** SHA-256 of the lines `<mode> <object> <path>`, sorted by the bytes of the path, the kernel-managed paths removed. */
 export function candidateOf(git: Git, revision: string): string | undefined {
   const key = `${git.root}\0${revision}`;
   const known = candidates.get(key);
@@ -74,7 +89,7 @@ export function candidateOf(git: Git, revision: string): string | undefined {
   return candidate;
 }
 
-/** Dirty source paths: everything `git status --porcelain` lists outside the change directories and the pin, untracked files included. */
+/** Dirty source paths: everything `git status --porcelain` lists outside the kernel-managed paths, untracked files included. */
 export function dirtyPaths(git: Git): string[] {
   // --untracked-files=all, because a collapsed `?? .grace5/` would hide whether a source path is inside.
   const result = run(git.root, ["status", "--porcelain", "-z", "--untracked-files=all"]);

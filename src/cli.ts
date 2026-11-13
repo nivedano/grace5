@@ -61,8 +61,10 @@ Usage:
   grace5 [--root <dir>] init [change]
 
 Creates .grace5/changes/, .grace5/kernel-version (the version pin, written with this kernel's
-version) and .grace5/README.md, a short entry point that links the project documents and rule
-files found in the root (README, AGENTS.md, CLAUDE.md, docs/, models/). With a change id (C-NNNN with an optional lower-case slug) it also creates
+version), .grace5/.gitignore (the local ignore file that keeps the run logs out of git; no
+project file is written) and .grace5/README.md, a short entry point that links the project
+documents and rule files found in the root (README, AGENTS.md, CLAUDE.md, docs/, models/).
+With a change id (C-NNNN with an optional lower-case slug) it also creates
 .grace5/changes/<change>/, its records/ directory and a contract.xml template. A change id
 is unique across open and closed changes: an id that already has a directory under
 .grace5/changes/ or .grace5/changes/closed/ is refused.
@@ -273,23 +275,22 @@ Exit status:
 Usage:
   grace5 [--root <dir>] upgrade
   grace5 [--root <dir>] upgrade --plan
-  grace5 [--root <dir>] upgrade --accept-evidence-loss
 
 Reads the pin .grace5/kernel-version (a missing pin reads as 0.1.0) and composes the chain of
 migration steps from that version to this kernel's version. A migration step is kernel code for
-one version boundary whose state layout, ignore lines or skills differ; it is idempotent and
-verifies its own result. A boundary without a step is a pin bump. Every step also refreshes the
-grace5-* skill directories that already exist under .agents/skills/ or .claude/skills/ from the
-packaged skills, and creates no new location.
+one version boundary whose state layout, local ignore file or skills differ; it is idempotent
+and verifies its own result. A boundary without a step is a pin bump. Every step also refreshes
+the grace5-* skill directories that already exist under .agents/skills/ or .claude/skills/ from
+the packaged skills, and creates no new location.
 
-Open changes may be present. Before anything is written, every step declares what it would
-write: a step that would write the directory of an open change is refused, with no override
-(close that change with the previous kernel, or abandon it); a write to a source path outside
-the change directories (the ignore line, an installed skill file) is listed in the plan as
-writes: <path>, and while changes are open it is refused unless --accept-evidence-loss is
-given, because a source write makes the evidence of every open change history. The pin itself
-is outside the candidate and changes no evidence. Open changes no step touches are listed as
-open, untouched: and read by the post-upgrade check like every other change.
+Open changes may be present. Everything the chain writes is kernel-managed, the state under
+.grace5/ and the installed grace5-* skill directories, which no candidate, dirty state or diff
+reads, so an upgrade changes no open change's evidence and needs no flag. Before anything is
+written, every step declares the change directories it would write: a step that would write
+an open change is refused, with no override (close that change with the previous kernel, or
+abandon it). Open changes no step touches are listed as open, untouched: and read by the
+post-upgrade check like every other change. The kernel writes no project file: a line an
+earlier version wrote into the project's .gitignore is left alone.
 
 The chain is printed as a plan, one line per link. With --plan nothing is written. Otherwise the
 links are applied in order, the pin is written after each one, and the first failure stops the
@@ -298,20 +299,14 @@ After the chain, every change in both locations is read as check reads it, and t
 if any reports a new defect, or a contract or definition hash other than before.
 
 Refuses: outside a git repository; without .grace5/; when the pin cannot be read as a version;
-when the pin is ahead of this kernel; when a step would write an open change; when a source
-write is pending while changes are open and --accept-evidence-loss is not given. It never
+when the pin is ahead of this kernel; when a step would write an open change. It never
 downgrades and takes no target version.
 
 Output:
   up to date: <version>                     the pin equals this kernel's version; nothing to do
   step: <from> -> <to>: <description>       a migration step of the plan
   bump: <from> -> <to>: <reason>            a boundary without a step; only the pin advances
-  writes: <path>                            a source path outside the change directories whose
-                                            bytes the chain would change
   open, untouched: <id>, <id>               the open changes, which no step writes
-  evidence of open changes becomes history: <id>, <id>
-                                            --accept-evidence-loss was given with open changes
-                                            and a source write pending
   refreshed: <path>                         a skill directory refreshed in place
   skills: none installed                    no skill directory exists in either location
   pinned: <version>                         the pin written after a link
@@ -321,9 +316,8 @@ Output:
   upgraded: <from> -> <to>                  the chain completed and the check passed
   refused: <reason>                         not a git repository, .grace5/ does not exist,
                                             repository pin is unreadable: <reason>,
-                                            kernel too old,
-                                            open changes touched by step <from> -> <to>: <id>, <id>,
-                                            or open changes present; the upgrade would write: <path>, <path>
+                                            kernel too old, or
+                                            open changes touched by step <from> -> <to>: <id>, <id>
 
 After a successful upgrade, commit the result.
 
@@ -351,7 +345,6 @@ async function main(argv: readonly string[]): Promise<number> {
   let start = false;
   let all = false;
   let plan = false;
-  let acceptEvidenceLoss = false;
   let help = false;
 
   for (let i = 0; i < args.length; i++) {
@@ -370,7 +363,6 @@ async function main(argv: readonly string[]): Promise<number> {
     } else if (command === "run" && arg === "--start") start = true;
     else if (command === "status" && arg === "--all") all = true;
     else if (command === "upgrade" && arg === "--plan") plan = true;
-    else if (command === "upgrade" && arg === "--accept-evidence-loss") acceptEvidenceLoss = true;
     else if (command === "run" && (VALUE_FLAGS as readonly string[]).includes(arg)) {
       const value = args[++i];
       if (value === undefined) return usage(`${arg} needs a value`);
@@ -423,7 +415,7 @@ async function main(argv: readonly string[]): Promise<number> {
     case "init":
       return initCommand(resolved, change);
     case "upgrade":
-      return upgradeCommand(resolved, plan, acceptEvidenceLoss);
+      return upgradeCommand(resolved, plan);
     case "check":
       return checkCommand(resolved, change);
     case "status":

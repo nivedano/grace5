@@ -433,6 +433,20 @@ export function kernelVersion(): string {
 }
 
 export const PIN_PATH = ".grace5/kernel-version";
+/** The local ignore file of upgrade.md and its two lines. */
+export const LOCAL_IGNORE_PATH = ".grace5/.gitignore";
+export const LOCAL_IGNORE_TEXT = "changes/*/records/logs/\nchanges/closed/*/records/logs/\n";
+/** Where a repository may hold the installed grace5-* skills (upgrade.md). */
+export const SKILL_LOCATIONS = [".agents/skills", ".claude/skills"] as const;
+
+/** The names of the skills the kernel packages, read from packages/skills/: the directories the candidate rule excludes under each location. */
+export function packagedSkillNames(): string[] {
+  return fs
+    .readdirSync(path.join(REPO_ROOT, "packages", "skills"), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("grace5-"))
+    .map((entry) => entry.name)
+    .sort();
+}
 
 const scenarios: Scenario[] = [];
 
@@ -570,10 +584,13 @@ export class Scenario {
   }
 
   /**
-   * The candidate of source-identity.md, computed here from `git ls-tree -r`: the change directories and the pin removed.
-   * With `pinIncluded` it is the candidate the 0.3.0 rule gave the same tree, which hashed the pin in.
+   * The candidate of source-identity.md, computed here from `git ls-tree -r`: the kernel-managed paths removed, which are
+   * the whole `.grace5/` directory and the installed grace5-* skill directories named by the packaged skills. An earlier
+   * `rule` gives the candidate that kernel's rule gave the same tree: 0.3.0 removed the change directories only, 0.4.0
+   * the change directories and the pin.
    */
-  computeCandidate(revision = "HEAD", pinIncluded = false): string {
+  computeCandidate(revision = "HEAD", rule: "0.3.0" | "0.4.0" | "0.5.0" = "0.5.0"): string {
+    const managed = rule === "0.3.0" ? [".grace5/changes/"] : rule === "0.4.0" ? [".grace5/changes/", PIN_PATH] : [".grace5/", ...SKILL_LOCATIONS.flatMap((location) => packagedSkillNames().map((name) => `${location}/${name}/`))];
     const entries: { path: string; line: string }[] = [];
     for (const row of this.git("ls-tree", "-r", revision).split("\n")) {
       const m = /^(\d+) \w+ ([0-9a-f]+)\t(.+)$/.exec(row);
@@ -581,7 +598,7 @@ export class Scenario {
       const mode = m[1] ?? "";
       const object = m[2] ?? "";
       const p = m[3] ?? "";
-      if (p.startsWith(".grace5/changes/") || (p === PIN_PATH && !pinIncluded)) continue;
+      if (managed.some((prefix) => (prefix.endsWith("/") ? p.startsWith(prefix) : p === prefix))) continue;
       entries.push({ path: p, line: `${mode} ${object} ${p}\n` });
     }
     entries.sort((a, b) => Buffer.compare(Buffer.from(a.path, "utf8"), Buffer.from(b.path, "utf8")));

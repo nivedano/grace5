@@ -1,14 +1,15 @@
-// Migration steps (upgrade.md): kernel code, one per version boundary whose state layout, ignore lines or skills differ.
+// Migration steps (upgrade.md): kernel code, one per version boundary whose state layout, local ignore file or skills differ.
 // Each step is idempotent and self-verifying; verify throws when the state is not in the step's target shape.
-// Each step also declares its writes before it makes them: the change ids whose directories it would write (`touches`)
-// and the source paths outside the change directories whose bytes would change (`writes`), so that `upgrade` can
-// refuse while a change is open before anything is written.
+// Each step declares, before anything is written, the change ids whose directories it would write (`touches`), so that
+// `upgrade` can refuse while such a change is open. Every path a step writes is kernel-managed (source-identity.md):
+// the state directory and the installed skills; no step writes a project file.
 
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { CHANGES_DIR } from "../git";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { CHANGES_DIR, STATE_DIR } from "../git";
 import { changesDir, CLOSED_DIR, closedDir, listChanges } from "../state";
 import { PIN_PATH, readPin, writePin } from "./pin";
+import { skillDifferences } from "./skills";
 
 export interface Step {
   readonly from: string;
@@ -17,31 +18,54 @@ export interface Step {
   readonly describe: string;
   /** Brings the state to the shape of `to`. Throws with the reason on failure. Applied to state already in shape, it changes nothing. */
   apply(root: string): void;
-  /** Throws with the reason when the state is not in the shape of `to`. */
-  verify(root: string): void;
+  /** Throws with the reason when the state is not in the shape of `to`; `packaged` is the packaged skills directory the refresh used, the kernel's own by default. */
+  verify(root: string, packaged?: string): void;
   /** The ids, open or closed, of the changes whose directories `apply` would write in this repository. */
   touches(root: string): string[];
-  /** The source paths outside the change directories whose bytes `apply` and the skill refresh would change, relative to the root. */
-  writes(root: string, packaged?: string): string[];
 }
 
-/** The ignore line the 0.1.0 to 0.2.0 step appends: the logs of moved changes stay local like those of the open ones. */
-export const CLOSED_LOGS_IGNORE = `${CHANGES_DIR}${CLOSED_DIR}/*/records/logs/`;
+/** The local ignore file (upgrade.md): keeps the run logs of the open and the closed changes out of git, inside the state directory. */
+export const LOCAL_IGNORE_PATH = `${STATE_DIR}.gitignore`;
+/** Its two lines, relative to the state directory. */
+export const LOCAL_IGNORE_LINES: readonly string[] = ["changes/*/records/logs/", `changes/${CLOSED_DIR}/*/records/logs/`];
+/** The file as init and the steps write it when it is absent: the two lines, LF. */
+export const LOCAL_IGNORE_TEXT = `${LOCAL_IGNORE_LINES.join("\n")}\n`;
+
+function localIgnoreLines(root: string): string[] {
+  const file = join(root, LOCAL_IGNORE_PATH);
+  if (!existsSync(file)) return [];
+  return readFileSync(file, "utf8").split(/\r?\n/).map((line) => line.trim());
+}
+
+function missingLocalIgnoreLines(root: string): string[] {
+  const present = localIgnoreLines(root);
+  return LOCAL_IGNORE_LINES.filter((line) => !present.includes(line));
+}
+
+/** Writes the local ignore file: created with the two lines where absent, the lines it lacks appended where it exists; a file that carries both is left alone. */
+export function writeLocalIgnore(root: string): void {
+  const missing = missingLocalIgnoreLines(root);
+  if (missing.length === 0) return;
+  const file = join(root, LOCAL_IGNORE_PATH);
+  mkdirSync(dirname(file), { recursive: true });
+  const existing = existsSync(file) ? readFileSync(file, "utf8") : "";
+  const separator = existing === "" || existing.endsWith("\n") ? "" : "\n";
+  appendFileSync(file, `${separator}${missing.join("\n")}\n`);
+}
+
+function verifyLocalIgnore(root: string): void {
+  const missing = missingLocalIgnoreLines(root);
+  if (missing.length > 0) throw new Error(`${LOCAL_IGNORE_PATH} lacks the line ${missing.join(", ")}`);
+}
 
 function closedSiblings(root: string): string[] {
   return listChanges(root).filter((id) => existsSync(join(changesDir(root), id, "records", "close.xml")));
 }
 
-function ignoreLines(root: string): string[] {
-  const file = join(root, ".gitignore");
-  if (!existsSync(file)) return [];
-  return readFileSync(file, "utf8").split(/\r?\n/).map((line) => line.trim());
-}
-
 const moveClosed: Step = {
   from: "0.1.0",
   to: "0.2.0",
-  describe: `move every closed change (one with records/close.xml) from ${CHANGES_DIR} to ${CHANGES_DIR}${CLOSED_DIR}/, logs included, and ignore ${CLOSED_LOGS_IGNORE} in .gitignore`,
+  describe: `move every closed change (one with records/close.xml) from ${CHANGES_DIR} to ${CHANGES_DIR}${CLOSED_DIR}/, logs included, and write the local ignore file ${LOCAL_IGNORE_PATH}`,
   apply(root) {
     for (const id of closedSiblings(root)) {
       const target = join(closedDir(root), id);
@@ -50,24 +74,15 @@ const moveClosed: Step = {
       mkdirSync(closedDir(root), { recursive: true });
       renameSync(join(changesDir(root), id), target);
     }
-    if (!ignoreLines(root).includes(CLOSED_LOGS_IGNORE)) {
-      const file = join(root, ".gitignore");
-      const existing = existsSync(file) ? readFileSync(file, "utf8") : "";
-      const separator = existing === "" || existing.endsWith("\n") ? "" : "\n";
-      appendFileSync(file, `${separator}${CLOSED_LOGS_IGNORE}\n`);
-    }
+    writeLocalIgnore(root);
   },
   verify(root) {
     const left = closedSiblings(root);
     if (left.length > 0) throw new Error(`closed change still under ${CHANGES_DIR}: ${left.join(", ")}`);
-    if (!ignoreLines(root).includes(CLOSED_LOGS_IGNORE)) throw new Error(`.gitignore lacks the line ${CLOSED_LOGS_IGNORE}`);
+    verifyLocalIgnore(root);
   },
   touches(root) {
     return closedSiblings(root);
-  },
-  writes(root, packaged) {
-    const paths = ignoreLines(root).includes(CLOSED_LOGS_IGNORE) ? [] : [".gitignore"];
-    return [...paths, ...skillWrites(root, packaged)].sort();
   },
 };
 
@@ -85,10 +100,6 @@ const writeThePin: Step = {
   touches() {
     return [];
   },
-  writes(root, packaged) {
-    // The pin is outside the candidate and the dirty state (source-identity.md), so it is not a source write.
-    return skillWrites(root, packaged);
-  },
 };
 
 const refreshTheSkills: Step = {
@@ -98,103 +109,35 @@ const refreshTheSkills: Step = {
   apply() {
     // Nothing beyond the skill refresh the runner performs for every step: 0.4.0 changed the skills and nothing else in the state.
   },
-  verify(root) {
-    const differing = skillWrites(root);
+  verify(root, packaged) {
+    // Compared with the packaged directory the refresh used (review-2 F5 of C-0005-upgrade-with-open-changes).
+    const differing = skillDifferences(root, packaged);
     if (differing.length > 0) throw new Error(`installed skill files differ from the packaged ones: ${differing.join(", ")}`);
   },
   touches() {
     return [];
   },
-  writes(root, packaged) {
-    return skillWrites(root, packaged);
+};
+
+const writeTheLocalIgnore: Step = {
+  from: "0.4.0",
+  to: "0.5.0",
+  describe: `write the local ignore file ${LOCAL_IGNORE_PATH}`,
+  apply(root) {
+    // The run-log ignore lines moved from the project's .gitignore into the state directory; a line an earlier version
+    // wrote into the project's .gitignore is left alone, since the kernel writes no project file.
+    writeLocalIgnore(root);
+  },
+  verify(root) {
+    verifyLocalIgnore(root);
+  },
+  touches() {
+    return [];
   },
 };
 
 /** The steps in version order. A boundary between two versions without a step is a pin bump. */
-export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills];
+export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills, writeTheLocalIgnore];
 
-// ---------------------------------------------------------------- skills
-
-/** The kernel's packaged skills: packages/skills/<name>/ of this source tree. */
-export const PACKAGED_SKILLS_DIR = resolve(import.meta.dir, "..", "..", "packages", "skills");
-/** Where a repository may already hold the skills; no other location is ever created. */
-export const SKILL_LOCATIONS = [".agents/skills", ".claude/skills"] as const;
-
-function listFiles(dir: string): string[] {
-  const found: string[] = [];
-  const walk = (current: string, prefix: string): void => {
-    for (const entry of readdirSync(current, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))) {
-      const rel = prefix === "" ? entry.name : `${prefix}/${entry.name}`;
-      if (entry.isDirectory()) walk(join(current, entry.name), rel);
-      else found.push(rel);
-    }
-  };
-  walk(dir, "");
-  return found;
-}
-
-/** The names of the skills the kernel packages (grace5-*). */
-export function packagedSkillNames(packaged = PACKAGED_SKILLS_DIR): string[] {
-  if (!existsSync(packaged)) throw new Error(`the packaged skills of the kernel are missing: ${packaged}`);
-  return readdirSync(packaged, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith("grace5-") && existsSync(join(packaged, entry.name, "SKILL.md")))
-    .map((entry) => entry.name)
-    .sort();
-}
-
-/** The installed grace5-* skill directories the refresh would mirror: `<location>/<name>` with the packaged source. */
-function installedSkills(root: string, packaged: string): { readonly rel: string; readonly source: string; readonly target: string }[] {
-  const found: { rel: string; source: string; target: string }[] = [];
-  for (const location of SKILL_LOCATIONS) {
-    for (const name of packagedSkillNames(packaged)) {
-      const target = join(root, location, name);
-      if (!existsSync(target) || !statSync(target).isDirectory()) continue;
-      found.push({ rel: `${location}/${name}`, source: join(packaged, name), target });
-    }
-  }
-  return found;
-}
-
-/** The files of one installed skill directory the mirror would write or remove: a file whose bytes differ, is missing, or is not packaged. */
-function mirrorDifference(source: string, target: string): string[] {
-  const wanted = new Set(listFiles(source));
-  const present = new Set(listFiles(target));
-  const differing: string[] = [];
-  for (const rel of present) if (!wanted.has(rel)) differing.push(rel);
-  for (const rel of wanted) {
-    if (!present.has(rel) || !readFileSync(join(source, rel)).equals(readFileSync(join(target, rel)))) differing.push(rel);
-  }
-  return differing;
-}
-
-/** The installed skill files, relative to the root, whose bytes the refresh would change; empty where the skills already match or none is installed. */
-export function skillWrites(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
-  const paths: string[] = [];
-  for (const skill of installedSkills(root, packaged)) for (const rel of mirrorDifference(skill.source, skill.target)) paths.push(`${skill.rel}/${rel}`);
-  return paths.sort();
-}
-
-/** Mirrors the packaged files into an existing skill directory: every packaged file written, every other file removed. */
-function mirror(source: string, target: string): void {
-  const wanted = new Set(listFiles(source));
-  for (const rel of listFiles(target)) if (!wanted.has(rel)) rmSync(join(target, rel));
-  for (const rel of wanted) {
-    const file = join(target, rel);
-    mkdirSync(dirname(file), { recursive: true });
-    writeFileSync(file, readFileSync(join(source, rel)));
-  }
-}
-
-/**
- * Refreshes the grace5-* skill directories wherever they already exist under .agents/skills/ or .claude/skills/, from the
- * packaged skills, and returns their paths relative to the root. Creates no new location; a grace5-* directory the kernel
- * does not package is left alone.
- */
-export function refreshSkills(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
-  const refreshed: string[] = [];
-  for (const skill of installedSkills(root, packaged)) {
-    mirror(skill.source, skill.target);
-    refreshed.push(skill.rel);
-  }
-  return refreshed;
-}
+// The packaged skills, their locations and the refresh live in skills.ts; re-exported for the chain runner and the tools.
+export { PACKAGED_SKILLS_DIR, SKILL_LOCATIONS, packagedSkillNames, refreshSkills, skillDifferences } from "./skills";

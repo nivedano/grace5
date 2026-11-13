@@ -2,10 +2,10 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { PIN_PATH } from "../git";
 import { kernelVersion } from "../records";
 
-export { PIN_PATH };
+/** The version pin: one line, the version, under the state directory, so outside the candidate (source-identity.md). */
+export const PIN_PATH = ".grace5/kernel-version";
 /** What a missing pin reads as where .grace5/ exists: the version before the pin existed. */
 export const UNPINNED_VERSION = "0.1.0";
 
