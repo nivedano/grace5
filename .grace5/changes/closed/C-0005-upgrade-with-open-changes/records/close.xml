@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0005-upgrade-with-open-changes" revision="2" contract-sha256="10b7f7ed73cee37927ce53d702b8f8f0b03e2dafd4b6e4cbee33ba57fca98b5a" date="2026-11-13T18:55:11.459Z" source-revision="81fff8ba1a677bb9d94d103502b6b987bdb0218a" candidate="3c0b7750b616919bdaa82e50b1ecac0cee86b5d02d832ef941c4761dcd9a2b83" start-revision="0f81d439403d8677c7845fdd4f5c9921e484036b" brief="brief-2.html" approval="approval-2.xml" review="2" kernel="grace5 0.4.0">
+  <Satisfied check="CK1" kind="automated" run="7" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="7" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="7" claim="command-completion"/>
+  <Satisfied check="CK4" kind="automated" run="7" claim="command-completion"/>
+  <Satisfied check="CK5" kind="automated" run="7" claim="command-completion"/>
+  <Satisfied check="CK6" kind="automated" run="7" claim="command-completion"/>
+</Close>
