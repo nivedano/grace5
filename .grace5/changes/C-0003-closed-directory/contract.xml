@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0003-closed-directory" revision="1" title="close moves the change directory under closed/, so open changes stay in view">
+  <Problem>Every change stays a sibling directory under .grace5/changes/ forever, closed or open, and nothing but the presence of records/close.xml tells them apart. A pilot repository will accumulate dozens a month, and the owner has to scroll a pile to find the open ones. The owner requires closed changes out of the way.</Problem>
+  <Change>grace5 close, after writing records/close.xml, moves the change directory to .grace5/changes/closed/&lt;id&gt;/ as its last step and prints the new path. Closed still means records/close.xml exists: a change under closed/ carries it, status and check read it, run and close refuse it with the fixed phrase "change is closed", nothing moves it back, and a directory under closed/ without close.xml is reported malformed. init refuses an id that exists open or closed. This repository's .gitignore ignores run logs under closed/ as it does for open changes. The status listing shows open changes one line each and ends with one line counting the closed ones; status --all lists the closed ones too, each marked closed. The method documents state the layout, the ledger gains one entry for the mechanism with its removal criterion, and the conformance list gains the cases. The two changes already closed in this repository are moved under closed/ in a records-only commit once the kernel reads them there. The version becomes 0.2.0.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/source-identity.md">Source identity is unchanged: everything under .grace5/changes/, closed/ included, stays outside the candidate and the dirty state, and no record is rewritten by the move.</Constraint>
+    <Constraint id="K2" rule="models/architecture/evidence-records.md">Closure still means records/close.xml exists and close still refuses in the documented order; the move adds a ninth step after the record is written and never a closing condition.</Constraint>
+    <Constraint id="K3" rule="models/architecture/rationale-ledger.md">The mechanism has one ledger entry whose source is the owner's requirement of 2026-11-13 and whose removal criterion is stated.</Constraint>
+    <Constraint id="K4">A change id is unique across open and closed; records keep their paths relative to the change directory, so a moved change validates unchanged.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Reopening a closed change: neither moving it back nor deleting its close.xml is supported, and under closed/ the latter makes it malformed.</NonGoal>
+    <NonGoal id="N2">Any grouping of closed changes by date or topic.</NonGoal>
+    <NonGoal id="N3">Moving the closed changes of a pilot repository, that is a repository other than this one that has adopted the kernel; each does it itself after taking this version.</NonGoal>
+    <NonGoal id="N4">The measurement reader in the control center, which the owner's separate repository amends to read closed/ as well.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK2">Each command behaves as the method and its topic files state for an open change, a closed change under closed/, and an id present in either place.</Criterion>
+    <Criterion id="A2" checks="CK2">Every new conformance case has a test that fails when the kernel accepts the case.</Criterion>
+    <Criterion id="A3" checks="CK3 CK4">The examples still verify, the generated packages carry the version of package.json, and neither they nor the CLI reference drift from their sources.</Criterion>
+    <Criterion id="A4" checks="CK5">The kernel reports grace5 0.2.0.</Criterion>
+    <Criterion id="A5" checks="CK6">C-0001-kernel and C-0002-pilot-readiness live under .grace5/changes/closed/ with their records intact and the kernel lists them as closed.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/**</Path>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>package.json</Path>
+    <Path>README.md</Path>
+    <Path>.grace5/README.md</Path>
+    <Path>.gitignore</Path>
+    <Path>.grace5/changes/closed/**</Path>
+    <Path>.grace5/changes/C-0001-kernel/**</Path>
+    <Path>.grace5/changes/C-0002-pilot-readiness/**</Path>
+    <Name>grace5 CLI</Name>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/decisions/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>CLAUDE.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); process.exit(out === 'grace5 0.2.0' ? 0 : 1)"</Command>
+    </Automated>
+    <Automated id="CK6" budget="60">
+      <Command>bun -e "const fs = require('fs'); const ok = ['C-0001-kernel', 'C-0002-pilot-readiness'].every((id) => fs.existsSync('.grace5/changes/closed/' + id + '/records/close.xml') &amp;&amp; !fs.existsSync('.grace5/changes/' + id)); const out = require('child_process').execFileSync('bun', ['src/cli.ts', 'status', '--all']).toString(); process.exit(ok &amp;&amp; out.includes('C-0001-kernel') &amp;&amp; out.includes('C-0002-pilot-readiness') ? 0 : 1)"</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">Closed changes move under .grace5/changes/closed/ at close; they are not merely hidden, and not grouped by date. Owner, 2026-11-13.</Decision>
+    <Decision id="D2">The framework is amended and this repository restructured first; a pilot repository (N3) moves its closed changes only on the owner's flag. Owner, 2026-11-13.</Decision>
+    <Decision id="D3">The version is 0.2.0, tagged v0.2.0 when this change closes.</Decision>
+    <Decision id="D4">The change executes in this repository's single worktree on master; no branch is created.</Decision>
+  </Decisions>
+</Contract>

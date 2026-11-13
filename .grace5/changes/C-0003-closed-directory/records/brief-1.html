@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0003-closed-directory revision 1</title>
+<meta name="grace5:change" content="C-0003-closed-directory">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="77ad093190cfebeb814cc1e975f6f19068d6a311094d36cafc7edf86115ceb77">
+<meta name="grace5:date" content="2026-11-13">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="627">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>close moves the change directory under closed/, so open changes stay in view</h1>
+  <p class="lead">Brief for approval. Change <code>C-0003-closed-directory</code>, revision 1, 2026-11-13. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>When <code>grace5 close</code> succeeds, its last step moves the change directory from .grace5/changes/&lt;id&gt;/ to .grace5/changes/closed/&lt;id&gt;/ and prints the new path. Today every change, open or closed, stays a sibling under .grace5/changes/ and only the presence of records/close.xml tells them apart.</li>
+        <li>Closed still means records/close.xml exists. A change under closed/ carries it: status and check read it, run and close refuse it with the fixed phrase &quot;change is closed&quot;, and nothing in the kernel moves it back. A directory under closed/ without close.xml is reported malformed, not open and not closed.</li>
+        <li><code>grace5 init</code> refuses a change id that already exists, open or closed. Today it reports the existing directory and leaves it alone.</li>
+        <li>This repository&#x27;s .gitignore ignores run logs under closed/ as it already does for open changes, so the moved changes&#x27; local logs do not appear as untracked files.</li>
+        <li>The status listing shows the open changes one line each and ends with one line counting the closed ones. <code>status --all</code> also lists the closed ones, each marked closed.</li>
+        <li>The method documents state the new layout, the rationale ledger gains one entry for the mechanism with its removal criterion, and the conformance list gains the new cases.</li>
+        <li>The two changes already closed in this repository, C-0001-kernel and C-0002-pilot-readiness, are moved under closed/ in a records-only commit once the kernel reads them there. Their records are not rewritten.</li>
+        <li>The kernel version becomes 0.2.0, tagged v0.2.0 when this change closes.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The TypeScript type-check (bun run check) completes without error on the final tree.</td><td class="limits">Command completion only. A type-check reads no behaviour: nothing about the move, the refusal phrase, the listing or init rests on it. A1 names it, but every behaviour A1 states is shown by CK2 alone.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Conformance suite</span><b>CK2</b> automated</td><td class="shows">The kernel test suite (bun test, up to ten minutes) completes without failure on the final tree, the new tests included.</td><td class="limits">A pass shows the tests that exist pass. It does not show that every new conformance case has a test, nor that each such test would fail if the kernel accepted the case (A2): that is what the review must read, and the tests and the kernel are written by the same agent.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Example contracts and briefs</span><b>CK3</b> automated</td><td class="shows">The example verifier completes: the worked example contracts under models/architecture/examples validate, their briefs pass the fidelity rules, and the defective brief is still reported.</td><td class="limits">It covers the examples only. It reads nothing under .grace5/changes/, says nothing about the moved changes or this brief, and nothing about the documents this change edits.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and CLI reference without drift</span><b>CK4</b> automated</td><td class="shows">The package tool reproduces packages/** and models/architecture/cli-reference.md byte for byte from skills/, package.json and the help text, so the generated packages carry the version package.json holds and neither they nor the CLI reference drift from their sources.</td><td class="limits">It does not show that the version is 0.2.0 (CK5 does), that a package installs or works in its harness, or that the skill text describes closed/ correctly; it shows only that packages equal skills and the reference equals the help text.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Kernel reports grace5 0.2.0</span><b>CK5</b> automated</td><td class="shows">bun src/cli.ts --version prints exactly <code>grace5 0.2.0</code>. The kernel reads that number from package.json, so a pass shows package.json says 0.2.0.</td><td class="limits">It does not show that a v0.2.0 tag exists or points at the closing commit; the kernel does not tag. It does not exercise the version stamped on records, though the same function produces it.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>The two closed changes live under closed/</span><b>CK6</b> automated</td><td class="shows">For C-0001-kernel and C-0002-pilot-readiness, records/close.xml exists under .grace5/changes/closed/&lt;id&gt;/, the old sibling directory is gone, and the output of status --all contains both ids.</td><td class="limits">It looks for the two ids as substrings of the output, not for a line that marks each closed, and for close.xml alone, not for the other records A5 calls intact. It does not show the move was a records-only commit; that is read from git by the review.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Closed changes are moved under .grace5/changes/closed/ when they close. They are not merely hidden from the listing, and they are not grouped by date. You ruled on 2026-11-13.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The framework is amended and this repository is restructured first. A pilot repository, meaning any other repository that has adopted the kernel (N3), moves its own closed changes only when you give the flag. Ruled 2026-11-13.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The version is 0.2.0, tagged v0.2.0 when this change closes.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The change executes in this repository&#x27;s single worktree on master, as the two earlier changes did; no branch is created.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The move is the last step and never a closing condition. If it fails after close.xml is written (a locked file on Windows, a permission), the change is closed in place and stays a sibling. The contract does not say what status reports then or whether anything retries the move.</li>
+        <li>Nothing moves a change back, and deleting close.xml under closed/ makes the directory malformed rather than open. A close made by mistake has no undo in the kernel; only git can restore it.</li>
+        <li>The contract does not say how the listing treats a closed change that is still a sibling, which is the state of every pilot repository until it takes this version and moves its own changes (N3, D2). Such a change is closed by K2, but whether the listing counts it among the closed ones or shows it on its own line is not stated.</li>
+        <li>.grace5/changes/closed/** and the two closed changes&#x27; directories are open for writing, and everything under .grace5/changes/ is outside the candidate and the dirty state. A record rewritten during the move would be caught by nothing in the kernel; K1 forbids it, and review alone holds that line.</li>
+        <li>The write boundary is nearly the whole repository: the kernel, the skills, the packages, every method document except the schemas, package.json and both READMEs. Four protected paths and the review are the boundary.</li>
+        <li>Only CK2 reads behaviour, and the same agent writes the tests and the kernel. A weakened or missing test turns CK2 green without the behaviour.</li>
+        <li>The v0.2.0 tag is made by hand at close. No check shows it exists or points at the closing commit.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Confirm from memory that D1 to D4 are the four rulings you made during preparation, and that no other was made.</li>
+        <li>Later, give the flag for each pilot repository to move its closed changes (D2); nothing in this change does that.</li>
+        <li>At close, make or confirm the v0.2.0 tag; the kernel will not.</li>
+        <li>No manual check, no bench session and no device is required. Every check is automated.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the kernel (src/**), the three skills (skills/**), the generated packages (packages/**, by the package tool), every method document and the ledger, conformance list and CLI reference (models/architecture/**, the schemas excepted), package.json, README.md, .grace5/README.md, this repository&#x27;s .gitignore, the new .grace5/changes/closed/ directory, and the directories of C-0001-kernel and C-0002-pilot-readiness so that they can be moved. The named surface is the grace5 CLI.</li>
+        <li>Under K1 source identity is unchanged: everything under .grace5/changes/, closed/ included, stays outside the candidate and the dirty state, and no record is rewritten by the move. Under K2 closure still means records/close.xml exists, close still refuses in the documented order, and the move is a ninth step after the record is written, never a closing condition. Under K3 the mechanism has one ledger entry sourced to your requirement of 2026-11-13 with a stated removal criterion. Under K4 a change id is unique across open and closed, and records keep their paths relative to the change directory, so a moved change validates unchanged.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: reopening a closed change. Neither moving it back nor deleting its close.xml is supported; under closed/, deleting close.xml makes the directory malformed.</li>
+        <li>N2: any grouping of closed changes by date or topic.</li>
+        <li>N3: moving the closed changes of a pilot repository, that is any repository other than this one that has adopted the kernel; each does it itself after taking this version.</li>
+        <li>N4: the measurement reader in the control center, which your separate repository amends to read closed/ as well.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>A3 said the packages and the CLI reference &quot;carry the version&quot;, which the reference, generated from a help text with no version number, cannot. Resolved by rewording A3: the generated packages carry the version of package.json, and neither they nor the CLI reference drift from their sources.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>K2 kept closure as the existence of records/close.xml while the Change and N1 made location alone decisive, a contradiction for a directory under closed/ without close.xml. Resolved by rewording the Change and N1: closed still means close.xml exists, a change under closed/ carries it, and a directory under closed/ without it is reported malformed. K2 stands.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>D2 named &quot;the firmware repository&quot; and N3 &quot;a pilot repository&quot;, neither defined. Resolved: N3 now defines a pilot repository as a repository other than this one that has adopted the kernel, and D2 uses that term and cites N3.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>.gitignore ignored run logs under .grace5/changes/*/records/logs/ only, a pattern that would miss closed/&lt;id&gt;/records/logs/, and .gitignore was not a Path. Resolved: .gitignore is a Path and the Change says it ignores run logs under closed/ as it does for open changes.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 627 words against a target of 600, 6 checks against 8. The 27 words over the target are the sentence stating what closed means for a directory under closed/ and the definition of a pilot repository in N3, both added to resolve findings and both needed by the owner.</p>
+  <p>This brief describes contract text with SHA-256 <code>77ad093190cfebeb814cc1e975f6f19068d6a311094d36cafc7edf86115ceb77</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>
