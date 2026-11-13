@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0005-upgrade-with-open-changes revision 1</title>
+<meta name="grace5:change" content="C-0005-upgrade-with-open-changes">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="82c982af093e44e6b6cca436ead6bcc61a1458ce804145a3bfaa89114f30d1a2">
+<meta name="grace5:date" content="2026-11-13">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="1063">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>upgrade refuses only the open changes a step would touch, and the documents name every way out</h1>
+  <p class="lead">Brief for approval. Change <code>C-0005-upgrade-with-open-changes</code>, revision 1, 2026-11-13. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li><code>grace5 upgrade</code> stops refusing because changes are open. Each migration step declares the change ids it would write in the repository at hand: the 0.1.0 to 0.2.0 step declares the closed siblings it moves, the 0.2.0 to 0.3.0 step declares none. upgrade refuses, with no override, when a step in the chain would write an open change, with the fixed phrase &quot;open changes touched by step &lt;from&gt; -&gt; &lt;to&gt;: &lt;id&gt;, &lt;id&gt;&quot;. Today it refuses &quot;open changes: &lt;id&gt;, &lt;id&gt;&quot; whenever any change is open, which is what locked the pilot out on 2026-11-13.</li>
+        <li>The pin leaves the candidate and the dirty state. Today .grace5/kernel-version is source like any tracked file, so writing it changes every open change&#x27;s candidate and dirties the tree. After this change source-identity.md excludes it beside .grace5/changes/**, and the kernel&#x27;s candidate and dirty computations follow: writing the pin changes no change&#x27;s candidate. The safety sentence about the pin in source-identity.md and upgrade.md is reworded to this.</li>
+        <li>Every other write a step makes outside the change directories stays source; today those are the .gitignore line of the first step and the installed grace5-* skill directories every step refreshes. The plan lists each such path whose bytes would change as &quot;writes: &lt;path&gt;&quot;. With open changes present, upgrade refuses before writing anything, &quot;open changes present; the upgrade would write: &lt;path&gt;, &lt;path&gt;&quot;, unless it is given <code>--accept-evidence-loss</code>; then it proceeds and prints &quot;evidence of open changes becomes history: &lt;id&gt;, &lt;id&gt;&quot;, which is what the candidate rule already makes true of any source write.</li>
+        <li>With open changes present and no source write pending, the upgrade proceeds with the open changes in place, lists them in the plan as &quot;open, untouched: &lt;id&gt;, &lt;id&gt;&quot;, and the post-upgrade check reads them like every other change: same contract and definition hashes, no new defect. Their evidence stands.</li>
+        <li>A change may therefore span kernel versions. Its receipts already carry the kernel of each run; <code>grace5 status</code> will print the kernel a counted result was recorded with whenever it differs from the kernel running now.</li>
+        <li>The documents name the two ways out when a step does touch an open change: close it with the previous kernel, which means running from a checkout at the previous tag, or abandon it. upgrade.md states the relaxed rule and both ways out; the execute and prepare skills say the same in one sentence each. The kernel offers no override.</li>
+        <li>An unreadable pin becomes a refusal like the others: &quot;repository pin is unreadable: &lt;reason&gt;&quot; on standard error with exit 1, and status prints &quot;state: unreadable (&lt;reason&gt;)&quot;. Today the kernel exits 1 from its top-level error handler with a line no document names. commands.md lists both phrases.</li>
+        <li>The conformance test for the skill refresh counts refreshes per step, not per link, so the first chain that contains a pin bump no longer fails that test for a reason that is not a kernel defect.</li>
+        <li>The kernel version becomes 0.4.0, tagged v0.4.0 when this change closes. This repository&#x27;s own pin is written to 0.4.0 by the change directly, and the 0.3.0 to 0.4.0 boundary is a pin bump: no step, only the pin advances.</li>
+        <li>Ledger entry L-23 is amended to the relaxed rule. No command, document, tool or state file is added.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The TypeScript type-check (bun run check, that is tsc --noEmit) completes without error on the final tree, the amended steps, command and tool included. This is the first part of A3.</td><td class="limits">Command completion only. A type-check runs no command and reads no behaviour: nothing about the declared ids, the refusal, the plan line, the unreadable pin or the test count rests on it.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Conformance suite</span><b>CK2</b> automated</td><td class="shows">The kernel test suite (bun test, up to ten minutes) completes without failure on the final tree, the new and amended tests included. It is the only check named by A1 and A2.</td><td class="limits">A pass shows the tests that exist pass. It does not show that each case A1 and A2 name has a test, nor that such a test would fail if the kernel still refused on any open change, wrote a source path without the flag, forgot the &quot;writes:&quot; or &quot;becomes history&quot; lines, let the pin change a candidate, accepted an unreadable pin, or counted per link. Neither shipped step can ever touch an open change (the first moves closed changes only, the second writes the pin), so the refusal &quot;open changes touched by step&quot; can be exercised only with a step the test injects; the source-write refusal can be reached with installed skills or a missing ignore line. The tests, the kernel and any injected step are written by the same agent. That is what the review must read.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Example contracts and briefs</span><b>CK3</b> automated</td><td class="shows">The example verifier completes: the worked example contracts under models/architecture/examples validate, their briefs pass the fidelity rules, and the defective brief is still reported.</td><td class="limits">It covers the examples only. It reads nothing under .grace5/changes/, exercises no upgrade, and says nothing about upgrade.md, commands.md, the ledger or the skills this change edits.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and CLI reference without drift</span><b>CK4</b> automated</td><td class="shows">The package tool reproduces packages/** and models/architecture/cli-reference.md byte for byte from skills/, package.json and the help text, so the generated packages carry the version package.json holds and neither they nor the CLI reference drift from their sources.</td><td class="limits">It does not show that the version is 0.4.0 (CK5 does), nor that the one sentence added to the execute and prepare skills says the right thing, nor that the help text names the new phrases; it shows only that packages equal skills and the reference equals the help text.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Kernel says 0.4.0 and this repository is pinned 0.4.0</span><b>CK5</b> automated</td><td class="shows">bun src/cli.ts --version prints exactly <code>grace5 0.4.0</code>, and .grace5/kernel-version in this repository reads 0.4.0. The kernel takes the number from package.json, so a pass shows package.json says 0.4.0 too.</td><td class="limits">The pin here is written by the change directly, not by the command, so a pass says nothing about upgrade or the pin bump. It does not show that a v0.4.0 tag exists or points at the closing commit; the kernel does not tag.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Clone at v0.2.0 with an open change upgrades without loss</span><b>CK6</b> automated</td><td class="shows">The upgrade verifier src/tools/upgrade-verify.ts, run with a flag it does not have today, completes: it clones this repository at the tag v0.2.0, adds one open change beside the three closed ones, runs the new kernel&#x27;s upgrade, and finds the same changes with the same contract and definition hashes, the pin 0.4.0, the open change still open and untouched, and that change&#x27;s candidate equal to what it was before the upgrade. The clone has no pin, so the whole chain runs: the first step with no closed sibling to move, the second writing the pin, then the bump to 0.4.0.</td><td class="limits">Neither refusal is exercised: no shipped step touches an open change, and the clone has no installed skills and already carries the ignore line, so no source write is pending and the flag is never needed. What &quot;untouched&quot; compares beyond the candidate is not stated; the tool decides. It says nothing about a pilot repository, where installed skills make the source-write refusal the likely path. The tool is written by the same agent as the command it verifies.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span><code>grace5 upgrade</code> may run while changes are open, as long as no migration step in the chain would write one of them; it refuses only the open changes a step would write, naming the step and the ids. This reverses your D2 of C-0004, where upgrade refused while any change was open. You ruled on 2026-11-13, after the pilot lockout.</span></li>
+        <li data-decision="D2"><b>D2</b><span>When a step does touch an open change there are two ways out, and the documents say so: close it with the previous kernel, or abandon it. The kernel offers no override for that case.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Source writes an upgrade makes outside the change directories, today the .gitignore line and the installed skills, are refused while changes are open unless <code>--accept-evidence-loss</code> is given; the flag names the cost it accepts, the open changes&#x27; evidence becoming history. This is the author&#x27;s design, put to you on this brief: you did not rule on it in the conversation.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The version is 0.4.0, tagged v0.4.0 when this change closes.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The change is executed on master in a temporary clone of this repository, not in the shared checkout the pilots run the kernel from, because that checkout serves a pilot at v0.2.0 while the pilot&#x27;s changes are open. The commits are pushed into the shared repository&#x27;s master, which is not checked out there, and the clone is deleted. No branch is created.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The flag is the way past the second refusal, and the kernel cannot tell who gives it. An agent executing an open change that meets &quot;the upgrade would write&quot; can pass <code>--accept-evidence-loss</code> itself; the printed line names the cost, nothing records who accepted it, and the open changes&#x27; clean results are history from then on. For the pilot that motivated the change, with three open changes and installed skills, the skill refresh makes this refusal the likely one, so the choice between losing three sets of final evidence and not upgrading will be made there.</li>
+        <li>&quot;writes: &lt;path&gt;&quot; is a prediction: the plan compares bytes before applying, and a step whose write it does not account for would not be listed. Today the two writes are known; the rule relies on each future step declaring its writes as it declares its ids.</li>
+        <li>Taking the pin out of the dirty state cuts both ways: an upgraded or hand-edited pin never shows as dirty, so a run after an upgrade is recorded clean before the pin is committed, and nothing in the kernel ties a receipt to the pin the tree had. The receipt&#x27;s kernel attribute is the only trace.</li>
+        <li>The contract does not say which change the pin commit belongs to when several are open, nor that each worktree holding an open change is upgraded on its own, since the pin lives in the checkout and the method puts one change per worktree.</li>
+        <li>&quot;Writes nothing under any open change&#x27;s directory&quot; holds only if every step declares its ids truthfully. The post-upgrade check catches a changed contract or definition hash and a new defect, not a touched notes.md or log. The declaration is the step author&#x27;s word, held by review.</li>
+        <li>The refusal that replaces the old one is reachable today only with a step a test injects: the two shipped steps never touch an open change. The phrase and the behaviour rest on CK2 and on review until a future step does.</li>
+        <li>D1 reverses D2 of C-0004 on the same day, after one incident. The ledger entry is amended to the new rule; its removal criterion is not re-examined.</li>
+        <li>The work is done in a temporary clone (D4). Until the push into the shared repository&#x27;s master succeeds, the commits and the records exist only in the clone that is to be deleted; if the push is refused, nothing is lost only if the clone is kept.</li>
+        <li>The write boundary is nearly the whole repository: the kernel, the skills, the packages, every method document except the schemas, package.json, both READMEs and the pin. Five protected paths and the review are the boundary, and .grace5/changes/closed/** lies outside the candidate, so that protection is held by review alone.</li>
+        <li>The v0.4.0 tag is made by hand at close. No check shows it exists or points at the closing commit.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Confirm from memory that D1 to D4 are the four rulings you made during preparation, and that no other was made; D1 in particular reverses a ruling you made earlier the same day.</li>
+        <li>Rule on D5, which you have not seen before: an upgrade that would write source outside the change directories while changes are open is refused unless <code>--accept-evidence-loss</code> is given. Approving this brief accepts that flag and its name; rejecting with a reason sends it back.</li>
+        <li>Accept that this repository&#x27;s own pin is written by the change, not by the command; the command is exercised on a clone (CK6).</li>
+        <li>Accept that the candidate rule changes: the pin joins the paths the candidate and the dirty state ignore, the one amendment of source identity since the kernel was written.</li>
+        <li>Later, give the flag for each pilot repository to run the upgrade (N3); where it has installed grace5-* skills that the refresh changes, decide whether <code>--accept-evidence-loss</code> is given, and expect its open changes to need their final evidence rerun if it is.</li>
+        <li>At close, make or confirm the v0.4.0 tag; the kernel will not.</li>
+        <li>No manual check, no bench session and no device is required. Every check is automated.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the kernel, its migration steps, its tests and the upgrade verifier (src/**), the execute and prepare skills (skills/**), the generated packages (packages/**, by the package tool), the method documents, the conformance list, ledger entry L-23 and the CLI reference (models/architecture/**, the schemas excepted), package.json, README.md, .grace5/README.md, and this repository&#x27;s pin .grace5/kernel-version. The named surface is the grace5 CLI.</li>
+        <li>Under K1 the candidate rule of source-identity.md is amended in one place only, the pin joining the excluded paths; without <code>--accept-evidence-loss</code> an upgrade with open changes present writes nothing that any change&#x27;s candidate reads, and in every case it writes nothing under any open change&#x27;s directory, which the declared ids guarantee. Under K2 no record is rewritten; receipts already carry the kernel attribute per run, and closed still means close.xml exists. Under K3 ledger entry L-23 is amended in its mechanism and cost columns and no entry is added. Under K4 the surface is unchanged: no command, document, tool or state file is added; the plan lines, the fixed phrases and the two flags, <code>--accept-evidence-loss</code> on upgrade and <code>--with-open-change</code> on the verifier, are additions to existing items.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: downgrades, and any way for the new kernel to operate on a repository whose pin is behind other than upgrade; a stale pin keeps refusing every command but status.</li>
+        <li>N2: changing how pilots obtain the kernel; which checkout a pilot runs the kernel from stays your deployment choice.</li>
+        <li>N3: upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on your flag.</li>
+        <li>N4: reading or converting GRACE 4 state.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>K1 kept source-identity.md unchanged while that document, and upgrade.md, said a pin change never invalidates evidence because upgrade refuses on open changes, the refusal this change removes; with the pin as source, an upgrade would have changed every open change&#x27;s candidate. Resolved: the Change now takes the pin out of the candidate and the dirty state, source-identity.md excludes it beside .grace5/changes/**, both safety sentences are reworded, and K1 names that one amendment.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>&quot;Pilot&quot; and &quot;pilot repository&quot; were used without a definition. Resolved: N3 defines a pilot repository as a repository other than this one that has adopted the kernel.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>The Change announced two ways out and listed what read as three. Resolved: it now reads &quot;close it with the previous kernel, which means running from a checkout at the previous tag, or abandon it&quot;.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>K1 and the Change claimed an upgrade writes nothing any candidate reads and invalidates no evidence, while the first step appends to .gitignore and every step rewrites installed grace5-* skill directories, both source. Resolved: the Change now names those source writes, lists them in the plan as &quot;writes: &lt;path&gt;&quot;, refuses with open changes present unless <code>--accept-evidence-loss</code> is given, and prints the cost; K1 is qualified by the flag, A1 names the cases, A5 asks CK6 to compare the open change&#x27;s candidate, and D5 records the flag as the author&#x27;s design put to the owner.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 1063 words against a target of 600, 6 checks against 8. The 463 words over the target are in the Change (371 words), the Acceptance (190), the Decisions (173) and the Constraints (96): the contract settles six matters in one change, the relaxed refusal with its fixed phrase and plan line, the pin leaving the candidate, the source-write refusal with its flag and two more fixed phrases, the documented ways out, the unreadable pin with its two fixed phrases, and the per-step test count, each stated in the words a test and a reader will rely on; the Problem (104) narrates the lockout and cites the three review findings it answers; and all four findings were resolved by adding text, the candidate amendment, the definition of a pilot repository, the second half of the ways-out sentence, and the sentences, criterion clause and decision that define the source-write refusal, rather than by removing any.</p>
+  <p>This brief describes contract text with SHA-256 <code>82c982af093e44e6b6cca436ead6bcc61a1458ce804145a3bfaa89114f30d1a2</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

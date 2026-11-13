@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0005-upgrade-with-open-changes" revision="1" title="upgrade refuses only the open changes a step would touch, and the documents name every way out">
+  <Problem>On 2026-11-13 kernel 0.3.0 locked a pilot out: it had three open changes, the kernel checkout it runs from moved to 0.3.0, every command but status refused on the stale pin, and upgrade refused because changes were open, although neither migration step would have touched them. The owner reversed the ruling behind that refusal. Review 1 of C-0004 also left on record that no document says how an open change is finished once the kernel is ahead of the pin (F1), that an unreadable pin has an undocumented outcome (F2), and that one conformance test counts refreshes per link instead of per step (F3).</Problem>
+  <Change>A migration step declares the change ids it would write, given the repository: for 0.1.0 to 0.2.0 the closed siblings it moves, for 0.2.0 to 0.3.0 none. upgrade refuses, with no override, when a step in the chain would write an open change, with the fixed phrase "open changes touched by step &lt;from&gt; -&gt; &lt;to&gt;: &lt;id&gt;, &lt;id&gt;". The pin leaves the candidate and the dirty state: source-identity.md excludes .grace5/kernel-version beside .grace5/changes/**, and the kernel's candidate and dirty computations follow, so writing the pin changes no change's candidate; the safety sentence about the pin in source-identity.md and upgrade.md is reworded to this. Every other write a step makes outside the change directories, today the ignore line and the installed skills, is source: the plan lists each such path whose bytes would change as "writes: &lt;path&gt;", and with open changes present upgrade refuses before writing anything, with the fixed phrase "open changes present; the upgrade would write: &lt;path&gt;, &lt;path&gt;", unless it is given --accept-evidence-loss, in which case it proceeds and prints "evidence of open changes becomes history: &lt;id&gt;, &lt;id&gt;", which is what the candidate rule already makes true of any source write. With open changes present and no source write pending, upgrade proceeds, lists them in the plan as "open, untouched: &lt;id&gt;, &lt;id&gt;", and the post-upgrade check covers them like every other change. A change may therefore span kernel versions; its receipts carry the kernel of each run, and status prints the kernel each counted result was recorded with when it differs from the current one. upgrade.md states the relaxed rule and the two ways out when a step does touch an open change: close it with the previous kernel, which means running from a checkout at the previous tag, or abandon it; the execute and prepare skills say the same in one sentence. An unreadable pin is a refusal like the others, with the fixed phrase "repository pin is unreadable: &lt;reason&gt;" on standard error and exit 1, and status prints "state: unreadable (&lt;reason&gt;)"; commands.md lists both. The conformance test for the skill refresh counts refreshes per step. The version becomes 0.4.0; this repository's pin is written to 0.4.0 by this change directly and the 0.3.0 to 0.4.0 boundary is a pin bump.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/source-identity.md">The candidate rule is amended in one place only, the pin joining the excluded paths. Without --accept-evidence-loss, an upgrade with open changes present writes nothing that any change's candidate reads; in every case it writes nothing under any open change's directory, which the declared ids guarantee.</Constraint>
+    <Constraint id="K2" rule="models/architecture/evidence-records.md">No record is rewritten; receipts already carry the kernel attribute per run, and closure still means close.xml exists.</Constraint>
+    <Constraint id="K3" rule="models/architecture/rationale-ledger.md">Ledger entry L-23 is amended in its mechanism and cost columns to the relaxed rule; no entry is added.</Constraint>
+    <Constraint id="K4" rule="AGENTS.md">The surface is unchanged: no command, document, tool or state file is added.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Downgrades, or any way for the new kernel to operate on a repository whose pin is behind other than upgrade.</NonGoal>
+    <NonGoal id="N2">Changing how pilots obtain the kernel; which checkout a pilot runs from is the owner's deployment choice.</NonGoal>
+    <NonGoal id="N3">Upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on the owner's flag.</NonGoal>
+    <NonGoal id="N4">Reading or converting GRACE 4 state.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK2">upgrade proceeds with open changes present when no step would write their directories or any source path, refuses naming the step and the ids when a directory would be touched, refuses naming the paths when a source write is pending and proceeds with --accept-evidence-loss, writing the pin leaves every candidate and the dirty state unchanged, and the post-upgrade check covers open changes; each is a conformance case with a test that fails when the kernel lacks it.</Criterion>
+    <Criterion id="A2" checks="CK2">An unreadable pin refuses with the fixed phrase and status reports it; a conformance case covers it, and the skill-refresh case counts per step.</Criterion>
+    <Criterion id="A3" checks="CK1 CK3 CK4">The kernel type-checks, the examples still verify, the generated packages carry the version of package.json, and neither they nor the CLI reference drift from their sources.</Criterion>
+    <Criterion id="A4" checks="CK5">The kernel reports grace5 0.4.0 and this repository's pin reads 0.4.0.</Criterion>
+    <Criterion id="A5" checks="CK6">A clone of this repository at tag v0.2.0 with one open change added beside its closed ones, upgraded by the new kernel, lists the same changes with the same hashes, carries the pin 0.4.0, keeps the open change open and untouched, and leaves that change's candidate as it was before the upgrade.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/**</Path>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>package.json</Path>
+    <Path>README.md</Path>
+    <Path>.grace5/README.md</Path>
+    <Path>.grace5/kernel-version</Path>
+    <Name>grace5 CLI</Name>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/decisions/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>CLAUDE.md</Protected>
+    <Protected>.grace5/changes/closed/**</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; process.exit(out === 'grace5 0.4.0' &amp;&amp; pin === '0.4.0' ? 0 : 1)"</Command>
+    </Automated>
+    <Automated id="CK6" budget="300">
+      <Command>bun src/tools/upgrade-verify.ts --with-open-change</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">upgrade may run with open changes present when no migration step touches them; it refuses only the open changes a step would write. Owner, 2026-11-13, reversing D2 of C-0004 after the pilot lockout.</Decision>
+    <Decision id="D2">The ways out when a step does touch an open change are closing it with the previous kernel or abandoning it, and the documents say so; the kernel offers no override for that case.</Decision>
+    <Decision id="D5">Source writes of an upgrade outside the change directories, today the ignore line and the installed skills, are refused while changes are open unless --accept-evidence-loss is given, which names the cost it accepts. Author's design, put to the owner on this brief.</Decision>
+    <Decision id="D3">The version is 0.4.0, tagged v0.4.0 when this change closes.</Decision>
+    <Decision id="D4">The change executes on master in a temporary clone of this repository, because the shared checkout the pilots run from serves a pilot at v0.2.0 while its changes are open; the commits are pushed into the shared repository's master, which is not checked out there, and the clone is deleted. No branch is created.</Decision>
+  </Decisions>
+</Contract>
