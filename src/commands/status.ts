@@ -1,6 +1,6 @@
 // grace5 status (commands.md): reads everything and changes nothing.
 
-import { kernelVersion } from "../records";
+import { kernelName, kernelVersion } from "../records";
 import { evaluate, listChanges, listClosedChanges, nextOf, readSource, selectChange, type ChangeState } from "../state";
 import { compareVersions, readPin } from "../upgrade/pin";
 
@@ -30,9 +30,13 @@ function describe(state: ChangeState): string[] {
   else lines.push(`candidate: ${source.candidate} (${source.dirty.length > 0 ? "dirty" : "clean"})`);
   for (const path of state.outside) lines.push(`outside: ${path}`);
   for (const path of state.protectedTouched) lines.push(`protected: ${path}`);
+  // A change may span kernel versions (upgrade.md): a result recorded by another kernel than the running one says which.
+  const running = kernelName();
   for (const check of state.checks) {
     const verdict = check.current?.result.verdict ?? "no result";
-    lines.push(`check ${check.check.id}: ${verdict}${check.counts ? ", counts" : `, does not count: ${check.reason ?? ""}`}`);
+    const recorded = check.current?.run.kernel;
+    const kernel = recorded !== undefined && recorded !== "" && recorded !== running ? `, recorded with ${recorded}` : "";
+    lines.push(`check ${check.check.id}: ${verdict}${check.counts ? ", counts" : `, does not count: ${check.reason ?? ""}`}${kernel}`);
   }
   const review = state.review;
   if (review === undefined) lines.push("review: none");

@@ -1,5 +1,8 @@
 // Migration steps (upgrade.md): kernel code, one per version boundary whose state layout, ignore lines or skills differ.
 // Each step is idempotent and self-verifying; verify throws when the state is not in the step's target shape.
+// Each step also declares its writes before it makes them: the change ids whose directories it would write (`touches`)
+// and the source paths outside the change directories whose bytes would change (`writes`), so that `upgrade` can
+// refuse while a change is open before anything is written.
 
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -16,6 +19,10 @@ export interface Step {
   apply(root: string): void;
   /** Throws with the reason when the state is not in the shape of `to`. */
   verify(root: string): void;
+  /** The ids, open or closed, of the changes whose directories `apply` would write in this repository. */
+  touches(root: string): string[];
+  /** The source paths outside the change directories whose bytes `apply` and the skill refresh would change, relative to the root. */
+  writes(root: string, packaged?: string): string[];
 }
 
 /** The ignore line the 0.1.0 to 0.2.0 step appends: the logs of moved changes stay local like those of the open ones. */
@@ -55,6 +62,13 @@ const moveClosed: Step = {
     if (left.length > 0) throw new Error(`closed change still under ${CHANGES_DIR}: ${left.join(", ")}`);
     if (!ignoreLines(root).includes(CLOSED_LOGS_IGNORE)) throw new Error(`.gitignore lacks the line ${CLOSED_LOGS_IGNORE}`);
   },
+  touches(root) {
+    return closedSiblings(root);
+  },
+  writes(root, packaged) {
+    const paths = ignoreLines(root).includes(CLOSED_LOGS_IGNORE) ? [] : [".gitignore"];
+    return [...paths, ...skillWrites(root, packaged)].sort();
+  },
 };
 
 const writeThePin: Step = {
@@ -68,9 +82,16 @@ const writeThePin: Step = {
     const pin = readPin(root);
     if (pin !== "0.3.0") throw new Error(`${PIN_PATH} reads ${pin ?? "nothing"}, expected 0.3.0`);
   },
+  touches() {
+    return [];
+  },
+  writes(root, packaged) {
+    // The pin is outside the candidate and the dirty state (source-identity.md), so it is not a source write.
+    return skillWrites(root, packaged);
+  },
 };
 
-/** The steps in version order. A boundary between two versions without a step is a pin bump. */
+/** The steps in version order. A boundary between two versions without a step is a pin bump (0.3.0 to 0.4.0 is one). */
 export const STEPS: readonly Step[] = [moveClosed, writeThePin];
 
 // ---------------------------------------------------------------- skills
@@ -102,6 +123,38 @@ export function packagedSkillNames(packaged = PACKAGED_SKILLS_DIR): string[] {
     .sort();
 }
 
+/** The installed grace5-* skill directories the refresh would mirror: `<location>/<name>` with the packaged source. */
+function installedSkills(root: string, packaged: string): { readonly rel: string; readonly source: string; readonly target: string }[] {
+  const found: { rel: string; source: string; target: string }[] = [];
+  for (const location of SKILL_LOCATIONS) {
+    for (const name of packagedSkillNames(packaged)) {
+      const target = join(root, location, name);
+      if (!existsSync(target) || !statSync(target).isDirectory()) continue;
+      found.push({ rel: `${location}/${name}`, source: join(packaged, name), target });
+    }
+  }
+  return found;
+}
+
+/** The files of one installed skill directory the mirror would write or remove: a file whose bytes differ, is missing, or is not packaged. */
+function mirrorDifference(source: string, target: string): string[] {
+  const wanted = new Set(listFiles(source));
+  const present = new Set(listFiles(target));
+  const differing: string[] = [];
+  for (const rel of present) if (!wanted.has(rel)) differing.push(rel);
+  for (const rel of wanted) {
+    if (!present.has(rel) || !readFileSync(join(source, rel)).equals(readFileSync(join(target, rel)))) differing.push(rel);
+  }
+  return differing;
+}
+
+/** The installed skill files, relative to the root, whose bytes the refresh would change; empty where the skills already match or none is installed. */
+export function skillWrites(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
+  const paths: string[] = [];
+  for (const skill of installedSkills(root, packaged)) for (const rel of mirrorDifference(skill.source, skill.target)) paths.push(`${skill.rel}/${rel}`);
+  return paths.sort();
+}
+
 /** Mirrors the packaged files into an existing skill directory: every packaged file written, every other file removed. */
 function mirror(source: string, target: string): void {
   const wanted = new Set(listFiles(source));
@@ -120,14 +173,9 @@ function mirror(source: string, target: string): void {
  */
 export function refreshSkills(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
   const refreshed: string[] = [];
-  const names = packagedSkillNames(packaged);
-  for (const location of SKILL_LOCATIONS) {
-    for (const name of names) {
-      const target = join(root, location, name);
-      if (!existsSync(target) || !statSync(target).isDirectory()) continue;
-      mirror(join(packaged, name), target);
-      refreshed.push(`${location}/${name}`);
-    }
+  for (const skill of installedSkills(root, packaged)) {
+    mirror(skill.source, skill.target);
+    refreshed.push(skill.rel);
   }
   return refreshed;
 }

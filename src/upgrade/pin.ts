@@ -2,9 +2,10 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { PIN_PATH } from "../git";
 import { kernelVersion } from "../records";
 
-export const PIN_PATH = ".grace5/kernel-version";
+export { PIN_PATH };
 /** What a missing pin reads as where .grace5/ exists: the version before the pin existed. */
 export const UNPINNED_VERSION = "0.1.0";
 
@@ -42,9 +43,19 @@ export function writePin(root: string, version: string): void {
   writeFileSync(file, `${version}\n`);
 }
 
-/** The refusal of commands.md when the pin differs from the running kernel, or undefined when a command may proceed. */
+/** The fixed phrase of commands.md for a pin that cannot be read as a version. */
+export function unreadablePin(error: unknown): string {
+  return `repository pin is unreadable: ${error instanceof Error ? error.message : String(error)}`;
+}
+
+/** The refusal of commands.md when the pin differs from the running kernel or cannot be read, or undefined when a command may proceed. */
 export function pinRefusal(root: string): string | undefined {
-  const pin = readPin(root);
+  let pin: string | undefined;
+  try {
+    pin = readPin(root);
+  } catch (error) {
+    return unreadablePin(error);
+  }
   if (pin === undefined) return undefined;
   const version = kernelVersion();
   const order = compareVersions(pin, version);

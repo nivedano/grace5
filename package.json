@@ -1,6 +1,6 @@
 {
   "name": "@nivedano/grace5",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "GRACE 5: a kernel for owner-approved, evidence-closed changes made by coding agents",
   "license": "MIT",
   "type": "module",

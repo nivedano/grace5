@@ -2,9 +2,8 @@
 
 import { openGit } from "../git";
 import { kernelVersion } from "../records";
-import { isOpen, listChanges } from "../state";
 import { applyUpgrade } from "../upgrade/chain";
-import { compareVersions, readPin } from "../upgrade/pin";
+import { compareVersions, readPin, unreadablePin } from "../upgrade/pin";
 import { STEPS } from "../upgrade/steps";
 
 function refuse(reason: string): number {
@@ -12,12 +11,15 @@ function refuse(reason: string): number {
   return 1;
 }
 
-export async function upgradeCommand(root: string, plan: boolean): Promise<number> {
+export async function upgradeCommand(root: string, plan: boolean, acceptEvidenceLoss: boolean): Promise<number> {
   if (openGit(root) === undefined) return refuse("not a git repository");
-  const pin = readPin(root);
+  let pin: string | undefined;
+  try {
+    pin = readPin(root);
+  } catch (error) {
+    return refuse(unreadablePin(error));
+  }
   if (pin === undefined) return refuse(".grace5/ does not exist: run grace5 init");
-  const open = listChanges(root).filter((id) => isOpen(root, id));
-  if (open.length > 0) return refuse(`open changes: ${open.join(", ")}`);
   const version = kernelVersion();
   const order = compareVersions(pin, version);
   if (order > 0) return refuse(`repository state is at ${pin}, kernel is ${version}: kernel too old`);
@@ -25,5 +27,6 @@ export async function upgradeCommand(root: string, plan: boolean): Promise<numbe
     console.log(`up to date: ${version}`);
     return 0;
   }
-  return applyUpgrade({ root, version, steps: STEPS, plan, print: (line) => console.log(line) });
+  // The open changes are the chain's business (upgrade.md): it refuses only those a step would write.
+  return applyUpgrade({ root, version, steps: STEPS, plan, acceptEvidenceLoss, print: (line) => console.log(line), refuse: (reason) => console.error(`refused: ${reason}`) });
 }

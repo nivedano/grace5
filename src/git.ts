@@ -4,6 +4,8 @@ import { spawnSync } from "node:child_process";
 import { sha256Hex } from "./contract";
 
 export const CHANGES_DIR = ".grace5/changes/";
+/** The version pin (upgrade.md): excluded from the candidate and the dirty state like the change directories. */
+export const PIN_PATH = ".grace5/kernel-version";
 
 export interface Git {
   readonly root: string;
@@ -30,8 +32,9 @@ export function headRevision(git: Git): string | undefined {
   return result.ok && /^[0-9a-f]{40}$/.test(revision) ? revision : undefined;
 }
 
+/** Source (source-identity.md): every tracked path except the change directories and the version pin. */
 function isSource(git: Git, repoPath: string): boolean {
-  return !repoPath.startsWith(git.prefix + CHANGES_DIR);
+  return !repoPath.startsWith(git.prefix + CHANGES_DIR) && repoPath !== git.prefix + PIN_PATH;
 }
 
 /** Strips the root's prefix, so paths read relative to the kernel's root; a path outside it keeps a leading `../`. */
@@ -42,7 +45,7 @@ function relative(git: Git, repoPath: string): string {
 
 const candidates = new Map<string, string>();
 
-/** SHA-256 of the lines `<mode> <object> <path>`, sorted by the bytes of the path, change directories removed. */
+/** SHA-256 of the lines `<mode> <object> <path>`, sorted by the bytes of the path, change directories and the pin removed. */
 export function candidateOf(git: Git, revision: string): string | undefined {
   const key = `${git.root}\0${revision}`;
   const known = candidates.get(key);
@@ -71,7 +74,7 @@ export function candidateOf(git: Git, revision: string): string | undefined {
   return candidate;
 }
 
-/** Dirty source paths: everything `git status --porcelain` lists outside the change directories, untracked files included. */
+/** Dirty source paths: everything `git status --porcelain` lists outside the change directories and the pin, untracked files included. */
 export function dirtyPaths(git: Git): string[] {
   // --untracked-files=all, because a collapsed `?? .grace5/` would hide whether a source path is inside.
   const result = run(git.root, ["status", "--porcelain", "-z", "--untracked-files=all"]);

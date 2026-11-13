@@ -1,7 +1,7 @@
 // The upgrade chain (upgrade.md): composed from the pinned version to the kernel's, printed as a plan, applied in order
 // with the pin written after each link, and checked afterwards against a snapshot of every change's hashes and defects.
 
-import { evaluate, listChanges, listClosedChanges, readSource } from "../state";
+import { evaluate, isOpen, listChanges, listClosedChanges, readSource } from "../state";
 import { compareVersions, readPin, writePin } from "./pin";
 import { refreshSkills, type Step } from "./steps";
 
@@ -73,19 +73,47 @@ export interface UpgradeInput {
   readonly version: string;
   readonly steps: readonly Step[];
   readonly plan: boolean;
+  /** `--accept-evidence-loss`: proceed with a source write while changes are open, which makes their evidence history. */
+  readonly acceptEvidenceLoss?: boolean;
   readonly print: (line: string) => void;
+  /** Receives a refusal reason (commands.md); the command prints it as `refused: <reason>` on standard error. */
+  readonly refuse?: (reason: string) => void;
   /** The packaged skills directory; the kernel's own by default. */
   readonly packagedSkills?: string;
 }
 
-/** Composes and applies the chain. The caller has already refused what commands.md refuses; this returns the exit status. */
+/**
+ * Composes and applies the chain. The caller has already refused what comes before the chain (not a git repository, no
+ * .grace5/, kernel too old, up to date); this refuses on the open changes a step would write and on a pending source
+ * write while changes are open, prints the plan, applies the links, and returns the exit status.
+ */
 export async function applyUpgrade(input: UpgradeInput): Promise<number> {
   const { root, version, print } = input;
+  const refuse = input.refuse ?? ((reason: string): void => print(`refused: ${reason}`));
   const pin = readPin(root);
   if (pin === undefined) throw new Error(".grace5/ does not exist");
   const chain = composeChain(pin, version, input.steps);
+  const steps = chain.flatMap((link) => (link.kind === "step" ? [link.step] : []));
+  // The open changes (upgrade.md): a step that would write one is refused with no override; a source write outside the
+  // change directories, which makes every open change's evidence history, needs --accept-evidence-loss.
+  const open = listChanges(root).filter((id) => isOpen(root, id));
+  for (const step of steps) {
+    const touched = step.touches(root).filter((id) => open.includes(id)).sort();
+    if (touched.length > 0) {
+      refuse(`open changes touched by step ${step.from} -> ${step.to}: ${touched.join(", ")}`);
+      return 1;
+    }
+  }
+  const writes = [...new Set(steps.flatMap((step) => step.writes(root, input.packagedSkills)))].sort();
+  if (open.length > 0 && writes.length > 0 && input.acceptEvidenceLoss !== true) {
+    refuse(`open changes present; the upgrade would write: ${writes.join(", ")}`);
+    return 1;
+  }
   for (const link of chain) print(describeLink(link));
+  for (const path of writes) print(`writes: ${path}`);
+  if (open.length > 0) print(`open, untouched: ${open.join(", ")}`);
   if (input.plan) return 0;
+  if (open.length > 0 && input.acceptEvidenceLoss === true) print(`evidence of open changes becomes history: ${open.join(", ")}`);
   const before = await snapshot(root);
   for (const link of chain) {
     const from = link.kind === "step" ? link.step.from : link.from;

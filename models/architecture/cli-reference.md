@@ -28,9 +28,11 @@ Global options:
 The version pin:
   .grace5/kernel-version holds the version the state conforms to; a missing pin where .grace5/
   exists reads as 0.1.0. Every command except status, upgrade, the help and version flags, and
-  init on a repository without .grace5/ refuses when the pin differs from this kernel:
+  init on a repository without .grace5/ refuses when the pin differs from this kernel or cannot
+  be read as a version:
     refused: repository state is at <pin>, kernel is <version>: run grace5 upgrade
     refused: repository state is at <pin>, kernel is <version>: kernel too old
+    refused: repository pin is unreadable: <reason>
 
 The change:
   A change is named by its directory, for example C-0007-empty-export; the bare number C-0007
@@ -198,6 +200,7 @@ The first line, in both forms, names the kernel and the pinned version of the st
   kernel: <version>, state: <pin>, run grace5 upgrade    the state is behind this kernel
   kernel: <version>, state: <pin>, kernel too old        the state is ahead of this kernel
   kernel: <version>, state: none                         there is no .grace5/
+  kernel: <version>, state: unreadable (<reason>)        the pin is not a version
 
 With a change, one fact per line:
   change: <id>
@@ -212,7 +215,9 @@ With a change, one fact per line:
   check <id>: <verdict>, counts
   check <id>: <verdict>, does not count: <reason>
                                       per check, its current result and whether it would
-                                      count at close; "no result" when it has none
+                                      count at close; "no result" when it has none; followed
+                                      by ", recorded with <kernel>" when the receipt was
+                                      written by another kernel than this one
   review: <current review>            its status, candidate and open findings, or none
   interrupted: run-<n>                per interrupted run
   closed: <path of close.xml>         only when closed; under .grace5/changes/closed/ once moved
@@ -287,6 +292,7 @@ grace5 upgrade: bring the repository state to this kernel's version
 Usage:
   grace5 [--root <dir>] upgrade
   grace5 [--root <dir>] upgrade --plan
+  grace5 [--root <dir>] upgrade --accept-evidence-loss
 
 Reads the pin .grace5/kernel-version (a missing pin reads as 0.1.0) and composes the chain of
 migration steps from that version to this kernel's version. A migration step is kernel code for
@@ -295,19 +301,35 @@ verifies its own result. A boundary without a step is a pin bump. Every step als
 grace5-* skill directories that already exist under .agents/skills/ or .claude/skills/ from the
 packaged skills, and creates no new location.
 
+Open changes may be present. Before anything is written, every step declares what it would
+write: a step that would write the directory of an open change is refused, with no override
+(close that change with the previous kernel, or abandon it); a write to a source path outside
+the change directories (the ignore line, an installed skill file) is listed in the plan as
+writes: <path>, and while changes are open it is refused unless --accept-evidence-loss is
+given, because a source write makes the evidence of every open change history. The pin itself
+is outside the candidate and changes no evidence. Open changes no step touches are listed as
+open, untouched: and read by the post-upgrade check like every other change.
+
 The chain is printed as a plan, one line per link. With --plan nothing is written. Otherwise the
 links are applied in order, the pin is written after each one, and the first failure stops the
 upgrade with the pin at the last completed version; running upgrade again resumes from there.
 After the chain, every change in both locations is read as check reads it, and the upgrade fails
 if any reports a new defect, or a contract or definition hash other than before.
 
-Refuses: outside a git repository; without .grace5/; while any change is open (close it or wait);
-when the pin is ahead of this kernel. It never downgrades and takes no target version.
+Refuses: outside a git repository; without .grace5/; when the pin cannot be read as a version;
+when the pin is ahead of this kernel; when a step would write an open change; when a source
+write is pending while changes are open and --accept-evidence-loss is not given. It never
+downgrades and takes no target version.
 
 Output:
   up to date: <version>                     the pin equals this kernel's version; nothing to do
   step: <from> -> <to>: <description>       a migration step of the plan
   bump: <from> -> <to>: <reason>            a boundary without a step; only the pin advances
+  writes: <path>                            a source path outside the change directories whose
+                                            bytes the chain would change
+  open, untouched: <id>, <id>               the open changes, which no step writes
+  evidence of open changes becomes history: <id>, <id>
+                                            --accept-evidence-loss was given with open changes
   refreshed: <path>                         a skill directory refreshed in place
   skills: none installed                    no skill directory exists in either location
   pinned: <version>                         the pin written after a link
@@ -316,7 +338,10 @@ Output:
   checked: <id>                             a change read unchanged after the chain
   upgraded: <from> -> <to>                  the chain completed and the check passed
   refused: <reason>                         not a git repository, .grace5/ does not exist,
-                                            open changes: <id>, <id>, or kernel too old
+                                            repository pin is unreadable: <reason>,
+                                            kernel too old,
+                                            open changes touched by step <from> -> <to>: <id>, <id>,
+                                            or open changes present; the upgrade would write: <path>, <path>
 
 After a successful upgrade, commit the result.
 
