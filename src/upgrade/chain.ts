@@ -113,18 +113,20 @@ export async function applyUpgrade(input: UpgradeInput): Promise<number> {
   for (const path of writes) print(`writes: ${path}`);
   if (open.length > 0) print(`open, untouched: ${open.join(", ")}`);
   if (input.plan) return 0;
-  if (open.length > 0 && input.acceptEvidenceLoss === true) print(`evidence of open changes becomes history: ${open.join(", ")}`);
+  // The cost the flag accepts is stated only where it is incurred: a source write pending while changes are open.
+  if (open.length > 0 && writes.length > 0 && input.acceptEvidenceLoss === true) print(`evidence of open changes becomes history: ${open.join(", ")}`);
   const before = await snapshot(root);
   for (const link of chain) {
     const from = link.kind === "step" ? link.step.from : link.from;
     const to = link.kind === "step" ? link.step.to : link.to;
     try {
       if (link.kind === "step") {
+        // Applied, the skills refreshed, then verified: a step may count the installed skills as part of its shape.
         link.step.apply(root);
-        link.step.verify(root);
         const refreshed = refreshSkills(root, input.packagedSkills);
         if (refreshed.length === 0) print("skills: none installed");
         for (const path of refreshed) print(`refreshed: ${path}`);
+        link.step.verify(root);
       }
       writePin(root, to);
     } catch (error) {

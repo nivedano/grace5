@@ -91,8 +91,27 @@ const writeThePin: Step = {
   },
 };
 
-/** The steps in version order. A boundary between two versions without a step is a pin bump (0.3.0 to 0.4.0 is one). */
-export const STEPS: readonly Step[] = [moveClosed, writeThePin];
+const refreshTheSkills: Step = {
+  from: "0.3.0",
+  to: "0.4.0",
+  describe: "refresh the installed skills to 0.4.0",
+  apply() {
+    // Nothing beyond the skill refresh the runner performs for every step: 0.4.0 changed the skills and nothing else in the state.
+  },
+  verify(root) {
+    const differing = skillWrites(root);
+    if (differing.length > 0) throw new Error(`installed skill files differ from the packaged ones: ${differing.join(", ")}`);
+  },
+  touches() {
+    return [];
+  },
+  writes(root, packaged) {
+    return skillWrites(root, packaged);
+  },
+};
+
+/** The steps in version order. A boundary between two versions without a step is a pin bump. */
+export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills];
 
 // ---------------------------------------------------------------- skills
 

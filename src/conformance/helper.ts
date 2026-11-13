@@ -569,8 +569,11 @@ export class Scenario {
     return this.git("status", "--porcelain", "--untracked-files=all");
   }
 
-  /** The candidate of source-identity.md, computed here from `git ls-tree -r`: the change directories and the pin removed. */
-  computeCandidate(revision = "HEAD"): string {
+  /**
+   * The candidate of source-identity.md, computed here from `git ls-tree -r`: the change directories and the pin removed.
+   * With `pinIncluded` it is the candidate the 0.3.0 rule gave the same tree, which hashed the pin in.
+   */
+  computeCandidate(revision = "HEAD", pinIncluded = false): string {
     const entries: { path: string; line: string }[] = [];
     for (const row of this.git("ls-tree", "-r", revision).split("\n")) {
       const m = /^(\d+) \w+ ([0-9a-f]+)\t(.+)$/.exec(row);
@@ -578,7 +581,7 @@ export class Scenario {
       const mode = m[1] ?? "";
       const object = m[2] ?? "";
       const p = m[3] ?? "";
-      if (p.startsWith(".grace5/changes/") || p === PIN_PATH) continue;
+      if (p.startsWith(".grace5/changes/") || (p === PIN_PATH && !pinIncluded)) continue;
       entries.push({ path: p, line: `${mode} ${object} ${p}\n` });
     }
     entries.sort((a, b) => Buffer.compare(Buffer.from(a.path, "utf8"), Buffer.from(b.path, "utf8")));

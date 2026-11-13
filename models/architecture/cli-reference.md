@@ -330,6 +330,7 @@ Output:
   open, untouched: <id>, <id>               the open changes, which no step writes
   evidence of open changes becomes history: <id>, <id>
                                             --accept-evidence-loss was given with open changes
+                                            and a source write pending
   refreshed: <path>                         a skill directory refreshed in place
   skills: none installed                    no skill directory exists in either location
   pinned: <version>                         the pin written after a link

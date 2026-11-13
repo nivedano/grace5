@@ -86,6 +86,14 @@ async function main(withOpenChange: boolean): Promise<number> {
     const expected = `upgraded: ${UNPINNED_VERSION} -> ${version}`;
     if (upgrade.code === 0 && upgrade.lines.includes(expected)) ok(expected);
     else fail(`upgrade exited ${String(upgrade.code)} without the line ${expected}`);
+    // The chain of this kernel is three steps and no bump; the clone has no skills, so each step reports none installed.
+    const stepLines = upgrade.lines.filter((line) => line.startsWith("step: ")).length;
+    const bumpLines = upgrade.lines.filter((line) => line.startsWith("bump: ")).length;
+    const skillsLines = upgrade.lines.filter((line) => line === "skills: none installed").length;
+    if (upgrade.lines.includes("step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0") && stepLines === 3 && bumpLines === 0) ok("plan: three steps, 0.3.0 -> 0.4.0 refreshes the skills, no bump");
+    else fail(`plan has ${String(stepLines)} step and ${String(bumpLines)} bump lines, expected three steps ending with the skill refresh`);
+    if (skillsLines === stepLines && !upgrade.lines.some((line) => line.startsWith("refreshed:"))) ok(`skills: none installed once per step (${String(skillsLines)})`);
+    else fail(`expected skills: none installed ${String(stepLines)} times and no refreshed: line, got ${String(skillsLines)}`);
     if (withOpenChange) {
       const untouched = `open, untouched: ${OPEN_CHANGE}`;
       if (upgrade.lines.includes(untouched)) ok(untouched);

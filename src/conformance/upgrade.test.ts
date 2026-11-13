@@ -155,6 +155,7 @@ test(
     expect(plan.code).toBe(0);
     expect(hasLine(plan, /^step: 0\.1\.0 -> 0\.2\.0: .*closed.*$/)).toBe(true);
     expect(hasLine(plan, /^step: 0\.2\.0 -> 0\.3\.0: .*kernel-version.*$/)).toBe(true);
+    expect(hasLine(plan, "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0")).toBe(true);
     const versions = versionsOf(plan);
     expect(versions[0]).toBe("0.1.0");
     expect(versions.at(-1)).toBe(VERSION);
@@ -253,7 +254,7 @@ test(
     expect(s.porcelain()).toBe(clean);
 
     // Each step applied twice to state in its shape changes nothing; the pin step sets the pin to its own `to`, which is
-    // behind a kernel whose chain ends in a bump, so the pin is the one path that may differ afterwards.
+    // behind the kernel's version, so the pin is the one path that may differ afterwards.
     for (const step of STEPS) {
       step.apply(s.repo);
       step.verify(s.repo);
@@ -341,6 +342,7 @@ test(
     expect(hasLine(upgrade, "refreshed: .agents/skills/grace5-prepare")).toBe(true);
     expect(upgrade.out).not.toContain("skills: none installed");
     // Two directories refreshed once per step; a pin bump refreshes nothing (F3 of review 1 of C-0004-upgrade-command).
+    expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(3);
     expect(upgrade.lines.filter((l) => l.startsWith("refreshed:")).length).toBe(2 * upgrade.lines.filter((l) => l.startsWith("step:")).length);
 
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
@@ -541,6 +543,19 @@ test(
     const check = s.check(open);
     expect(check.code).toBe(0);
     expect(check.contractSha).toBe(contractSha);
+
+    // --accept-evidence-loss with nothing to write: the upgrade proceeds as before and states no cost, since none is incurred.
+    s.commit("take the pin");
+    s.pin(undefined);
+    s.commit("the pin removed again");
+    const flagged = s.cli(["upgrade", "--accept-evidence-loss"]);
+    expect(flagged.code).toBe(0);
+    expect(hasLine(flagged, `open, untouched: ${open}`)).toBe(true);
+    expect(flagged.out).not.toContain("writes:");
+    expect(flagged.out).not.toContain("evidence of open changes");
+    expect(flagged.lines.at(-1)).toBe(`upgraded: 0.1.0 -> ${VERSION}`);
+    expect(s.porcelain()).toBe(`?? ${PIN_PATH}\n`);
+    expect(candidateLine(s, open)).toBe(before);
   },
   TEST_TIMEOUT,
 );
@@ -579,15 +594,15 @@ test(
     expect(s.readPin()).toBe("0.1.0\n");
     expect(s.porcelain()).toBe(clean);
 
-    // The kernel's own steps: the move declares the closed siblings, the pin step nothing; an open change is never declared.
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], []]);
+    // The kernel's own steps: the move declares the closed siblings, the pin and skill steps nothing; an open change is never declared.
+    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], [], []]);
     s.pin(VERSION);
     closeFully(s);
     s.commit("close the first change");
     fs.renameSync(s.closedChangeDir, s.openChangeDir);
     s.pin(undefined);
     s.commit("the closed change as a sibling, as a 0.1.0 kernel left it");
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], []]);
+    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], [], []]);
 
     // So the command proceeds: the sibling moves, the open change is untouched.
     const upgrade = s.cli(["upgrade"]);
@@ -798,6 +813,49 @@ test(
     expect(hasLine(mixed, "check CK1: passed, counts")).toBe(true);
     expect(hasLine(mixed, "check CK2: passed, does not count: recorded on an earlier candidate, recorded with grace5 0.3.0")).toBe(true);
     expect(mixed.lines.filter((l) => l.startsWith("check CK1:") && l.includes("recorded with")).length).toBe(0);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "UP-18 a result recorded by 0.3.0 on a pinned tree is on an earlier candidate under this kernel, while a result this kernel records on a pinned tree counts after the pin changes",
+  () => {
+    const s = prepared({ id: "C-0528-boundary", checks: [automated("CK1")] });
+    expect(s.start().code).toBe(0);
+    s.commit("the start receipt");
+    const current = s.computeCandidate();
+    const underOld = s.computeCandidate("HEAD", true);
+    expect(underOld).not.toBe(current);
+    const receipt = s.receipt();
+    expect(attr(receipt, "Run", "candidate")).toBe(current);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
+
+    // The same receipt as the 0.3.0 kernel would have written it on this tree: its rule hashed the pin into the candidate.
+    const file = path.join(s.recordsDir, `run-${String(s.latestRun())}.xml`);
+    fs.writeFileSync(file, receipt.replace(`candidate="${current}"`, `candidate="${underOld}"`).replace(`kernel="grace5 ${VERSION}"`, `kernel="grace5 0.3.0"`));
+    const stale = s.status();
+    expect(hasLine(stale, `candidate: ${current} (clean)`)).toBe(true);
+    expect(hasLine(stale, "check CK1: passed, does not count: recorded on an earlier candidate, recorded with grace5 0.3.0")).toBe(true);
+    expect(hasLine(stale, "next: check CK1: recorded on an earlier candidate")).toBe(true);
+    s.writeReview({ candidate: underOld });
+    const close = s.close();
+    expect(close.code).toBe(1);
+    expect(hasLine(close, "refused: check CK1: recorded on an earlier candidate")).toBe(true);
+    expect(s.hasRecord("close.xml")).toBe(false);
+
+    // Rerun by this kernel: the result counts, and keeps counting when the pin is rewritten, removed and written back by upgrade.
+    expect(s.run("--check", "CK1").code).toBe(0);
+    expect(attr(s.receipt(), "Run", "candidate")).toBe(current);
+    const counting = "check CK1: passed, counts";
+    expect(hasLine(s.status(), counting)).toBe(true);
+    s.pin("0.3.0");
+    s.commit("the pin rewritten");
+    expect(hasLine(s.status(), counting)).toBe(true);
+    expect(hasLine(s.cli(["upgrade"]), `upgraded: 0.3.0 -> ${VERSION}`)).toBe(true);
+    expect(hasLine(s.status(), counting)).toBe(true);
+    expect(hasLine(s.status(), `candidate: ${current} (clean)`)).toBe(true);
+    s.commit("the pin advanced");
+    expect(hasLine(s.status(), counting)).toBe(true);
   },
   TEST_TIMEOUT,
 );

@@ -6,6 +6,8 @@ Terminal evidence must belong to the final candidate. This file defines what a c
 
 Source is every path git tracks at a revision, except the GRACE 5 change directories, `.grace5/changes/**`, and the version pin, `.grace5/kernel-version`. The exclusion covers `.grace5/changes/closed/`, where `close` moves a change, so the move and the closed changes are outside the candidate and the dirty state like the open ones. The pin is excluded so that writing it, which is what `upgrade` does at every link, changes no change's candidate and no dirty state: a change may therefore span kernel versions, and the kernel each receipt was recorded with is read from the receipt, not from the candidate (`upgrade.md`). Every other path an upgrade writes outside the change directories is source and makes the evidence of every open change history, which is why `upgrade` refuses such a write while changes are open unless told to accept the loss. The kernel requires a git repository.
 
+The exclusion of the pin dates from 0.4.0; the 0.3.0 rule hashed the pin into the candidate. So at the 0.3.0 to 0.4.0 boundary the rule itself changed once: a tree that carries a pin has one candidate under 0.3.0 and another under 0.4.0, and results and reviews recorded by 0.3.0 on a pinned tree do not count under 0.4.0, where they read as recorded on an earlier candidate, and are rerun and re-reviewed. A tree without a pin has the same candidate under both rules and is unaffected. A closed record is read by the rule of the kernel it names, which every record carries; the kernel compares no closed change's candidate, so those records keep their meaning for a reader who applies that rule (`upgrade.md`).
+
 | Term | Definition |
 |---|---|
 | Source revision | The commit `HEAD` names when a command runs. |
@@ -28,7 +30,7 @@ The exclusion is by path and nothing else: whatever is placed under `.grace5/cha
 | `notes.md` is edited and committed | Same | None. |
 | The review record is written and committed | Same | None. |
 | Another change's records are committed on the same branch | Same | None. |
-| `upgrade` writes the pin, before or after it is committed | Same | None. The result still counts; `status` names the kernel it was recorded with. |
+| `upgrade` writes the pin, before or after it is committed | Same | None for a result recorded under this rule: it still counts, and `status` names the kernel it was recorded with. A result recorded by 0.3.0 on a pinned tree is on an earlier candidate under 0.4.0, whether or not the pin is written. |
 | `upgrade` appends the ignore line or refreshes an installed skill | Different | Every result is history, which is why `upgrade` refuses that write while changes are open unless `--accept-evidence-loss` is given. |
 | A test file is edited and committed | Different | Every result is of an earlier candidate; `close` refuses until the required checks are rerun, manual observations included. |
 | A product file is edited and left uncommitted | Same revision, dirty | A new run records `dirty="true"`; `close` refuses a dirty tree. |
