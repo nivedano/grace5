@@ -398,7 +398,8 @@ test(
   "CHECK prints the contract hash, each definition hash and the size against target",
   () => {
     const h = happy();
-    const contract = h.s.read(`.grace5/changes/${HAPPY.id}/contract.xml`);
+    // The happy change is closed by now, so its directory has moved under closed/ (CL-01).
+    const contract = h.s.contractText();
     expect(h.info.code).toBe(0);
     expect(h.info.defects).toEqual([]);
     expect(h.info.contractSha).toBe(sha256(contract));

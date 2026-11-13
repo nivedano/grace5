@@ -498,6 +498,11 @@ export class Scenario {
     return fs.readFileSync(path.join(this.recordsDir, name), "utf8");
   }
 
+  /** The contract text, wherever the change directory is now. */
+  contractText(): string {
+    return fs.readFileSync(path.join(this.changeDir, "contract.xml"), "utf8");
+  }
+
   hasRecord(name: string): boolean {
     return fs.existsSync(path.join(this.recordsDir, name));
   }
