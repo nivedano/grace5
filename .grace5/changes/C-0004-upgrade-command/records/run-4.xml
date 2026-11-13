@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0004-upgrade-command" revision="1" contract-sha256="24b9566cee396a7779315c4dc1328b0a710943f6c30c6a4e2c24b84d17370479" n="4" run-id="6b90147ca01a4cfc83630f58b183ac66" started="2026-11-13T16:19:41.635Z" ended="2026-11-13T16:25:09.188Z" status="completed" source-revision="e33e8997b43d0eafb2cfff4da75ce4b6eba8e966" dirty="false" candidate="8907d11120e77cfa57dbbb186a27308c0ebfab249edff2415db25c921b177ba7" kernel="grace5 0.3.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="4862" log="records/logs/run-4/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=180
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="ec4431d09e468bedf3067d6144afb26f6dfb3b2ca074bd57dd46f0dbaf0dd019" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="314433" log="records/logs/run-4/CK2.log" log-sha256="c9f0c20f804ee461b72c8386d0eab4c5c017e3769b278c16c5b8215396673268">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="583" log="records/logs/run-4/CK3.log" log-sha256="17d3f980c94c01a29aa18a48dc723505ec69ba6da62e3df1b11a539ad5c60032">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run examples:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="552" log="records/logs/run-4/CK4.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK5" kind="automated" required="true" definition-sha256="fd2f17e6631429229a24d89100a8d3298dc0841dd45b309bf960d85b9672421b" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="158" log="records/logs/run-4/CK5.log" log-sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855">
+    <Definition>kind=automated
+id=CK5
+required=true
+cwd=.
+budget=60
+command=bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; process.exit(out === 'grace5 0.3.0' &amp;&amp; pin === '0.3.0' ? 0 : 1)"
+</Definition>
+  </Result>
+  <Result check="CK6" kind="automated" required="true" definition-sha256="db65b473fc5d71529bb61e9c799ea664b9bae3089d09936549a171ba68d6135d" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="6956" log="records/logs/run-4/CK6.log" log-sha256="4235dbacc4075d1f2cff2ffd8d52f2290b63b5cfcc9ab4cf1b4191bba003a1f2">
+    <Definition>kind=automated
+id=CK6
+required=true
+cwd=.
+budget=300
+command=bun src/tools/upgrade-verify.ts
+</Definition>
+  </Result>
+</Run>
