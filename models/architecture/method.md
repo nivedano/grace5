@@ -12,12 +12,13 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 |---|---|
 | Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` while the change is open, and under `.grace5/changes/closed/<id>/` once `close` has moved it (`commands.md`) |
 | Records | `brief-<rev>.html`, `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/` |
-| Commands | `grace5 init`, `check`, `run`, `status`, `close`; `--help` and `--version` |
+| Commands | `grace5 init`, `check`, `run`, `status`, `close`, `upgrade`; `--help` and `--version` |
+| State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, and the migration steps `upgrade` composes from it to the kernel's version (`upgrade.md`) |
 | Skills | prepare, execute, review, in `skills/`; the harness packages in `packages/` are generated from them and never edited |
-| Tools of this repository | `src/tools/`: the package generator, the CLI reference generator and the example verifier; not part of the installed CLI |
-| Documents | this method and its topic files (`commands.md`, `authorization.md`, `brief.md`, `source-identity.md`, `trace-provenance.md`, `evidence-records.md`), the schemas in `schemas/`, the brief template in `templates/`, the worked examples in `examples/`, `conformance.md`, `rationale-ledger.md`, `retirement.md`, `m2-proposal.md` (a proposal to the measurement method, not part of the kernel), `cli-reference.md` generated from the help text |
+| Tools of this repository | `src/tools/`: the package generator, the CLI reference generator, the example verifier and the upgrade verifier (`upgrade-verify.ts`, which upgrades a clone of this repository at the previous version's tag); not part of the installed CLI |
+| Documents | this method and its topic files (`commands.md`, `authorization.md`, `brief.md`, `source-identity.md`, `trace-provenance.md`, `evidence-records.md`, `upgrade.md`), the schemas in `schemas/`, the brief template in `templates/`, the worked examples in `examples/`, `conformance.md`, `rationale-ledger.md`, `retirement.md`, `m2-proposal.md` (a proposal to the measurement method, not part of the kernel), `cli-reference.md` generated from the help text |
 
-Anything not in this table is absent: no graph, no module index, no source markup, no literal text assertions, no rule parser, no log parser beyond ordered substring matching, no migration, no daemon. The deferred proposals and their admission tests are at the end.
+Anything not in this table is absent: no graph, no module index, no source markup, no literal text assertions, no rule parser, no log parser beyond ordered substring matching, no migration of GRACE 4 state, no daemon. The deferred proposals and their admission tests are at the end.
 
 ## The contract
 
@@ -57,7 +58,7 @@ A check is required unless it says `required="false"`. Markers are plain substri
 5. Review. An independent reviewer reads the complete diff from the start revision against the contract and the cited rules, and writes `records/review-<n>.xml`: findings, per-check adequacy, rule verdicts, and a statement of independence. A small change may be self-reviewed, and the record says so.
 6. Close. `grace5 close` verifies the verdicts on the final candidate and writes `close.xml`, or refuses and names the exact unmet obligation; then it moves the change directory under `.grace5/changes/closed/`, so the open changes stay in view. Which record supersedes which is in `evidence-records.md`.
 
-`grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. Without an id it lists the open changes and counts the closed ones. A malformed change is reported as malformed and never hides a valid one.
+`grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. Without an id it lists the open changes and counts the closed ones. A malformed change is reported as malformed and never hides a valid one. Its first line names the kernel's version and the pin of the state, and every other command refuses state pinned to another version until `grace5 upgrade` has brought it to the kernel's (`upgrade.md`).
 
 A material revision of behaviour, boundary, constraints or checks increments `revision`, gets a difference-only brief and a new approval; git preserves the previous revision. Until it is approved, only the checks whose definitions the last approval bound may run.
 
@@ -75,4 +76,4 @@ When a change crosses a boundary between two components, the contract names the 
 | Overlap information for shared worktrees | Recorded isolation-failure events in a pilot. |
 | Formal-methods pilots | Never in the schema; external and bounded only. |
 
-Every later change to GRACE 5 is a change in its own repository whose Problem cites an explicit owner requirement, an invariant, or an observed failure, and which adds or amends one ledger entry.
+Every later change to GRACE 5 is a change in its own repository whose Problem cites an explicit owner requirement, an invariant, or an observed failure, and which adds or amends one ledger entry. A change that alters the state layout, the ignore lines or the skills ships its migration step in the same change (`upgrade.md`).

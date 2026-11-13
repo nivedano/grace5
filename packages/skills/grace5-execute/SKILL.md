@@ -9,7 +9,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 ## Before starting
 
-- `grace5 status` must report `authorization: approved for execution`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here.
+- `grace5 status` must report `authorization: approved for execution`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first, which needs every change closed (`upgrade.md`).
 - One change per worktree. Never create a branch or a worktree without the owner's consent; ask where the work should happen and use what they name.
 - Run `grace5 run <id> --start` once. It records the start revision, the dirty paths already present and the starting state of the checks (`commands.md`).
 - Pre-existing dirty work is identified, never adopted: do not stage, stash, commit or tidy it. Tell the owner what the receipt lists; the final tree must be clean (`source-identity.md`).

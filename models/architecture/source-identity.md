@@ -4,7 +4,7 @@ Terminal evidence must belong to the final candidate. This file defines what a c
 
 ## The rule
 
-Source is every path git tracks at a revision, except the GRACE 5 change directories: `.grace5/changes/**`. The exclusion covers `.grace5/changes/closed/`, where `close` moves a change, so the move and the closed changes are outside the candidate and the dirty state like the open ones. The kernel requires a git repository.
+Source is every path git tracks at a revision, except the GRACE 5 change directories: `.grace5/changes/**`. The exclusion covers `.grace5/changes/closed/`, where `close` moves a change, so the move and the closed changes are outside the candidate and the dirty state like the open ones. The version pin `.grace5/kernel-version` is tracked outside the change directories and is therefore source, which is safe because `upgrade` refuses while any change is open, so a pin change never invalidates a change's evidence (`upgrade.md`). The kernel requires a git repository.
 
 | Term | Definition |
 |---|---|
