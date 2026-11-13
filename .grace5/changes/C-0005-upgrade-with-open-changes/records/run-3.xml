@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0005-upgrade-with-open-changes" revision="1" contract-sha256="82c982af093e44e6b6cca436ead6bcc61a1458ce804145a3bfaa89114f30d1a2" n="3" run-id="d07dae2828054ccb8e0b9f0167270350" started="2026-11-13T17:47:28.991Z" ended="2026-11-13T17:53:13.077Z" status="completed" source-revision="8042b5c4158443fee89a1a9450a4022b20b34c0c" dirty="false" candidate="19846c1682c6bd2b919d13c6474518d0b869d1c4a496e9c177064cad792ec156" kernel="grace5 0.4.0">
+  <Result check="CK2" kind="automated" required="true" definition-sha256="ec4431d09e468bedf3067d6144afb26f6dfb3b2ca074bd57dd46f0dbaf0dd019" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="344068" log="records/logs/run-3/CK2.log" log-sha256="32bda59b616dc8580d91428311431ed084fce9881d84116a405dbe44886728a1">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test
+</Definition>
+  </Result>
+</Run>
