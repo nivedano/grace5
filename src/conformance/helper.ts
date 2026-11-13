@@ -419,6 +419,21 @@ export interface ObserveOptions {
   note?: string;
 }
 
+let kernelVersionCache: string | undefined;
+
+/** The version `grace5 --version` reports. Every fixture repository is pinned to it (upgrade.md), since any other pin is refused. */
+export function kernelVersion(): string {
+  if (kernelVersionCache === undefined) {
+    const r = spawnSync(process.execPath, [CLI, "--version"], { encoding: "utf8", windowsHide: true });
+    const m = /^grace5 (\S+)/.exec((r.stdout ?? "").trim());
+    if (!m) throw new Error(`grace5 --version printed no version: ${r.stdout ?? ""}${r.stderr ?? ""}`);
+    kernelVersionCache = m[1] ?? "";
+  }
+  return kernelVersionCache;
+}
+
+export const PIN_PATH = ".grace5/kernel-version";
+
 const scenarios: Scenario[] = [];
 
 /** Removes every temporary repository made so far. Call from afterAll. */
@@ -450,6 +465,20 @@ export class Scenario {
     this.git("config", "commit.gpgsign", "false");
     for (const [rel, content] of Object.entries(SCRIPTS)) this.write(rel, content);
     this.writeContract(def);
+    this.pin(kernelVersion());
+  }
+
+  /** Writes the version pin, or removes it when given undefined (the state of a repository before the pin existed). */
+  pin(version: string | undefined): void {
+    const file = path.join(this.repo, PIN_PATH);
+    if (version === undefined) fs.rmSync(file, { force: true });
+    else this.write(PIN_PATH, `${version}\n`);
+  }
+
+  /** The pin as a command reads it: the file's text, or none. */
+  readPin(): string | undefined {
+    const file = path.join(this.repo, PIN_PATH);
+    return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : undefined;
   }
 
   get id(): string {

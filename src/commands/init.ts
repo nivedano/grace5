@@ -2,7 +2,9 @@
 
 import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { kernelVersion } from "../records";
 import { locateChange } from "../state";
+import { PIN_PATH } from "../upgrade/pin";
 
 const CHANGE_ID = /^C-[0-9]{4}(-[a-z0-9]+)*$/;
 
@@ -49,7 +51,9 @@ function readme(root: string): string {
     "",
     "GRACE 5 state of this repository: one directory per open change under `changes/`, each holding `contract.xml`, an optional `notes.md` and `records/` (brief, approval, run receipts, review, close); `grace5 close` moves a closed change to `changes/closed/`.",
     "",
-    "The commands are `grace5 init`, `check`, `run`, `status` and `close`; `grace5 --help` describes them.",
+    "`kernel-version` pins the version this state conforms to; a kernel of another version refuses to operate on it, and `grace5 upgrade` brings it to the kernel's version.",
+    "",
+    "The commands are `grace5 init`, `check`, `run`, `status`, `close` and `upgrade`; `grace5 --help` describes them.",
     "",
     "Project documents and rule files found when this file was created:",
     "",
@@ -87,6 +91,9 @@ export function initCommand(root: string, change: string | undefined): number {
     report(relative, !present);
   };
   directory(".grace5/changes");
+  // The pin (upgrade.md) is written with the kernel's version when .grace5/ is created; where it exists already, the pin
+  // check of the CLI has run before this point.
+  file(PIN_PATH, () => `${kernelVersion()}\n`);
   file(".grace5/README.md", () => readme(root));
   if (change !== undefined) {
     directory(`.grace5/changes/${change}`);

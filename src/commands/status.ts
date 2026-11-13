@@ -1,6 +1,22 @@
 // grace5 status (commands.md): reads everything and changes nothing.
 
+import { kernelVersion } from "../records";
 import { evaluate, listChanges, listClosedChanges, nextOf, readSource, selectChange, type ChangeState } from "../state";
+import { compareVersions, readPin } from "../upgrade/pin";
+
+/** The first line of both forms (upgrade.md): the kernel's version, the pin, and whether the state is behind or ahead. */
+function kernelLine(root: string): string {
+  const version = kernelVersion();
+  let pin: string | undefined;
+  try {
+    pin = readPin(root);
+  } catch (error) {
+    return `kernel: ${version}, state: unreadable (${error instanceof Error ? error.message : String(error)})`;
+  }
+  if (pin === undefined) return `kernel: ${version}, state: none`;
+  const order = compareVersions(pin, version);
+  return `kernel: ${version}, state: ${pin}${order < 0 ? ", run grace5 upgrade" : order > 0 ? ", kernel too old" : ""}`;
+}
 
 function describe(state: ChangeState): string[] {
   const lines: string[] = [`change: ${state.id}`];
@@ -38,11 +54,13 @@ export async function statusCommand(root: string, change: string | undefined, al
       console.error(`refused: ${selection.error}`);
       return 1;
     }
+    console.log(kernelLine(root));
     for (const line of describe(await evaluate(root, selection.id))) console.log(line);
     return 0;
   }
   // The listing (commands.md): one line per open change, a malformed one never hiding the others; the closed changes,
   // moved under closed/ or not, are counted on the last line and listed one line each only with --all.
+  console.log(kernelLine(root));
   const source = readSource(root);
   const closedLines: string[] = [];
   let closed = 0;

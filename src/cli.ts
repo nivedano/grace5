@@ -7,7 +7,9 @@ import { closeCommand } from "./commands/close";
 import { initCommand } from "./commands/init";
 import { runCommand } from "./commands/run";
 import { statusCommand } from "./commands/status";
+import { upgradeCommand } from "./commands/upgrade";
 import { kernelName } from "./records";
+import { pinRefusal } from "./upgrade/pin";
 
 const HELP: Readonly<Record<string, string>> = {
   "": `grace5: a kernel for owner-approved, evidence-closed changes
@@ -21,11 +23,19 @@ Commands:
   run      Execute checks, or record a manual observation or a skip, and write one receipt.
   status   Report the whole state of a change and its next unresolved obligation, or list every change.
   close    Verify the eight closing steps and write close.xml, or refuse at the first unmet one.
+  upgrade  Bring the repository state from its pinned version to this kernel's version, step by step.
 
 Global options:
   --root <dir>   The repository root that holds .grace5/. Defaults to the current directory.
   --help, -h     Show this help, or the help of a command (grace5 <command> --help).
   --version      Print the kernel name and version.
+
+The version pin:
+  .grace5/kernel-version holds the version the state conforms to; a missing pin where .grace5/
+  exists reads as 0.1.0. Every command except status, upgrade, the help and version flags, and
+  init on a repository without .grace5/ refuses when the pin differs from this kernel:
+    refused: repository state is at <pin>, kernel is <version>: run grace5 upgrade
+    refused: repository state is at <pin>, kernel is <version>: kernel too old
 
 The change:
   A change is named by its directory, for example C-0007-empty-export; the bare number C-0007
@@ -48,23 +58,24 @@ Exit status:
 Usage:
   grace5 [--root <dir>] init [change]
 
-Creates .grace5/changes/ and .grace5/README.md, a short entry point that links the project
-documents and rule files found in the root (README, AGENTS.md, CLAUDE.md, docs/, models/).
-With a change id (C-NNNN with an optional lower-case slug) it also creates
+Creates .grace5/changes/, .grace5/kernel-version (the version pin, written with this kernel's
+version) and .grace5/README.md, a short entry point that links the project documents and rule
+files found in the root (README, AGENTS.md, CLAUDE.md, docs/, models/). With a change id (C-NNNN with an optional lower-case slug) it also creates
 .grace5/changes/<change>/, its records/ directory and a contract.xml template. A change id
 is unique across open and closed changes: an id that already has a directory under
 .grace5/changes/ or .grace5/changes/closed/ is refused.
 
-It overwrites nothing: an existing file or directory is reported and left alone.
+It overwrites nothing: an existing file or directory is reported and left alone. Where .grace5/
+already exists, init is refused like every other command when the pin differs from this kernel.
 
 Output:
   created: <path>    for each file or directory created
   exists: <path>     for each one already present
-  refused: <reason>  the change id exists, open or closed; nothing is written
+  refused: <reason>  the change id exists, open or closed, or the pin differs; nothing is written
 
 Exit status:
   0  success
-  1  the root is not a directory, or the change id exists
+  1  the root is not a directory, the change id exists, or the pin differs from this kernel
   2  a usage error, such as a malformed change id`,
 
   check: `grace5 check: validate a change, executing nothing
@@ -171,6 +182,12 @@ Usage:
   grace5 [--root <dir>] status [change]
   grace5 [--root <dir>] status --all
 
+The first line, in both forms, names the kernel and the pinned version of the state:
+  kernel: <version>, state: <pin>                        the two are equal
+  kernel: <version>, state: <pin>, run grace5 upgrade    the state is behind this kernel
+  kernel: <version>, state: <pin>, kernel too old        the state is ahead of this kernel
+  kernel: <version>, state: none                         there is no .grace5/
+
 With a change, one fact per line:
   change: <id>
   malformed: <first error>            only when the change fails validation
@@ -245,6 +262,49 @@ Exit status:
   0  close.xml was written
   1  refused
   2  a usage error`,
+
+  upgrade: `grace5 upgrade: bring the repository state to this kernel's version
+
+Usage:
+  grace5 [--root <dir>] upgrade
+  grace5 [--root <dir>] upgrade --plan
+
+Reads the pin .grace5/kernel-version (a missing pin reads as 0.1.0) and composes the chain of
+migration steps from that version to this kernel's version. A migration step is kernel code for
+one version boundary whose state layout, ignore lines or skills differ; it is idempotent and
+verifies its own result. A boundary without a step is a pin bump. Every step also refreshes the
+grace5-* skill directories that already exist under .agents/skills/ or .claude/skills/ from the
+packaged skills, and creates no new location.
+
+The chain is printed as a plan, one line per link. With --plan nothing is written. Otherwise the
+links are applied in order, the pin is written after each one, and the first failure stops the
+upgrade with the pin at the last completed version; running upgrade again resumes from there.
+After the chain, every change in both locations is read as check reads it, and the upgrade fails
+if any reports a new defect, or a contract or definition hash other than before.
+
+Refuses: outside a git repository; without .grace5/; while any change is open (close it or wait);
+when the pin is ahead of this kernel. It never downgrades and takes no target version.
+
+Output:
+  up to date: <version>                     the pin equals this kernel's version; nothing to do
+  step: <from> -> <to>: <description>       a migration step of the plan
+  bump: <from> -> <to>: <reason>            a boundary without a step; only the pin advances
+  refreshed: <path>                         a skill directory refreshed in place
+  skills: none installed                    no skill directory exists in either location
+  pinned: <version>                         the pin written after a link
+  failed: <from> -> <to>: <reason>          a step failed; the pin is at <from>
+  failed: post-upgrade check: <id>: <what>  a change reads differently after the chain
+  checked: <id>                             a change read unchanged after the chain
+  upgraded: <from> -> <to>                  the chain completed and the check passed
+  refused: <reason>                         not a git repository, .grace5/ does not exist,
+                                            open changes: <id>, <id>, or kernel too old
+
+After a successful upgrade, commit the result.
+
+Exit status:
+  0  up to date, the plan was printed, or the upgrade completed
+  1  refused, a step failed, or the post-upgrade check failed
+  2  a usage error`,
 };
 
 const VALUE_FLAGS = ["--observe", "--by", "--build", "--environment", "--reference", "--note", "--from"] as const;
@@ -264,6 +324,7 @@ async function main(argv: readonly string[]): Promise<number> {
   const lists = new Map<string, string[]>();
   let start = false;
   let all = false;
+  let plan = false;
   let help = false;
 
   for (let i = 0; i < args.length; i++) {
@@ -281,6 +342,7 @@ async function main(argv: readonly string[]): Promise<number> {
       command = arg;
     } else if (command === "run" && arg === "--start") start = true;
     else if (command === "status" && arg === "--all") all = true;
+    else if (command === "upgrade" && arg === "--plan") plan = true;
     else if (command === "run" && (VALUE_FLAGS as readonly string[]).includes(arg)) {
       const value = args[++i];
       if (value === undefined) return usage(`${arg} needs a value`);
@@ -308,19 +370,32 @@ async function main(argv: readonly string[]): Promise<number> {
     return 0;
   }
   const text = HELP[command];
-  if (text === undefined || command === "") return usage(`unknown command ${command}; the commands are init, check, run, status, close`);
+  if (text === undefined || command === "") return usage(`unknown command ${command}; the commands are init, check, run, status, close, upgrade`);
   if (help) {
     console.log(text);
     return 0;
   }
+  if (command === "upgrade" && positional.length > 0) return usage(`upgrade takes no change, got ${positional.join(" ")}`);
   if (positional.length > 1) return usage(`${command} takes one change, got ${positional.join(" ")}`);
   const change = positional[0];
   if (all && change !== undefined) return usage("--all lists every change and takes no change id");
   const resolved = resolve(root);
 
+  // The pin (upgrade.md): every command but status and upgrade refuses state laid out for another version.
+  // init on a repository without .grace5/ has no pin to read and creates it.
+  if (command !== "status" && command !== "upgrade") {
+    const refusal = pinRefusal(resolved);
+    if (refusal !== undefined) {
+      console.error(`refused: ${refusal}`);
+      return 1;
+    }
+  }
+
   switch (command) {
     case "init":
       return initCommand(resolved, change);
+    case "upgrade":
+      return upgradeCommand(resolved, plan);
     case "check":
       return checkCommand(resolved, change);
     case "status":

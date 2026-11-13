@@ -145,6 +145,11 @@ export function kernelName(): string {
   return kernel;
 }
 
+/** The version alone, as package.json states it; the pin of upgrade.md is compared with this. */
+export function kernelVersion(): string {
+  return kernelName().slice("grace5 ".length);
+}
+
 const attr = (element: XmlElement, name: string): string => collapse(element.attributes[name] ?? "");
 const optionalAttr = (element: XmlElement, name: string): string | undefined => (element.attributes[name] === undefined ? undefined : attr(element, name));
 const numberAttr = (element: XmlElement, name: string): number | undefined => (element.attributes[name] === undefined ? undefined : Number(attr(element, name)));

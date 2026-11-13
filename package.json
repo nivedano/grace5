@@ -1,6 +1,6 @@
 {
   "name": "@nivedano/grace5",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "GRACE 5: a kernel for owner-approved, evidence-closed changes made by coding agents",
   "license": "MIT",
   "type": "module",
@@ -10,7 +10,8 @@
     "test": "bun test",
     "examples:verify": "bun src/tools/examples-verify.ts",
     "package": "bun src/tools/package.ts",
-    "package:verify": "bun src/tools/package.ts --verify"
+    "package:verify": "bun src/tools/package.ts --verify",
+    "upgrade:verify": "bun src/tools/upgrade-verify.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
