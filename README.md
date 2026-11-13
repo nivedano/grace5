@@ -16,7 +16,7 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 
 ## Status
 
-The kernel implements the method: `bun src/cli.ts --help`. Nothing here is released; pilots in real repositories come next.
+Version 0.1.0. The kernel implements the method and is closed on itself: its first change, under `.grace5/changes/`, was prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Toolchain
 

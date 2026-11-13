@@ -18,6 +18,8 @@ Dirty state is what git reports: a file git is told to ignore, or to assume unch
 
 Excluding the change directory keeps receipts, reviews, briefs, approvals, logs and notes from changing the candidate. The contract lives there too, and it is not ignored: each result carries the hash of the exact check definition it ran (`definition-sha256`), and `close` requires it to equal that check's definition hash in the current approved revision. The `contract-sha256` on a run receipt says which contract text was in force and is not itself a closing condition; on the brief and the approval it is one. A changed command or marker list therefore invalidates the results of that check and no others; a changed product file invalidates all of them. A rule that ignored the change directory without that binding would hide changed commands, and v0 does not have such a rule.
 
+The exclusion is by path and nothing else: whatever is placed under `.grace5/changes/`, a script, a fixture, a copy of product code, is outside the candidate and outside the dirty state, and a check's `definition-sha256` binds the command text, not a file that command executes. A check must therefore execute nothing kept in the change directory, and a `Path` or `Protected` glob that points into it is never reported; the kernel does not detect either, and whether a command reaches into the change tree is for review to read in the contract (accepted design, review finding F6 of C-0001-kernel).
+
 ## Examples
 
 | Event after a clean passing run | Candidate | Effect on evidence |

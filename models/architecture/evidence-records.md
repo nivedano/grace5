@@ -77,3 +77,7 @@ No record is deleted or rewritten to supersede it. Git and the numbering hold th
 8. The current review is `completed`; carries the current contract hash; covers the complete diff, its `start-revision` being the start run's revision and its `end-revision` a commit that carries the final candidate; has no blocking finding that is `open` or that is `owner-disposed` without the owner's quoted decision, has an `Adequacy` with `discriminates="true"` for every required check, and has no `Rule` with verdict `violated`.
 
 Then it writes `close.xml` naming the run that satisfied each check. Checks marked `required="false"` are listed with their latest verdict and never counted.
+
+## What closed means
+
+A change is closed when `records/close.xml` exists; the eight steps above are what `close` verifies before writing it, not what the kernel verifies afterwards. The kernel authenticates no record: every record is agent-writable, and a schema-valid `close.xml` written by hand makes `status` and the listing report the change as closed, with the kernel comparing the record against nothing. What the file names, the candidate, the review and the satisfying runs, is there for a reader and for measurement to compare with the other records and with git; `status` does not do that comparison. Deleting `close.xml` reopens the change. Records are therefore committed, so that git holds who wrote what and when, and review and measurement, not the kernel, are where a close record that does not match its evidence is caught (accepted design, review finding F9 of C-0001-kernel).

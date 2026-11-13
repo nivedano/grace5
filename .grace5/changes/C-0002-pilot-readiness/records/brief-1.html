@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0002-pilot-readiness revision 1</title>
+<meta name="grace5:change" content="C-0002-pilot-readiness">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="cf61b1008957eaf36db4a642168b69a86cae63b4a7d3db6c29c0dc2d6db3302e">
+<meta name="grace5:date" content="2026-11-13">
+<meta name="grace5:writer" content="self">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="531">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pilot readiness: the accepted designs are written down and the kernel carries a version</h1>
+  <p class="lead">Brief for approval. Change <code>C-0002-pilot-readiness</code>, revision 1, 2026-11-13. Full brief. First written by an independent reader against an earlier contract text; brought up to the corrected contract by the author, because no independent subagent could be reached (four launches failed with an API error). Treat the resolved findings and the changed items as author-written.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>Three method documents (source-identity.md, evidence-records.md, commands.md) gain sentences stating three designs the kernel already follows, which review 6 of C-0001 left open as findings F6, F9 and F13: everything under .grace5/changes/ is outside the candidate and the dirty state, so a check executes nothing kept there; a change is closed when records/close.xml exists, the kernel authenticates no record, and status says what it can and cannot tell about a hand-written one; the kernel reads XML with its own reader after XSD validation, restates schema defaults in code, and fails closed wherever the two could disagree.</li>
+        <li>Every added sentence is confirmed against the code or by a probe before it is written. Where the kernel and a document would disagree, the sentence is not written and the disagreement is reported to you instead.</li>
+        <li>F11, the fourth open finding, gets no document text: the contract calls it a scope note on C-0001 that its review record answers.</li>
+        <li>The package version becomes 0.1.0. The kernel prints <code>grace5 0.1.0</code> for --version and stamps that on every record it writes, so pilot evidence can be attributed to a version. The generated packages carry 0.1.0.</li>
+        <li>The README status says the kernel is closed on itself and names 0.1.0, instead of calling it unfinished.</li>
+        <li>Nothing in the kernel changes: no file under src/ or skills/ is written, no mechanism is added or altered, and no ledger entry is added. Two existing ledger entries, L-09 (the candidate rule) and L-15 (close), get their cost column amended to name the limits this change documents, and nothing else in them changes.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The TypeScript type-check (bun run check) completes without error on the final tree.</td><td class="limits">Command completion only. It does not show that src/ was left alone; the protected paths do that at close. It reads no document sentence.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Conformance suite</span><b>CK2</b> automated</td><td class="shows">The kernel test suite (bun test, about four minutes) completes without failure on the final tree.</td><td class="limits">The suite tests the code, not the prose. It does not show that any sentence added to the documents matches the behaviour it describes; that rests on K2 and the review.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Example contracts and briefs</span><b>CK3</b> automated</td><td class="shows">The example verifier completes: the worked example contracts validate, their briefs pass the fidelity rules, and the defective brief is still reported.</td><td class="limits">It covers models/architecture/examples only. It says nothing about the three documents this change edits, the version, or this brief.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and CLI reference without drift</span><b>CK4</b> automated</td><td class="shows">The generator reproduces packages/** and models/architecture/cli-reference.md byte for byte from skills/, package.json and the help text: the committed packages carry whatever version package.json holds, and neither they nor the reference drift from their sources.</td><td class="limits">It does not show that the version is 0.1.0 (CK5 does). The CLI reference carries no version, and the criterion no longer claims it does. It does not show that a package installs or works in its harness.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Kernel reports grace5 0.1.0</span><b>CK5</b> automated</td><td class="shows">bun src/cli.ts --version prints exactly <code>grace5 0.1.0</code>. The kernel reads that number from package.json, so a pass shows package.json says 0.1.0 without any source change.</td><td class="limits">It does not exercise the kernel attribute written on records, though it is produced by the same function. It does not show that a v0.1.0 tag exists; the kernel does not tag.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The four findings review 6 left open are accepted and nothing is changed in code: the three that are designs (F6, F9, F13) are written into the documents, and F11, a scope note on C-0001, is answered by its review record. You ruled on 2026-11-13: one change, documents plus version.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The version is 0.1.0, tagged v0.1.0 when this change closes. The package stays private; the pilots run the kernel from this checkout. Ruled 2026-11-13.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The author email in the published git history is left as it is. Ruled 2026-11-13.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The change executes in this repository&#x27;s single worktree on master, as C-0001 did; no branch is created.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>No automated check reads the sentences this change adds. A sentence that reads well but misstates the kernel passes all five checks; only K2 (confirm against code or probe) and the review stand between the documents and a false statement of the method.</li>
+        <li>The ledger is open for writing so that two cost columns can be amended. No check reads the ledger; that the amendment stays within L-09 and L-15 and their cost column, as K3 requires, rests on review alone.</li>
+        <li>The ledger&#x27;s own header makes an entry conditional on a mechanism being added or altered, while method.md makes one unconditional. This change satisfies both by amending; it does not reconcile the two sentences, which stay as they are.</li>
+        <li>The v0.1.0 tag is made by hand at close. The kernel does not tag and no check shows the tag exists or points at the closing commit.</li>
+        <li>Only three method documents are open for writing. A design that the author judges belongs in a fourth (method.md, brief.md, authorization.md, trace-provenance.md) is an outside write: status reports it, review decides, the kernel does not block it.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Confirm from memory that D1 to D4 are the four rulings you made, and that no other was made during preparation.</li>
+        <li>At close, make or confirm the v0.1.0 tag; the kernel will not.</li>
+        <li>No manual check, no bench session and no device is required. Every check is automated.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write three method documents (models/architecture/source-identity.md, evidence-records.md, commands.md), the rationale ledger (models/architecture/rationale-ledger.md, cost column of L-09 and L-15 only), README.md, package.json and everything under packages/ (regenerated by the package tool, never edited by hand).</li>
+        <li>Under K1 the kernel&#x27;s surface and behaviour are unchanged and nothing under src/ or skills/ is written. Under K2 every added sentence describes behaviour the kernel already has, confirmed against the code or by a probe, and an unconfirmable sentence is reported rather than written. Under K3 no mechanism is added or altered and no ledger entry is added; L-09 and L-15 are amended in their cost column and in nothing else.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: the kernel is not changed for F6, F9 or F13: no binding of the files a check executes, no authentication of records, no deriving the change id pattern from the schema.</li>
+        <li>N2: the package is not published to a registry or a plugin marketplace.</li>
+        <li>N3: the pilots themselves and the migration procedure of the pilot repositories are not part of this change.</li>
+        <li>N4: the author identity in the published git history is not changed.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/**">src/**</li>
+        <li data-protected="skills/**">skills/**</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>D1 said the four open findings of review 6 &quot;are written into the documents&quot; while the Change writes F6, F9 and F13 and leaves F11 to its review record. Resolved by rewording D1: three designs are documented, F11 is a scope note answered by its review record.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>K3 said the ledger is not edited and protected it, while method.md says every later change adds or amends one ledger entry. Resolved by amending the cost column of L-09 and L-15 to name the documented limits: K3 now cites method.md, the ledger is a Path, no entry is added.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A3 said the CLI reference carries the version of package.json, which it cannot. Resolved by rewording A3: the packages carry the version, and neither they nor the reference drift from their sources.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 531 words against a target of 600, 5 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>cf61b1008957eaf36db4a642168b69a86cae63b4a7d3db6c29c0dc2d6db3302e</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

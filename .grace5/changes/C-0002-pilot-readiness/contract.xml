@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0002-pilot-readiness" revision="1" title="Pilot readiness: the accepted designs are written down and the kernel carries a version">
+  <Problem>Review 6 of C-0001-kernel left four non-blocking findings open as accepted designs that no method document states (F6, F9, F11, F13). Every record carries kernel="grace5 0.0.0", so pilot exposure cannot be attributed to a version. The README still describes the kernel as unfinished. Two pilot repositories are about to adopt the kernel.</Problem>
+  <Change>The method documents state the accepted designs behind F6, F9 and F13 where a reader of those documents would look: that everything under .grace5/changes/ is outside the candidate and the dirty state whatever it holds, so a check must execute nothing kept there; that a change is closed when records/close.xml exists, that the kernel authenticates no record, and what status can and cannot tell about a hand-written one; that the kernel reads XML with its own reader after XSD validation and restates schema defaults in code, failing closed wherever the two could disagree. F11 is a scope note on C-0001 and is answered by its review record alone. The package version becomes 0.1.0 and the generated packages carry it. The README status says the kernel is closed on itself and names the version.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="AGENTS.md">The surface and the kernel's behaviour are unchanged; no file under src/ or skills/ is written.</Constraint>
+    <Constraint id="K2">Each added sentence describes behaviour the kernel already has, confirmed against the code or by a probe. Where the kernel and a document would disagree, the sentence is not written and the disagreement is reported.</Constraint>
+    <Constraint id="K3" rule="models/architecture/method.md">No mechanism is added or altered and no ledger entry is added. The entries of the mechanisms whose accepted limits this change documents, L-09 for the candidate rule and L-15 for close, are amended in their cost column to name those limits, and in nothing else.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Changing the kernel for F6, F9 or F13: binding files a check executes, authenticating records, or deriving the id pattern from the schema.</NonGoal>
+    <NonGoal id="N2">Publishing the package to a registry or a plugin marketplace.</NonGoal>
+    <NonGoal id="N3">The pilots and the migration procedure of the pilot repositories.</NonGoal>
+    <NonGoal id="N4">The author identity in the published git history.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK2">The kernel type-checks and its conformance suite passes with no source change.</Criterion>
+    <Criterion id="A2" checks="CK3">Every example contract and brief still passes the kernel's own verification.</Criterion>
+    <Criterion id="A3" checks="CK4">The generated packages carry the version of package.json, and neither they nor the CLI reference drift from their sources.</Criterion>
+    <Criterion id="A4" checks="CK5">The kernel reports grace5 0.1.0 as its version.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>models/architecture/source-identity.md</Path>
+    <Path>models/architecture/evidence-records.md</Path>
+    <Path>models/architecture/commands.md</Path>
+    <Path>models/architecture/rationale-ledger.md</Path>
+    <Path>README.md</Path>
+    <Path>package.json</Path>
+    <Path>packages/**</Path>
+    <Name>GRACE 5 method documents</Name>
+    <Protected>src/**</Protected>
+    <Protected>skills/**</Protected>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/decisions/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>CLAUDE.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); process.exit(out === 'grace5 0.1.0' ? 0 : 1)"</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The four open findings of review 6 are accepted and nothing is changed in code: the three that are designs (F6, F9, F13) are written into the documents, and F11, a scope note on C-0001, is answered by its review record. Owner, 2026-11-13: one change, docs plus version.</Decision>
+    <Decision id="D2">The version is 0.1.0, tagged v0.1.0 when this change closes; the package stays private and the pilots run the kernel from this checkout. Owner, 2026-11-13.</Decision>
+    <Decision id="D3">The author email in the published history is left as it is. Owner, 2026-11-13.</Decision>
+    <Decision id="D4">The change executes in this repository's single worktree on master, as C-0001 did; no branch is created.</Decision>
+  </Decisions>
+</Contract>
