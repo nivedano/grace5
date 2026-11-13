@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0007-orchestrate-skill" revision="1" title="A fourth skill, grace5-orchestrate, runs several approved changes in one mostly unattended session, and every skill reads a repository's optional local extensions">
+  <Problem>Explicit owner requirement of 2026-11-13: GRACE 5 must ship, out of the box, the counterpart of the GRACE 4 batch orchestrator, which was bound to GRACE 4 and to one project and cannot be reused. Today the three skills carry one change each; running several in a row, unattended, with the owner asked only what is critical, is left to each session's improvisation. A repository also has no place to tell every GRACE 5 role once how it works locally, for example which issue tracker receives discoveries or how an implementer is launched.</Problem>
+  <Change>Local extensions. A repository may keep prose instruction files in .grace5/extensions/, one topic per file, each saying in its own words which roles it addresses. The folder is optional; the kernel never creates, reads, writes or validates it. Each of the four skills says, in one sentence, that its reader reads the files there before working and follows those addressed to its role, and method.md defines the folder in one section. An extension may replace a skill's default and may grant standing authority for outward-facing actions; it cannot grant, and no skill takes from it, an owner gate the kernel reserves. The orchestrated run. A fourth skill, skills/grace5-orchestrate, defines it. One orchestrating session takes the open changes that status reports as approved for execution, lists every other open change as left out with the reason, and carries each taken change from start to close through subagents: an implementer that follows grace5-execute and an independent reviewer that follows grace5-review. The orchestrator implements nothing itself, reads the state of a change from grace5 status and never from a subagent's report, runs grace5 close, and keeps a run ledger on disk from which a fresh session can resume. By default changes run one at a time in the current worktree, in id order, each closed or parked before the next starts; concurrency and isolated workspaces exist only where an extension provides and authorizes them. The owner is asked only about a critical stop, and the skill lists the classes: an owner gate the kernel reserves (approval of a material revision, a manual observation, an owner-disposed finding); uncommitted work, not made by the run, found inside a change's Affected paths; an outward-facing or irreversible action without standing authority (a push, a deploy, creating a branch or a worktree); a failed required check or a blocking finding that remains after two fix rounds, a fix round being one return of the change to its implementer to correct the product inside the contract; an extension may set another number and may add classes. A change at a critical stop is parked in the ledger with its question and the run continues with every later change that does not depend on it, a change depending on a parked one when its contract names it or when the orchestrator reads a path common to both Affected lists, in which case it is parked too as waiting; the owner receives all parked questions in one round when nothing else can move. Every other decision is the orchestrator's and is written to the ledger. Run ledgers live under .grace5/orchestration/runs/ and are committed when the run ends. Delivery. The 0.5.0 to 0.6.0 migration step installs grace5-orchestrate in every skill location that already holds a packaged skill, and nowhere else, and refreshes the three installed skills. The packaged name joins the kernel-managed skill directories of source-identity.md. The version becomes 0.6.0.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/authorization.md">No approval, execution authorization or owner disposition is set or inferred by the orchestrator, a subagent or an extension; a standing instruction to run changes unattended is none of these.</Constraint>
+    <Constraint id="K2" rule="models/architecture/source-identity.md">The run writes no kernel record by hand and adopts no pre-existing work. .grace5/extensions/ and .grace5/orchestration/ are in the state directory, so writing an extension or a ledger changes no candidate.</Constraint>
+    <Constraint id="K3" rule="models/architecture/upgrade.md">The migration step is idempotent, self-verifying, declares that it touches no change, and writes only kernel-managed paths.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">One entry, L-24, is added for the skill and the extensions folder, with its removal criterion.</Constraint>
+    <Constraint id="K5" rule="AGENTS.md">The surface grows by one skill, one migration step and two directories in the state that the kernel never writes, .grace5/extensions/ for the owner's instructions and .grace5/orchestration/ for the orchestrator's ledgers, and by nothing else: no command, schema, record kind, topic document or validation is added, and no skill or document names a product, tracker, container runtime or harness-specific tool as required.</Constraint>
+    <Constraint id="K6">grace5-orchestrate cites the three lifecycle skills and the method documents and does not restate them; each lifecycle skill gains the one sentence on extensions and is otherwise unchanged.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Preparing, briefing or approving changes inside a run; a change not approved for execution is listed and left out.</NonGoal>
+    <NonGoal id="N2">Any kernel reading, schema, naming rule or validation of an extension file or a run ledger.</NonGoal>
+    <NonGoal id="N3">A shipped extension, or a shipped integration with an issue database, a container runtime or any other tool; those are written by each repository.</NonGoal>
+    <NonGoal id="N4">Overlap detection by the kernel, or a scheduler for concurrent changes; the deferred proposal of method.md stays deferred.</NonGoal>
+    <NonGoal id="N5">Installing the skill in a pilot repository or writing any pilot's extensions; each takes the version on the owner's flag.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK7">A fresh session given only the skill carries an approved change to a kernel close without asking the owner anything, parks a change that reaches a critical stop with its question while the remaining changes proceed, commits its ledger, asks its parked questions in one round, infers no approval, and makes no push, branch or worktree.</Criterion>
+    <Criterion id="A2" checks="CK7">One extension file addressed to every role is followed by the orchestrator and by its subagents alike.</Criterion>
+    <Criterion id="A3" checks="CK2 CK6">The 0.5.0 to 0.6.0 step installs grace5-orchestrate beside installed packaged skills in each location, creates no location, changes nothing when applied twice, and leaves every change's hashes and candidate as they were; a conformance case fails when the kernel lacks it.</Criterion>
+    <Criterion id="A4" checks="CK1 CK3 CK4">The kernel type-checks, the examples still verify, the three packages carry the four skills, and neither they nor the CLI reference drift from their sources.</Criterion>
+    <Criterion id="A5" checks="CK5">The kernel reports grace5 0.6.0 and this repository's pin reads 0.6.0.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>src/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>package.json</Path>
+    <Path>README.md</Path>
+    <Path>AGENTS.md</Path>
+    <Name>grace5-orchestrate skill</Name>
+    <Name>local extensions</Name>
+    <Name>grace5 upgrade</Name>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/decisions/**</Protected>
+    <Protected>CLAUDE.md</Protected>
+  </Affected>
+  <Checks>
+    <Environment id="E1">A scratch git repository outside this one, initialised by the kernel at the candidate revision, with the four skills installed from the packages. It holds four open changes, each an edit of its own file, no two sharing an Affected path or naming one another, with one automated check, in this id order: one whose check cannot pass inside its Affected paths; one that also carries a manual check naming the owner; one that can close; one whose approval does not authorize execution. The approval records of these four are fixtures of the scratch repository, written by the author as the conformance suite writes its own, each quoting a statement marked as a fixture; they approve nothing real. It has one extension file, .grace5/extensions/commits.md, which addresses every role and says every commit made in the repository carries the trailer "Rehearsal: yes"; no extension grants authority. A fresh session that has seen nothing of this change's conversation is told only to run the open changes with grace5-orchestrate.</Environment>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="900">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; const skill = fs.existsSync('packages/skills/grace5-orchestrate/SKILL.md'); process.exit(out === 'grace5 0.6.0' &amp;&amp; pin === '0.6.0' &amp;&amp; skill ? 0 : 1)"</Command>
+    </Automated>
+    <Automated id="CK6" budget="300">
+      <Command>bun src/tools/upgrade-verify.ts --with-open-change</Command>
+    </Automated>
+    <Manual id="CK7" environment="E1">
+      <Procedure>The owner reads the run ledger, the session's final report, the commit log and the output of grace5 status in the scratch repository after the session stops. Pass: the first and second changes are parked in the ledger, each with one question that belongs to a listed critical class; the third is closed by the kernel although both were parked before it, and the owner was asked nothing before it closed; the fourth is listed as left out because it is not approved for execution; the parked questions reached the owner together, once; every commit the run made, by the orchestrator or a subagent, carries the trailer "Rehearsal: yes"; the ledger is committed under .grace5/orchestration/runs/; git shows no new branch, worktree or push; no approval record was written or changed by the run. Fail: any of these does not hold, or the orchestrating session itself wrote a file under a change's Affected paths.</Procedure>
+    </Manual>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">GRACE 5 ships an orchestrator skill out of the box: a capable orchestrator that manages subagents for each open change, mostly autonomous, only critical issues escalated to the owner, behaviour extensible locally; an issue database or containerised implementers must be possible and are named nowhere in GRACE 5. Owner, 2026-11-13.</Decision>
+    <Decision id="D2">A run covers only the changes whose current revision is approved for execution; every other open change is listed and left out. Owner, 2026-11-13.</Decision>
+    <Decision id="D3">Local instructions are prose in a folder with a well-known name, not mandatory, shared by the orchestrator, the executor and the other skills as needed, so that for example an issue tracker is described once for all parties; the kernel gains no schema or validation for them. Owner, 2026-11-13.</Decision>
+    <Decision id="D4">A change at a critical stop, as the Change lists them, is parked and the run keeps going; the owner gets all parked questions in one round when nothing else can move. Owner, 2026-11-13.</Decision>
+    <Decision id="D5">The folder is .grace5/extensions/ and the run ledgers live under .grace5/orchestration/runs/, both inside the state directory, so that editing an extension stales no open change's evidence; the cost is that an extension edit is not part of any change's reviewed diff. Ledgers are committed when the run ends. Author's design, put to the owner on this brief.</Decision>
+    <Decision id="D6">The 0.5.0 to 0.6.0 step installs the new skill beside the packaged skills a repository already has, instead of leaving installation to a manual copy. Author's design, put to the owner on this brief.</Decision>
+    <Decision id="D7">Without an extension the run is one change at a time in the current worktree. Author's design, put to the owner on this brief.</Decision>
+    <Decision id="D8">The four critical classes of the Change are the floor of what reaches the owner; an extension may add classes and may not remove the kernel's owner gates. Author's design, put to the owner on this brief.</Decision>
+    <Decision id="D9">The skill's behaviour is evidenced by one rehearsal in a scratch repository whose ledger and report the owner reads, about ten minutes; the scratch changes carry fixture approvals written by the author. Author's design, put to the owner on this brief.</Decision>
+    <Decision id="D10">The version is 0.6.0, tagged v0.6.0 when this change closes; the change executes in this repository on master, without a branch. Author's proposal, put to the owner on this brief.</Decision>
+  </Decisions>
+</Contract>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0007-orchestrate-skill revision 1</title>
+<meta name="grace5:change" content="C-0007-orchestrate-skill">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="6999102460464928c78ca12b6bb8c654b000789ab59620c9855d7ec3e35a17b8">
+<meta name="grace5:date" content="2026-11-13">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="1770">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="7">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>A fourth skill, grace5-orchestrate, runs several approved changes in one mostly unattended session, and every skill reads a repository's optional local extensions</h1>
+  <p class="lead">Brief for approval. Change <code>C-0007-orchestrate-skill</code>, revision 1, 2026-11-13. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>GRACE 5 ships a fourth skill, <code>grace5-orchestrate</code>. One session takes every open change that is approved for execution and carries each one from start to close. It lists every other open change as left out, with the reason.</li>
+        <li>The orchestrator writes no product code. For each change it starts an implementer subagent that follows <code>grace5-execute</code> and an independent reviewer subagent that follows <code>grace5-review</code>. It reads where a change stands from <code>grace5 status</code>, never from what a subagent says, and it runs <code>grace5 close</code> itself.</li>
+        <li>By default the run does one change at a time, in id order, in the current worktree. Running changes side by side, or in separate workspaces, happens only where a local extension provides and authorizes it.</li>
+        <li>You are asked only at a critical stop. There are four classes: (1) a gate the kernel reserves for you: approving a material revision, a manual observation, disposing a finding; (2) uncommitted work the run did not make, found inside a change's affected paths; (3) an outward-facing or irreversible action with no standing authority: a push, a deploy, creating a branch or a worktree; (4) a required check that still fails, or a blocking finding that remains, after two fix rounds. A fix round is one return of the change to its implementer to correct the product inside the contract.</li>
+        <li>A change at a critical stop is parked with its question, and the run goes on with the later changes that do not depend on it. A later change depends on a parked one when its contract names it or when both list a common affected path; it is then parked too, as waiting. You receive all parked questions together, once, when nothing else can move.</li>
+        <li>Every other decision is the orchestrator's own and is written to a run ledger. The ledger is kept on disk under <code>.grace5/orchestration/runs/</code>, lets a fresh session resume the run, and is committed when the run ends.</li>
+        <li>A repository may keep local instructions as plain prose files in <code>.grace5/extensions/</code>, one topic per file, each saying which roles it addresses. The folder is optional. All four skills tell their reader to read it first and follow what is addressed to their role. The kernel never creates, reads, writes or validates it.</li>
+        <li>An extension may replace a skill's default, may change the number of fix rounds, may add critical classes, and may grant standing authority for outward-facing actions. It can never grant an approval or any other gate the kernel reserves for you.</li>
+        <li>Upgrading from 0.5.0 to 0.6.0 installs the new skill wherever a repository already has the packaged skills installed, and nowhere else, and refreshes the three existing ones. The version becomes 0.6.0.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>The kernel type-checks</span><b>CK1</b> automated</td><td class="shows">The kernel's code, including the new migration step, compiles without type errors.</td><td class="limits">Nothing about behaviour, and nothing about the skill, which is prose.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>The test suite passes</span><b>CK2</b> automated</td><td class="shows">The existing conformance cases still hold, and the new case for the 0.5.0 to 0.6.0 step passes; that case is meant to fail on a kernel without the step.</td><td class="limits">The new case is written inside this change, so its strength is judged at review, not here. The tests do not exercise the orchestrator's behaviour.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>The worked examples still verify</span><b>CK3</b> automated</td><td class="shows">The method's examples behave as documented under the 0.6.0 kernel.</td><td class="limits"></td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages match their sources</span><b>CK4</b> automated</td><td class="shows">The three packages are exact copies of the skill sources, and the CLI reference matches the CLI's help text.</td><td class="limits">That the copies are identical, not that the skill text is right or complete.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Version and pin read 0.6.0</span><b>CK5</b> automated</td><td class="shows">The kernel reports <code>grace5 0.6.0</code>, this repository's pin reads 0.6.0, and the packaged skill file for <code>grace5-orchestrate</code> exists.</td><td class="limits">Only that the file exists, not what it says.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Upgrade rehearsal with an open change</span><b>CK6</b> automated</td><td class="shows">In a clone with an open change and a stale installed skill, the upgrade completes and the open change's hashes and candidate are left as they were.</td><td class="limits">The clone is a constructed case. A real pilot repository is not upgraded by this change.</td></tr>
+          <tr class="manual" data-check="CK7" data-kind="manual" data-required="true"><td><span>Rehearsal run you read</span><b>CK7</b> manual</td><td class="shows">In a scratch repository with four small changes, each editing its own file and none depending on another, a fresh session told only to run them with the skill: parked the change whose check cannot pass and the change that needs your manual observation, each with one question from a listed class; closed the third without asking you anything; listed the fourth as left out because it is not approved for execution; asked its parked questions together, once; put the trailer required by the one extension file on every commit, its own and its subagents'; committed its ledger; made no branch, worktree or push; wrote or changed no approval; and wrote no product file itself.</td><td class="limits">It is one run, with one-file changes, of one session. It does not show how the skill behaves with large changes, with changes that depend on each other, with uncommitted foreign work, with a blocking review finding, with resuming from the ledger in a fresh session, or with an extension that grants authority or allows concurrency. The approvals in the scratch repository are fixtures written by the author, so the run shows that the skill respects approvals it finds, not that anything real was approved. The extension is seen only through commit trailers, so a subagent that makes no commit is not observed following it. The result rests on your reading of the ledger, the final report, the commit log and <code>grace5 status</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Yours, 2026-11-13: GRACE 5 ships an orchestrator skill out of the box. It is a capable orchestrator that manages subagents for each open change, mostly autonomous, escalating only critical issues to you, and extensible locally. An issue database or containerised implementers must be possible, and GRACE 5 names neither anywhere.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Yours, 2026-11-13: a run covers only the changes whose current revision is approved for execution. Every other open change is listed and left out.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Yours, 2026-11-13: local instructions are prose files in a folder with a well-known name. They are not mandatory. The orchestrator, the executor and the other skills share them as needed, so that, for example, an issue tracker is described once for everyone. The kernel gets no schema or validation for them.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Recorded as yours, 2026-11-13: a change at a critical stop is parked and the run keeps going. This covers all four classes the change lists, not only the gates reserved for you. You get all parked questions in one round when nothing else can move.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Author's design, for you to rule on here: the folder is <code>.grace5/extensions/</code> and the run ledgers live under <code>.grace5/orchestration/runs/</code>. Both sit inside the state directory, so editing an extension does not make any open change's evidence stale. The cost: an extension edit is not part of any change's reviewed diff. Ledgers are committed when the run ends.</span></li>
+        <li data-decision="D6"><b>D6</b><span>Author's design, for you to rule on here: the 0.5.0 to 0.6.0 upgrade step installs the new skill beside the packaged skills a repository already has, instead of leaving it to a manual copy.</span></li>
+        <li data-decision="D7"><b>D7</b><span>Author's design, for you to rule on here: without an extension, the run is one change at a time in the current worktree.</span></li>
+        <li data-decision="D8"><b>D8</b><span>Author's design, for you to rule on here: the four critical classes are the minimum of what reaches you. An extension may add classes. It may not remove the kernel's owner gates.</span></li>
+        <li data-decision="D9"><b>D9</b><span>Author's design, for you to rule on here: the skill's behaviour is shown by one rehearsal in a scratch repository, whose ledger and report you read, about ten minutes. The scratch changes carry fixture approvals written by the author.</span></li>
+        <li data-decision="D10"><b>D10</b><span>Author's proposal, for you to rule on here: the version is 0.6.0, tagged <code>v0.6.0</code> when this change closes. The change is executed in this repository on <code>master</code>, without a branch.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The orchestrator's rules are prose that a session follows. The kernel still enforces its own gates (approval, required checks, review, close), but nothing mechanical stops an orchestrating session from writing product code itself or from asking too little. The only evidence is one rehearsal.</li>
+        <li>An extension can replace a skill's default and can grant standing authority for pushes and deploys. Extension files are outside every change's reviewed diff and the kernel does not check them. One edited prose file can widen what an unattended run does without anyone reviewing the edit.</li>
+        <li>Every decision outside the four classes is taken without you and only recorded in the ledger. You learn of it by reading the ledger afterwards.</li>
+        <li>Whether a change depends on a parked one is judged by the orchestrator from the contracts and their affected paths. The kernel does not detect overlap. A dependence that neither contract shows is missed.</li>
+        <li>A check that fails for a reason outside the contract costs two fix rounds of subagent work before it reaches you.</li>
+        <li>The upgrade step writes a new skill directory into every repository that upgrades to 0.6.0 and already has the packaged skills. It is automatic, not opt-in per repository.</li>
+        <li>The contract is about three times the target length. More text means more room for a reading you did not intend; the decisions above are the short form to hold it to.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Rule on the six items that are the author's design, not your words: D5, D6, D7, D8, D9 and D10. Approving this brief approves them, including work on <code>master</code> without a branch and the tag <code>v0.6.0</code> at close.</li>
+        <li>Do the manual check CK7 yourself, about ten minutes: after the rehearsal session stops, read the run ledger, the session's final report, the commit log and the output of <code>grace5 status</code> in the scratch repository, and compare them with the pass list. The change cannot close without your observation.</li>
+        <li>Accept that the rehearsal's approvals are fixtures written by the author in a scratch repository outside this one, marked as fixtures. They approve nothing real.</li>
+        <li>Later, outside this change: give the flag for each pilot repository to take 0.6.0, and write any extensions a repository needs. Nothing is shipped for a tracker, a container runtime or any other tool.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>It may write the skill sources (<code>skills/**</code>), the three packages (<code>packages/**</code>), the kernel and its tests (<code>src/**</code>), the method documents (<code>models/architecture/**</code>), <code>package.json</code>, <code>README.md</code> and <code>AGENTS.md</code>.</li>
+        <li>The three existing skills each gain one sentence about extensions and are otherwise unchanged. The new skill cites the three skills and the method documents and does not restate them.</li>
+        <li>The method gains one section in <code>method.md</code> defining the extensions folder, the new skill's name among the kernel-managed skill directories in <code>source-identity.md</code>, and one rationale entry, L-24, with its removal criterion.</li>
+        <li>The surface grows by one skill, one migration step and two directories in the state that the kernel never writes, and by nothing else: no new command, schema, record kind, topic document or validation. No skill or document names a product, tracker, container runtime or harness-specific tool as required.</li>
+        <li>The migration step can be applied twice without further effect, verifies itself, declares that it touches no change, and writes only kernel-managed paths. In this repository that includes the version pin, which becomes 0.6.0.</li>
+        <li>No orchestrator, subagent or extension sets or infers an approval, an execution authorization or an owner disposition. A standing instruction to run changes unattended is none of these.</li>
+        <li>A run writes no kernel record by hand and adopts no work that was there before it. Extensions and ledgers are in the state directory, so writing them changes no change's candidate.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1. A run does not prepare, brief or approve changes. A change not approved for execution is listed and left out.</li>
+        <li>N2. The kernel does not read extension files or run ledgers, and gets no schema, naming rule or validation for them.</li>
+        <li>N3. No extension is shipped, and no integration with an issue database, a container runtime or any other tool. Each repository writes its own.</li>
+        <li>N4. The kernel does not detect overlap between changes, and there is no scheduler for concurrent changes. The deferred proposal in <code>method.md</code> stays deferred.</li>
+        <li>N5. The skill is not installed in any pilot repository and no pilot's extensions are written. Each pilot takes the version on your flag.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>E1, CK7 (serving A1): the environment did not say the four scratch changes edit different files, so the third could have been parked as waiting instead of closing. Resolved: E1 now says each change edits its own file, no two sharing an affected path or naming one another.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>D4: the term "owner-only stop" was used once and not defined. Resolved: D4 now says "a critical stop, as the Change lists them"; the undefined term is gone.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 1770 words against a target of 600, 7 checks against 8. Author's reason for the excess: the change introduces a skill and a shared extensions folder whose behaviour no existing document states, so the Change states the run, the critical classes and their definitions once, and the manual check needs a full environment and procedure.</p>
+  <p>This brief describes contract text with SHA-256 <code>6999102460464928c78ca12b6bb8c654b000789ab59620c9855d7ec3e35a17b8</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>
