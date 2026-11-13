@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0004-upgrade-command" revision="1" contract-sha256="24b9566cee396a7779315c4dc1328b0a710943f6c30c6a4e2c24b84d17370479" date="2026-11-13T16:40:13.985Z" source-revision="e6cabecab20155bb73e3c51a8186b4183d8c3b9e" candidate="8907d11120e77cfa57dbbb186a27308c0ebfab249edff2415db25c921b177ba7" start-revision="51c93cd7f7ee579100a3b2c31bdef0b16ab5cff9" brief="brief-1.html" approval="approval-1.xml" review="1" kernel="grace5 0.3.0">
+  <Satisfied check="CK1" kind="automated" run="4" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="4" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="4" claim="command-completion"/>
+  <Satisfied check="CK4" kind="automated" run="4" claim="command-completion"/>
+  <Satisfied check="CK5" kind="automated" run="4" claim="command-completion"/>
+  <Satisfied check="CK6" kind="automated" run="4" claim="command-completion"/>
+</Close>
