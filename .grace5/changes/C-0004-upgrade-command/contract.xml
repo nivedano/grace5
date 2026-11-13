@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0004-upgrade-command" revision="1" title="The kernel carries its own upgrade: a state version pin, migration steps, and grace5 upgrade">
+  <Problem>A repository that adopted the kernel has no defined way to take a newer version. The 0.1.0 to 0.2.0 move was done by hand from a chat; a repository's version is a sentence in its README or AGENTS.md that no command reads; nothing stops a kernel from operating on state laid out for another version; and a person at such a repository has to ask an agent how to migrate. The owner requires the upgrade to be a facility of the kernel, precisely defined, independent of anything outside it.</Problem>
+  <Change>The state carries a pin: .grace5/kernel-version holds the version the state conforms to. init writes it with the kernel's version when it creates .grace5/; where .grace5/ exists, a missing pin reads as 0.1.0. Every command except status, upgrade, the help and version flags, and init on a repository without .grace5/, refuses when the pin differs from the running kernel, naming both versions and the command to run. A sixth command, grace5 upgrade, composes the chain of migration steps from the pinned version to the kernel's own version, prints it as a plan in plain words, stops there with --plan, otherwise applies the steps in order, pins after each one, and stops at the first failure with the repository at a consistent version; it refuses while any change is open, naming the open ids, and never downgrades. A migration step is kernel code, one per version boundary whose state layout, ignore lines or skills differ, idempotent and self-verifying, describing itself in one sentence; the first is 0.1.0 to 0.2.0, which moves closed changes under closed/ and appends the line .grace5/changes/closed/*/records/logs/ to the repository's .gitignore when absent; the second is 0.2.0 to 0.3.0, which writes the pin; a later boundary without a step is a pin bump. Every step refreshes the grace5-* skill directories wherever they already exist under .agents/skills/ or .claude/skills/ from the kernel's packaged skills and creates no new location. After the chain, check runs over every change in both locations and the upgrade fails if any reports a new defect or a changed contract or definition hash. status prints the pin and whether it matches the kernel. The method document, a new topic file upgrade.md, the README's upgrading section, the help text, the conformance list and the ledger state the facility; a kernel change that alters the state layout, the ignore lines or the skills must ship its step in the same change. The version becomes 0.3.0; this repository's own pin is written to 0.3.0 by this change directly, because upgrade refuses while this change is open, and the 0.2.0 to 0.3.0 step is exercised on a clone by CK6.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/source-identity.md">The pin is an ordinary tracked file and therefore source under the rule as it stands; the rule is not amended. Because upgrade refuses while any change is open, a pin change can never invalidate a change's evidence.</Constraint>
+    <Constraint id="K2" rule="models/architecture/evidence-records.md">No record is rewritten by an upgrade; a moved change validates with the same hashes, and closure still means close.xml exists.</Constraint>
+    <Constraint id="K3" rule="models/architecture/rationale-ledger.md">The pin and the upgrade command are one mechanism with one ledger entry, source the owner's requirement of 2026-11-13, removal criterion stated.</Constraint>
+    <Constraint id="K4" rule="AGENTS.md">The method's surface table lists everything this change adds and nothing else is added: the command upgrade with its migration steps, the topic document upgrade.md, the repository tool src/tools/upgrade-verify.ts, and the state file .grace5/kernel-version; no deferred proposal is implemented.</Constraint>
+    <Constraint id="K5">A person at the repository needs no agent and no document outside the kernel to upgrade: status names the command, the plan names every step, the README's upgrading section is three sentences.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Downgrades, and upgrading to any version other than the running kernel's.</NonGoal>
+    <NonGoal id="N2">Reading or converting GRACE 4 state; the cutover from GRACE 4 stays outside the kernel.</NonGoal>
+    <NonGoal id="N3">Installing skills where none are installed, or operating a repository's own skill mirror; the step refreshes existing directories and reports.</NonGoal>
+    <NonGoal id="N4">Upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on the owner's flag with the command this change delivers.</NonGoal>
+    <NonGoal id="N5">Publishing the package or a plugin marketplace entry.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK2">Each command behaves as the method and upgrade.md state for a fresh, a pinned, an unpinned, a behind and an ahead repository.</Criterion>
+    <Criterion id="A2" checks="CK2">Every new conformance case has a test that fails when the kernel accepts the case: the refusal on a stale pin, the refusal on an open change, the plan, the chain from 0.1.0 with a missing pin, idempotence, the stop at a failing step, the skill refresh, and the post-upgrade check.</Criterion>
+    <Criterion id="A3" checks="CK1 CK3 CK4">The kernel type-checks, the examples still verify, the generated packages carry the version of package.json, and neither they nor the CLI reference drift from their sources.</Criterion>
+    <Criterion id="A4" checks="CK5">The kernel reports grace5 0.3.0 and this repository's pin reads 0.3.0.</Criterion>
+    <Criterion id="A5" checks="CK6">A clone of this repository at tag v0.2.0, upgraded by the new kernel's grace5 upgrade, lists the same changes with the same contract and definition hashes as before and carries the pin 0.3.0.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/**</Path>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>package.json</Path>
+    <Path>README.md</Path>
+    <Path>.gitignore</Path>
+    <Path>.grace5/README.md</Path>
+    <Path>.grace5/kernel-version</Path>
+    <Name>grace5 CLI</Name>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/decisions/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>CLAUDE.md</Protected>
+    <Protected>.grace5/changes/closed/**</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; process.exit(out === 'grace5 0.3.0' &amp;&amp; pin === '0.3.0' ? 0 : 1)"</Command>
+    </Automated>
+    <Automated id="CK6" budget="300">
+      <Command>bun src/tools/upgrade-verify.ts</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The upgrade is a kernel facility: a pin in the state, migration steps as kernel code, one command that composes them from version X to X+n; nothing outside the kernel is needed to take a version. Owner, 2026-11-13.</Decision>
+    <Decision id="D2">grace5 upgrade refuses while any change is open, naming the open ids; the owner closes or waits. Owner, 2026-11-13.</Decision>
+    <Decision id="D3">Measurement stays in the owner's separate repository and is not part of the kernel. Owner, 2026-11-13.</Decision>
+    <Decision id="D4">The version is 0.3.0, tagged v0.3.0 when this change closes; the change executes on master in the single worktree after C-0003 has closed; no branch is created.</Decision>
+  </Decisions>
+</Contract>

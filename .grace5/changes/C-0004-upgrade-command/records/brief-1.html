@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0004-upgrade-command revision 1</title>
+<meta name="grace5:change" content="C-0004-upgrade-command">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="24b9566cee396a7779315c4dc1328b0a710943f6c30c6a4e2c24b84d17370479">
+<meta name="grace5:date" content="2026-11-13">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="981">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>The kernel carries its own upgrade: a state version pin, migration steps, and grace5 upgrade</h1>
+  <p class="lead">Brief for approval. Change <code>C-0004-upgrade-command</code>, revision 1, 2026-11-13. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>The state carries a version pin: the file .grace5/kernel-version holds the version the state conforms to. <code>grace5 init</code> writes it with the kernel&#x27;s version when it creates .grace5/; where .grace5/ already exists and the file is missing, the repository is read as 0.1.0. Today no file says which version a repository is at; this repository&#x27;s README says 0.2.0 in a sentence no command reads.</li>
+        <li>Every command refuses when the pin differs from the running kernel, naming both versions and the command to run. The exceptions are <code>status</code>, <code>upgrade</code>, <code>--help</code>, <code>--version</code>, and <code>init</code> on a repository that has no .grace5/ yet. Today any kernel operates on state laid out for any version.</li>
+        <li>A sixth command, <code>grace5 upgrade</code>, composes the chain of migration steps from the pinned version to the kernel&#x27;s own version and prints it as a plan in plain words. With <code>--plan</code> it stops there. Otherwise it applies the steps in order, writes the pin after each one, and stops at the first failure with the repository at a consistent version. It refuses while any change is open, naming the open ids, and never downgrades.</li>
+        <li>A migration step is kernel code: one per version boundary whose state layout, ignore lines or skills differ; idempotent, self-verifying, describing itself in one sentence. The first step, 0.1.0 to 0.2.0, moves closed changes under closed/ and appends the line <code>.grace5/changes/closed/*/records/logs/</code> to the repository&#x27;s .gitignore when it is absent. The second, 0.2.0 to 0.3.0, writes the pin. A later boundary without a step is a pin bump.</li>
+        <li>Every step refreshes the grace5-* skill directories wherever they already exist under .agents/skills/ or .claude/skills/, from the skills packaged with the kernel, and creates no new location.</li>
+        <li>After the chain, <code>check</code> runs over every change in both locations, and the upgrade fails if any change reports a new defect or a changed contract or definition hash.</li>
+        <li><code>grace5 status</code> prints the pin and whether it matches the kernel.</li>
+        <li>The pin is an ordinary tracked file, so it is source like any other: an upgrade changes the candidate and leaves the tree dirty until the pin is committed. Because upgrade refuses while a change is open, no change&#x27;s evidence is invalidated by it.</li>
+        <li>The method document, a new topic file upgrade.md, an upgrading section of the README (three sentences), the help text, the conformance list and the rationale ledger state the facility. From now on a kernel change that alters the state layout, the ignore lines or the skills must ship its migration step in the same change.</li>
+        <li>The kernel version becomes 0.3.0, tagged v0.3.0 when this change closes. This repository&#x27;s own pin is written to 0.3.0 by this change directly, because upgrade refuses while this change is open; the 0.2.0 to 0.3.0 step is exercised on a clone instead (CK6).</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The TypeScript type-check (bun run check, that is tsc --noEmit) completes without error on the final tree, the new command, steps and tool included. This is the first part of A3.</td><td class="limits">Command completion only. A type-check runs no command and reads no behaviour: nothing about the pin, the refusal, the plan, the chain or the skill refresh rests on it.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Conformance suite</span><b>CK2</b> automated</td><td class="shows">The kernel test suite (bun test, up to ten minutes) completes without failure on the final tree, the new tests included. It is the only check named by A1 and A2.</td><td class="limits">A pass shows the tests that exist pass. It does not show that each of the eight cases A2 names has a test, nor that such a test would fail if the kernel accepted the case, nor that the five repository states of A1 (fresh, pinned, unpinned, behind, ahead) are each exercised for each command: that is what the review must read, and the tests and the kernel are written by the same agent.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Example contracts and briefs</span><b>CK3</b> automated</td><td class="shows">The example verifier completes: the worked example contracts under models/architecture/examples validate, their briefs pass the fidelity rules, and the defective brief is still reported.</td><td class="limits">It covers the examples only. It reads nothing under .grace5/changes/, exercises no upgrade, and says nothing about upgrade.md or the other documents this change edits.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and CLI reference without drift</span><b>CK4</b> automated</td><td class="shows">The package tool reproduces packages/** and models/architecture/cli-reference.md byte for byte from skills/, package.json and the help text, so the generated packages carry the version package.json holds and neither they nor the CLI reference drift from their sources.</td><td class="limits">It does not show that the version is 0.3.0 (CK5 does), that the skill text describes the upgrade correctly, or that what the upgrade step copies into a repository&#x27;s .agents/skills/ or .claude/skills/ equals these packages; it shows only that packages equal skills and the reference equals the help text.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Kernel says 0.3.0 and this repository is pinned 0.3.0</span><b>CK5</b> automated</td><td class="shows">bun src/cli.ts --version prints exactly <code>grace5 0.3.0</code>, and .grace5/kernel-version in this repository exists and reads 0.3.0. The kernel takes the number from package.json, so a pass shows package.json says 0.3.0 too.</td><td class="limits">The pin here is written by the change directly, not by the command, so a pass says nothing about upgrade. It does not show that the pin check refuses anything, and not that a v0.3.0 tag exists or points at the closing commit; the kernel does not tag.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Clone at v0.2.0 upgrades without loss</span><b>CK6</b> automated</td><td class="shows">A tool this change creates, src/tools/upgrade-verify.ts (it does not exist today), completes: it takes a clone of this repository at the tag v0.2.0, runs the new kernel&#x27;s grace5 upgrade on it, and finds the same changes with the same contract and definition hashes as before and the pin 0.3.0.</td><td class="limits">The tool is written by the same agent as the command it verifies. The clone has no pin, so the chain starts at 0.1.0; its closed changes are already under closed/ and its .gitignore already has the line, so the first step is exercised as a no-op; it has no .agents/skills/ or .claude/skills/, so the skill refresh is not exercised. It says nothing about a pilot repository, an open change, a failing step or a downgrade attempt.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The upgrade is a facility of the kernel: a pin in the state, migration steps as kernel code, and one command that composes them from version X to X+n. Nothing outside the kernel, no agent and no document elsewhere, is needed to take a version. You ruled on 2026-11-13.</span></li>
+        <li data-decision="D2"><b>D2</b><span><code>grace5 upgrade</code> refuses while any change is open and names the open ids; you close the change or wait. Ruled 2026-11-13.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Measurement stays in your separate repository and is not part of the kernel. Ruled 2026-11-13.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The version is 0.3.0, tagged v0.3.0 when this change closes. The change executes on master in this repository&#x27;s single worktree after C-0003 has closed; no branch is created.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The refusal lands on every repository at once. The moment a repository is read by the 0.3.0 kernel, every command but status and upgrade refuses until upgrade has run, and upgrade itself refuses while that repository has an open change. A pilot with a change in flight cannot take the new kernel until the change closes, unless its pin is written by hand as this repository&#x27;s is.</li>
+        <li>The pin is source. After every upgrade the tree is dirty until the pin, and whatever the steps moved or appended, is committed; a run before that commit is recorded dirty and counts for nothing. K1 relies on the open-change refusal to keep this harmless, and that refusal is tested only by CK2.</li>
+        <li>The step overwrites grace5-* directories under .agents/skills/ or .claude/skills/ in the repository being upgraded. Local edits there are lost; the contract says the step reports, not that it warns or keeps a copy.</li>
+        <li>Only CK2 reads behaviour, and the same agent writes the tests, the kernel and the CK6 tool. The safety claims of the command (idempotent steps, stop at the first failure at a consistent version, no downgrade, no new defect after the chain) rest on those tests and on the review.</li>
+        <li>.grace5/changes/closed/** is protected, but everything under .grace5/changes/ is outside the candidate and the kernel never reports a protected glob there, so this protection is held by review alone. The first migration step writes exactly that tree in the repositories it upgrades; here it runs only on the clone CK6 makes.</li>
+        <li>The write boundary is nearly the whole repository: the kernel, the skills, the packages, every method document except the schemas, package.json, both READMEs, .gitignore and the pin. Five protected paths and the review are the boundary.</li>
+        <li>The v0.3.0 tag is made by hand at close. No check shows it exists or points at the closing commit.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Confirm from memory that D1 to D4 are the four rulings you made during preparation, and that no other was made.</li>
+        <li>Accept that this repository&#x27;s own pin is written by the change, not by the command, because the command refuses while this change is open; the command is exercised on a clone instead.</li>
+        <li>Later, give the flag for each pilot repository to run the upgrade (N4); nothing in this change touches a pilot.</li>
+        <li>At close, make or confirm the v0.3.0 tag; the kernel will not.</li>
+        <li>No manual check, no bench session and no device is required. Every check is automated.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the kernel, its tests and its tools (src/**, including the new upgrade verifier), the three skills (skills/**), the generated packages (packages/**, by the package tool), every method document, the new upgrade.md, the ledger, the conformance list and the CLI reference (models/architecture/**, the schemas excepted), package.json, README.md, this repository&#x27;s .gitignore, .grace5/README.md, and the new pin file .grace5/kernel-version. The named surface is the grace5 CLI.</li>
+        <li>Under K1 the pin is an ordinary tracked file and source under the source identity rule as it stands; the rule is not amended, and because upgrade refuses while any change is open a pin change never invalidates a change&#x27;s evidence. Under K2 no record is rewritten by an upgrade, a moved change validates with the same hashes, and closed still means close.xml exists. Under K3 the pin and the command are one mechanism with one ledger entry, sourced to your requirement of 2026-11-13, with a removal criterion. Under K4 the method&#x27;s surface table lists everything this change adds and nothing else is added: the command upgrade with its steps, upgrade.md, the repository tool src/tools/upgrade-verify.ts and the state file .grace5/kernel-version; no deferred proposal is implemented. Under K5 a person at a repository needs no agent and no outside document: status names the command, the plan names every step, the README section is three sentences.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: downgrades, and upgrading to any version other than the running kernel&#x27;s.</li>
+        <li>N2: reading or converting GRACE 4 state; the cutover from GRACE 4 stays outside the kernel.</li>
+        <li>N3: installing skills where none are installed, or operating a repository&#x27;s own skill mirror; the step refreshes directories that already exist and reports.</li>
+        <li>N4: upgrading any pilot repository, that is a repository other than this one that has adopted the kernel; each does it on your flag with the command this change delivers.</li>
+        <li>N5: publishing the package or a plugin marketplace entry.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>The Problem placed this repository&#x27;s version sentence in AGENTS.md; it is in README.md. Resolved: the Problem now says &quot;a repository&#x27;s version is a sentence in its README or AGENTS.md&quot;.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>init was to write the pin, yet a missing pin read as 0.1.0 and init was not exempt from the refusal, so init could never run on a fresh repository. Resolved: init writes the pin when it creates .grace5/, a missing pin reads as 0.1.0 only where .grace5/ exists, and init on a repository without .grace5/ is exempt.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>K1 said the pin was outside the candidate and the dirty state, which the cited source identity rule does not give for a tracked file outside .grace5/changes/**. Resolved: K1 now says the pin is source under the rule as it stands, the rule is not amended, and the open-change refusal keeps a pin change from invalidating evidence.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>K4 said the surface grows by exactly one command and one topic document while the Change also added the pin file, the steps and the CK6 tool. Resolved: K4 now lists everything added, the command with its steps, upgrade.md, src/tools/upgrade-verify.ts and .grace5/kernel-version, and says nothing else is added.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A1 named CK1, a type-check that cannot show how a command behaves. Resolved: A1 names CK2 only; CK1 moved to A3, which now opens with &quot;the kernel type-checks&quot;.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A4 required this repository&#x27;s pin to read 0.3.0 while upgrade refuses on an open change and this change is open, with no stated way to write it. Resolved: the Change says this repository&#x27;s pin is written to 0.3.0 by the change directly, for that reason, and the 0.2.0 to 0.3.0 step is exercised on a clone by CK6.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>&quot;Adds the ignore line&quot; named no line and no file. Resolved: the first step appends .grace5/changes/closed/*/records/logs/ to the repository&#x27;s .gitignore when absent; the Change also now names the second step, 0.2.0 to 0.3.0, which writes the pin, and keeps the pin bump for a later boundary without a step.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>N4 used &quot;pilot repository&quot; without defining it in this contract. Resolved: N4 defines it as a repository other than this one that has adopted the kernel.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 981 words against a target of 600, 6 checks against 8. The 381 words over the target are in the Change section, 351 words on its own, and in K1 and K4: the facility is new and the Problem requires it to be precisely defined, so the pin, the refusal and its exemptions, the forms of the command, both migration steps with the ignore line named, the skill refresh, the post-upgrade check, the documents and the writing of this repository&#x27;s own pin are each stated in the contract; six of the eight findings were resolved by adding a sentence rather than removing one, and A2 names the eight conformance cases one by one.</p>
+  <p>This brief describes contract text with SHA-256 <code>24b9566cee396a7779315c4dc1328b0a710943f6c30c6a4e2c24b84d17370479</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>
+</footer>
+</body>
+</html>

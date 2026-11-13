@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0004-upgrade-command" revision="1" contract-sha256="24b9566cee396a7779315c4dc1328b0a710943f6c30c6a4e2c24b84d17370479" brief-sha256="95ae50c7f5b4a4ecc313011bccfdb5e733cc02dc8380a3ed1a4e340490b0896b" date="2026-11-13" owner="nivedano" decision="approved" executes="true" recorded-by="Claude Fable 5.1 (lead agent of the preparing session)">
+  <Statement>Approved, go ahead</Statement>
+  <Source>The owner's answer to the owner-gate question for C-0004-upgrade-command revision 1 in the Claude Code session of 2026-11-13, asked through the question tool after the owner was given the path of records/brief-1.html to read; the owner selected the option "Approved, go ahead". The brief was written by an independent subagent; its eight findings were resolved in the contract before the owner read it.</Source>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="ec4431d09e468bedf3067d6144afb26f6dfb3b2ca074bd57dd46f0dbaf0dd019"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="fd2f17e6631429229a24d89100a8d3298dc0841dd45b309bf960d85b9672421b"/>
+  <Bound check="CK6" definition-sha256="db65b473fc5d71529bb61e9c799ea664b9bae3089d09936549a171ba68d6135d"/>
+</Approval>
