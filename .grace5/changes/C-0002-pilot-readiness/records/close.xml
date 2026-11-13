@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0002-pilot-readiness" revision="1" contract-sha256="cf61b1008957eaf36db4a642168b69a86cae63b4a7d3db6c29c0dc2d6db3302e" date="2026-11-13T11:10:51.536Z" source-revision="f14297f6ffc4a1f1564ef94ee12f07d6252e0535" candidate="345ae36a3d2e54543b7e5886164708c84bbefbfb7ec378d1704f225346eea530" start-revision="3fc9502c64af98b0335a1c7f4e5ab37d69b1065f" brief="brief-1.html" approval="approval-1.xml" review="1" kernel="grace5 0.1.0">
+  <Satisfied check="CK1" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK4" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK5" kind="automated" run="2" claim="command-completion"/>
+</Close>
