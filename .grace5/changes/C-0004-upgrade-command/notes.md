@@ -20,3 +20,12 @@ Sequence, technical detail and discovered sub-steps. Mutable, never approved.
 - The post-upgrade check fails on a new defect, a changed contract or definition hash, or an id missing or appearing; a defect present before the upgrade is not the upgrade's.
 - A step failure after a completed step leaves the pin at that step's `to`; a failure of the first step leaves the pin as it was.
 - Skill refresh mirrors `packages/skills/<name>/` into an existing `.agents/skills/<name>/` or `.claude/skills/<name>/` only for the names the kernel packages; other `grace5-*` directories (a repository's own) are left alone.
+
+## Outcome
+
+- Commits on master: `9840e88` (kernel: pin, steps, chain, command, tool, helper pin, version 0.3.0, repository pin), `4da8d93` (documents, conformance group UP-01 to UP-11 with `src/conformance/upgrade.test.ts`, ledger L-23, README, skills, regenerated packages and CLI reference), then the receipts.
+- Discrimination of the new tests: against the tree at `aff7cc1` (the kernel before this change, exported to a temporary directory with the new helper, the test file and the `src/upgrade/` library copied in, since without the library the file does not load), 10 of 11 cases failed; UP-08 drove the copied chain runner only, so it was tied to the command as well and now needs the kernel's `upgrade`.
+- Borderline: UP-06 (a failing second step) and UP-08 (a mutating step) drive the chain runner with injected steps in addition to the black-box parts, because the kernel's own two steps cannot be made to fail at the second link or to alter a contract from outside.
+- `status` also appends `, kernel too old` when the pin is ahead, and prints `state: none` without `.grace5/`; the contract asks only that the pin and whether it matches be printed.
+- The skill refresh mirrors a packaged skill directory: files the package does not carry are removed from it. A `grace5-*` directory the kernel does not package is left alone.
+- `failed:` lines go to standard output; `refused:` to standard error, as for the other commands.
