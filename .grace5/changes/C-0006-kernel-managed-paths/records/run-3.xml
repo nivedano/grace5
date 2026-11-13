@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0006-kernel-managed-paths" revision="1" contract-sha256="f550c4065d21fd421c33426baf57267a969a6360775d29375eb854cb078f3a07" n="3" run-id="c5690bb2456643bf914f76237bdc3db8" started="2026-11-13T20:02:17.884Z" ended="2026-11-13T20:08:29.693Z" status="completed" source-revision="8d32623a8491fb9b20698ad65666ea4d099eb4ed" dirty="false" candidate="9165ff5933fd719178c4c02151f18cdebc09b67ad01966012efdd2c091d8cb86" kernel="grace5 0.5.0">
+  <Result check="CK2" kind="automated" required="true" definition-sha256="ec4431d09e468bedf3067d6144afb26f6dfb3b2ca074bd57dd46f0dbaf0dd019" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="371804" log="records/logs/run-3/CK2.log" log-sha256="87546bf37390066ec6ac5151cd2178e1b4d85835b63a402739fb6a4182eb945b">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test
+</Definition>
+  </Result>
+</Run>
