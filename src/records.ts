@@ -21,6 +21,8 @@ export interface Approval extends Binding {
   readonly file: string;
   readonly briefSha256: string;
   readonly decision: "approved" | "rejected";
+  /** `approved` or empty for an approval, the reason for a rejection. */
+  readonly statement: string;
   readonly bound: readonly { readonly check: string; readonly definitionSha256: string }[];
 }
 
@@ -161,6 +163,7 @@ function readApproval(root: XmlElement, file: string): Approval {
     file,
     briefSha256: attr(root, "brief-sha256"),
     decision: attr(root, "decision") === "approved" ? "approved" : "rejected",
+    statement: collapse(childNamed(root, "Statement")?.text ?? ""),
     bound: childrenNamed(root, "Bound").map((b) => ({ check: attr(b, "check"), definitionSha256: attr(b, "definition-sha256") })),
   };
 }

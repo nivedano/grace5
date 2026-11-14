@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0009-decision-not-conversation" revision="1" title="An approval records a decision, not a conversation, and a version is an owner-requested release">
+  <Problem>The approval record asks the agent to copy the owner's words and to say where they were said. Source is read by nothing: no command parses it, and the reviewer is never given the approval at all, so it buys no authority while committing conversational detail permanently. Statement duplicates decision for an approval; only a rejection's reason has no other home. Separately, every change so far has bumped the kernel version, the pin, the README status line and a migration step. The owner requires the opposite: a version is a release that carries many changes, created and installed only on an explicit owner request, and a change that is not a release touches none of these (owner requirement of 2026-11-14).</Problem>
+  <Change>Approval record. Source becomes an optional legacy element the kernel accepts and ignores; a new record omits it. Statement becomes optional: an approval carries exactly approved, a rejection carries the reason and is required. check reports a defect for a rejected record with no Statement; it does not police an approval's wording, because records already written must keep validating. authorization.md, commands.md, the prepare skill, the review hand-over, the CLI reference, conformance.md, m2-proposal.md and ledger entry L-05 are rewritten to this. Version as release. A release is a version this repository tags v&lt;version&gt;; the previous release is the nearest earlier such tag. The owner asks for a release explicitly, and a release is one change that may carry any number of closed changes. Only that change bumps package.json, README's status line and the pin, and adds the migration step for the boundaries its carried changes cross; it verifies an upgrade from the previous release's tag on a clone with one open change. The sentence requiring a change that alters the state layout, the local ignore file or the skills to ship its step in the same change now says the release that carries it ships the step; the existing chain, pin rule and steps are unchanged. method.md, AGENTS.md, README.md, all four skills and ledger entry L-25 state the rule, and a reviewer writes a blocking finding when a non-release change bumps the version, the pin or a step. This change is deliberately not a release: it leaves the version, the pin and the steps at 0.6.0, and its skill edits install at the next release. Conformance gains AUTH-04, AUTH-05, AUTH-06 and REL-01, each with a test that fails without the change.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/authorization.md">No record is rewritten. Every approval already written, in this repository and in a pilot, validates unchanged and reads with the same decision and binding.</Constraint>
+    <Constraint id="K2" rule="models/architecture/upgrade.md">No change command writes package.json, .grace5/kernel-version or a migration step; only an owner-requested release does. The existing chain, the pin rule and every existing step stay as they are; the rule that a state-layout, ignore-file or skills change ships its step in the same change moves it to the release that carries the change.</Constraint>
+    <Constraint id="K3" rule="models/architecture/rationale-ledger.md">L-05 is amended and L-25 added, each with a removal criterion; no other mechanism changes.</Constraint>
+    <Constraint id="K4" rule="AGENTS.md">The surface shrinks by one required element and one narrative field and grows by one defect in check and by nothing else: no command, record kind or migration step is added.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">Rewriting any approval record already committed, the closed changes and C-0007 included; the history is untouched.</NonGoal>
+    <NonGoal id="N2">Authenticating the owner. This change removes an unused quote; it adds no authority mechanism and no signature.</NonGoal>
+    <NonGoal id="N3">Cutting a release. The first release under the new rule is a separate change the owner requests.</NonGoal>
+    <NonGoal id="N4">Changing upgrade behaviour, the meaning of the pin, or any existing migration step.</NonGoal>
+    <NonGoal id="N5">Reading or converting GRACE 4 state.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK2">A new approval with no Source validates, reports approved, runs and closes; a legacy record with Source validates and behaves identically; a rejected record with no Statement is a defect. Each is a conformance case with a test that fails when the kernel lacks it.</Criterion>
+    <Criterion id="A2" checks="CK2">A change closes with the kernel's version and the pin unchanged, and no change command writes package.json or .grace5/kernel-version; REL-01 asserts it.</Criterion>
+    <Criterion id="A3" checks="CK1 CK3 CK4">The kernel type-checks, the examples verify, and the generated packages and CLI reference match their sources and carry the version of package.json.</Criterion>
+    <Criterion id="A4" checks="CK5">The kernel reports grace5 0.6.0 and this repository's pin reads 0.6.0: this change is not a release.</Criterion>
+    <Criterion id="A5" checks="CK6">Every change in either location, the closed ones and C-0007 included, reads with no defect under the amended schema.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/**</Path>
+    <Path>skills/**</Path>
+    <Path>packages/**</Path>
+    <Path>models/architecture/**</Path>
+    <Path>AGENTS.md</Path>
+    <Path>README.md</Path>
+    <Name>grace5 CLI</Name>
+    <Protected>models/decisions/**</Protected>
+    <Protected>CLAUDE.md</Protected>
+    <Protected>.grace5/changes/closed/**</Protected>
+    <Protected>.grace5/changes/C-0007-orchestrate-skill/**</Protected>
+    <Protected>.grace5/kernel-version</Protected>
+    <Protected>package.json</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="180">
+      <Command>bun test src/conformance/receipts.test.ts src/conformance/failure.test.ts src/conformance/upgrade.test.ts --test-name-pattern "AUTH|REL"</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run examples:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK5" budget="60">
+      <Command>bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; process.exit(out === 'grace5 0.6.0' &amp;&amp; pin === '0.6.0' ? 0 : 1)"</Command>
+    </Automated>
+    <Automated id="CK6" budget="180">
+      <Command>bun -e "const fs=require('fs'),path=require('path'),cp=require('child_process'); const ids=[]; for (const root of ['.grace5/changes','.grace5/changes/closed']) { for (const n of fs.readdirSync(root)) { if (n === 'closed') continue; const p=path.join(root,n); if (fs.statSync(p).isDirectory()) ids.push(n); } } for (const id of ids) { const r=cp.spawnSync('bun',['src/cli.ts','check',id]); if (r.status !== 0) { process.stdout.write(r.stdout); process.stderr.write(r.stderr); process.exit(1); } }"</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">Owner, 2026-11-14: an approval records a decision, not the conversation. Source is redundant; a new approval omits it. An approval's Statement is the single word approved; a rejection's Statement is its reason and is required.</Decision>
+    <Decision id="D2">Owner, 2026-11-14: not every change makes a version. Creating and installing a version are explicit owner requests; one version carries many changes. A change that is not a release leaves the version, the pin and the steps untouched.</Decision>
+    <Decision id="D3">Legacy records are not rewritten: Source and any Statement already written stay, validate and are read as before; the kernel ignores Source everywhere.</Decision>
+    <Decision id="D4">This change is not a release. It stays at 0.6.0 and ships no migration step, demonstrating the rule it writes down.</Decision>
+    <Decision id="D5">The brief is written by an independent subagent and the review by an independent reviewer; the owner's cheap-path ruling of 2026-11-13 is not used.</Decision>
+    <Decision id="D6">C-0007-orchestrate-skill stays open and protected and closes before this change's final evidence, so no open change inherits a stale candidate; no branch or worktree is created and both run on master.</Decision>
+  </Decisions>
+</Contract>

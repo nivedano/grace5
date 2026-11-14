@@ -25,6 +25,7 @@ Validates and executes nothing. For the selected change:
 5. Every XML record present validates against its schema and names this change.
 6. The brief whose `grace5:revision` equals the contract's revision carries the current contract hash and passes every mechanical fidelity rule of `brief.md`; a missing or different hash is itself a defect. Briefs of other revisions are history and are not checked.
 7. An approval that is `approved` has one `Bound` per check; legacy execution fields are ignored for either decision.
+8. A rejected approval carries a non-empty `Statement` as its reason.
 
 It prints the contract hash, each check's definition hash, and size against target. Words are the whitespace-separated tokens of all element text in `contract.xml`, attribute values excluded. Checks are all check elements, optional ones included.
 

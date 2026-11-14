@@ -9,7 +9,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
 
-You coordinate; you write no product files. Implementers follow `grace5-execute`; reviewers follow `grace5-review` independently of the authoring conversation. Read the state of every change from `grace5 status`, never from a subagent's report. You run `grace5 close` when status names no other obligation. Never manufacture or edit kernel receipts, approvals or close records; the reviewer authors its review record as its skill requires. Preparation and owner decisions are outside the run.
+You coordinate; you write no product files. Implementers follow `grace5-execute`; reviewers follow `grace5-review` independently of the authoring conversation. Read the state of every change from `grace5 status`, never from a subagent's report. You run `grace5 close` when status names no other obligation. Never manufacture or edit kernel receipts, approvals or close records; the reviewer authors its review record as its skill requires. Preparation and owner decisions are outside the run. A release is outside it too: no implementer bumps the version, the pin or a step; the owner requests a release as its own change (`upgrade.md`).
 
 ## Orient and record the run
 

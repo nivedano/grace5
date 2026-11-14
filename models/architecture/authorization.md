@@ -4,18 +4,18 @@ What an approval binds, how a revision is approved, what authorizes execution, a
 
 ## What the approval statement binds
 
-The owner approves one revision of one contract. The approval record binds four things together, in one quoted statement.
+The owner approves one revision of one contract. The approval record binds four things together in one decision: the text, the checks, the brief the owner read, and the decision taken.
 
 | Bound thing | How |
 |---|---|
 | The readable contract | `contract-sha256`: SHA-256 of the bytes of `contract.xml` at that revision, with CRLF read as LF. It covers all eight sections, Checks included. |
 | Each check definition | One `Bound` element per check with the SHA-256 of its canonical definition text (`evidence-records.md`). `grace5 check` prints both hashes; the agent copies them and invents none. |
 | The brief the owner read | `brief-sha256`: SHA-256 of the bytes of `brief-<rev>.html` as the owner read it, so a brief edited after approval no longer matches. |
-| The owner's words | `Statement` holds them verbatim; `Source` says where they were said. `decision` is `approved` or `rejected`. |
+| The decision | `decision` is `approved` or `rejected`; `owner` and `date` name who decided and when. An approval's `Statement` is the single word `approved` or is absent; a rejection's `Statement` is its reason and is required. A new record carries no `Source` and no excerpt of the conversation. |
 
 The owner approves on the brief, not on the contract. The brief carries the same contract hash, so a brief written for different contract text cannot support the approval; `close` checks that the brief, the approval and the current contract agree.
 
-An approval exists only when the owner said so about this brief. "Proceed", "keep going" or "make a plan", said without the brief of this revision in front of the owner, is not an approval, and no agent writes the record from it. The record is agent-written, so the record alone is not proof of authority: its value is that it quotes a statement the owner can recognise or disown, and the review reads it against the conversation where it can.
+An approval exists only when the owner said so about this brief. "Proceed", "keep going" or "make a plan", said without the brief of this revision in front of the owner, is not an approval, and no agent writes the record from it. The record is agent-written and the kernel authenticates no one: its authority is the decision bound to the exact contract, check and brief hashes, and no agent infers it. The record holds no quote and no account of the conversation. `Source` is accepted in records already written and ignored; a new record omits it.
 
 ## Execution authorization
 
@@ -39,7 +39,7 @@ While a revision awaits approval, or after it was rejected:
 | A check that is new or whose definition changed | Refused by `run` with the reason "amended in unapproved revision". |
 | `close` | Refused: the current revision has no approval. |
 
-A rejection is recorded as `approval-<rev>.xml` with `decision="rejected"` and the owner's words. The author then either restores the contract to the approved text with its approved revision number (the hash matches the earlier approval again) or writes a further revision with a higher number; a rejected number is not reused. The current revision is always the one the contract's `revision` attribute names, and the current brief and approval are the ones of that number.
+A rejection is recorded as `approval-<rev>.xml` with `decision="rejected"` and the reason in `Statement`. The author then either restores the contract to the approved text with its approved revision number (the hash matches the earlier approval again) or writes a further revision with a higher number; a rejected number is not reused. The current revision is always the one the contract's `revision` attribute names, and the current brief and approval are the ones of that number.
 
 What does not need re-approval: anything in `notes.md`; the choice of files inside Affected; tests and test doubles of affected files; the order of work; a rerun of any check.
 

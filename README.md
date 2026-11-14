@@ -16,11 +16,11 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 
 ## Status
 
-Version 0.6.0. An approval authorizes execution; legacy execution fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
+Version 0.6.0, the last release: a version marks an owner-requested release and carries any number of changes (`models/architecture/upgrade.md`). An approval records a decision bound to the contract, its checks and the brief; legacy execution and source fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Upgrading
 
-`grace5 status` tells you when the repository state is behind the kernel and names the command. `grace5 upgrade --plan` shows the steps the kernel will apply, in plain words, and the open changes it leaves untouched. `grace5 upgrade` applies them, and you commit the result. Everything it writes is kernel-managed, the state under `.grace5/` and the installed `grace5-*` skills, which no change's candidate or diff reads, so open changes do not stop it unless a step would write one of them; `upgrade.md` names the ways out.
+`grace5 status` tells you when the repository state is behind the kernel and names the command. A version is created only when the owner requests a release; changes between releases carry the last release's version, and a release ships the migration steps they need (`models/architecture/upgrade.md`). `grace5 upgrade --plan` shows the steps the kernel will apply, in plain words, and the open changes it leaves untouched. `grace5 upgrade` applies them, and you commit the result. Everything it writes is kernel-managed, the state under `.grace5/` and the installed `grace5-*` skills, which no change's candidate or diff reads, so open changes do not stop it unless a step would write one of them; `upgrade.md` names the ways out.
 
 ## Toolchain
 

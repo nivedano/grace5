@@ -243,6 +243,13 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     }
   }
 
+  // Check rule 8: a rejection carries its reason, so the next revision has it.
+  for (const record of records.approvals.values()) {
+    if (record.decision === "rejected" && record.statement.trim() === "") {
+      defects.push(`${record.file}: a rejection carries no Statement as its reason`);
+    }
+  }
+
   // The current approval governs execution; while the current revision is unapproved, rejected or altered,
   // the last approval governs the checks it still binds. Legacy execution fields have no meaning.
   let executionApproval: Approval | undefined;

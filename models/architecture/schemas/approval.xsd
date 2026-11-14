@@ -6,9 +6,10 @@
   <xs:element name="Approval">
     <xs:complexType>
       <xs:sequence>
-        <!-- Statement: the words of the owner, verbatim. Source: where they were said (conversation, message, commit). -->
-        <xs:element name="Statement" type="Text"/>
-        <xs:element name="Source" type="Text"/>
+        <!-- Statement: an approval's single word "approved", or a rejection's reason. Optional: an approval needs no words. -->
+        <xs:element name="Statement" type="Text" minOccurs="0"/>
+        <!-- Source: legacy in records already written, where the statement was said. The kernel ignores it; a new record omits it. -->
+        <xs:element name="Source" type="Text" minOccurs="0"/>
         <!-- Bound: one per check of the approved revision with the hash of its definition, so run can tell an approved check from an amended one. -->
         <xs:element name="Bound" minOccurs="0" maxOccurs="unbounded"><xs:complexType>
           <xs:attribute name="check" type="xs:NCName" use="required"/>

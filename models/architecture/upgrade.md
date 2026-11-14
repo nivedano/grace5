@@ -2,6 +2,14 @@
 
 How a repository takes a newer kernel: the version pin in the state, the refusal that protects state laid out for another version, the migration steps, and the command `grace5 upgrade` that composes them. Nothing outside the kernel is needed; a person at the repository runs three commands and commits.
 
+## Versions are releases
+
+A version marks a release, not a change. The owner asks for a release explicitly, and only that request creates a version: no change, no agent and no command does it by itself. Between two releases any number of changes may close, and they carry the version of the last release. `package.json`, this repository's README status line and `.grace5/kernel-version` name the last release until the next one; a change that is not a release leaves all three and the migration table untouched.
+
+A release is a version this repository tags `v<version>`; the previous release is the nearest earlier such tag. A release is one change, requested by the owner, that carries the closed changes since the previous release and does all of the following together: sets the version in `package.json` and in the README status line, adds one migration step for each version boundary it crosses whose state layout, local ignore file or skills differ, writes the pin, and verifies an upgrade from the previous release's tag on a clone that carries one open change. Its brief names the changes it carries.
+
+Consequences for a change: it does not bump the version, the pin or a step, and it does not add a row to the migration table. A reviewer writes a blocking finding when a change that is not a release does any of these, and the prepare and execute skills say the same. This is the owner's ruling of 2026-11-14 (`rationale-ledger.md` L-25).
+
 ## The pin
 
 `.grace5/kernel-version` holds the version the state conforms to: one line, the version, ended by a line feed. `init` writes it with the kernel's version when it creates `.grace5/`. Where `.grace5/` exists without a pin, the state is at 0.1.0, the version before the pin existed. The pin is tracked and, like everything under `.grace5/`, is a kernel-managed path outside the candidate and the dirty state (`source-identity.md`), so writing it changes no change's candidate: under that rule a change may span kernel versions, its receipts carry the kernel of each run, and `status` names the kernel a counted result was recorded with when it differs from the running one. The rule itself has changed at two boundaries, and those two are different. 0.3.0 hashed the pin into the candidate, so a tree that carries a pin has one candidate under 0.3.0 and another under 0.4.0; a tree without a pin, as every repository was before 0.3.0, has the same candidate under both rules and is unaffected. 0.4.0 hashed `.grace5/README.md` and the installed skills into the candidate, so every repository the kernel initialised, this one included, has one candidate under 0.4.0 and another under 0.5.0 for the same tree, since `.grace5/README.md` alone makes the difference. Results and reviews recorded by the earlier kernel on such a tree are on an earlier candidate under the later one, do not count, and are rerun and re-reviewed once after the upgrade; `status` shows them as `does not count: recorded on an earlier candidate, recorded with grace5 <version>`. A closed record is read by the rule of the kernel it names: the candidate in a `close.xml` written by 0.3.0 reproduces with the pin included, one written by 0.4.0 with the entry point and the installed skills included, and the kernel compares no closed change's candidate.
@@ -38,7 +46,7 @@ A migration step is kernel code for one version boundary whose state layout, loc
 | 0.4.0 to 0.5.0 | Writes the local ignore file `.grace5/.gitignore` and verifies it carries both lines; nothing else. | None. |
 | 0.5.0 to 0.6.0 | Installs `grace5-orchestrate` in every skill location that already holds a packaged skill, and nowhere else, refreshes the installed skills and verifies the orchestrator is present where required and every installed skill matches the package; no change directory or record is written. Legacy approval execution fields are ignored by the kernel. | None. |
 
-A kernel change that alters the state layout, the local ignore file or the skills ships its step in the same change, and the conformance list gains a case for it.
+A release whose carried changes alter the state layout, the local ignore file or the skills ships the step for the boundary it crosses, and the conformance list gains a case for it. A change that is not a release ships no step, even when it alters the skills.
 
 ## The local ignore file
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0009-decision-not-conversation" revision="1" contract-sha256="c8155c36ea913a80ff22e59eda11880f1638b54b0a03bb58f9781a4a2fb95993" brief-sha256="9c7c44b7c36939ff6f5ea4b752d71b4d29ade4e82874dcc34546eda0ab860947" date="2026-11-14" owner="nivedano" decision="approved" recorded-by="Claude (lead agent of the preparing session)">
+  <Statement>approved</Statement>
+  <Source>The owner gate for C-0009-decision-not-conversation revision 1 on records/brief-1.html, 2026-11-14. This record is written by grace5 0.6.0, before this change makes Source optional.</Source>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="43f8a0964de858db9a48afc8ea72a3908370f8edf76b49dc4d3cccfbfc5f419a"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="252635bbd9ad256874f746d138d2029349b93c6aa5652a663d141059be738291"/>
+  <Bound check="CK6" definition-sha256="ce0d6933534b74d42960d355405012ef9d2b3d2a4097a92a0ae07a819508ed82"/>
+</Approval>

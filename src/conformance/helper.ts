@@ -383,6 +383,10 @@ export interface ApprovalOptions {
   executes?: boolean;
   /** Legacy fields, emitted only when explicitly requested to test compatibility. */
   execution?: boolean;
+  /** Emits a legacy Source element; the kernel ignores it. Omitted by default. */
+  source?: string;
+  /** Leaves Statement out, for the rejected-without-a-reason case. */
+  omitStatement?: boolean;
   /** Check ids left without a Bound element. */
   omitBound?: string[];
 }
@@ -852,11 +856,12 @@ export class Scenario {
     const decision = o.decision ?? "approved";
     const legacyExecutes = o.executes === undefined ? "" : ` executes="${o.executes}"`;
     const briefSha = sha256(fs.readFileSync(path.join(this.recordsDir, `brief-${rev}.html`)));
+    const statement = o.omitStatement === true ? "" : decision === "approved" ? "approved" : "Rejected: not this way.";
     const lines = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
       `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="${today()}" owner="Fixture Owner" decision="${decision}"${legacyExecutes} recorded-by="conformance suite">`,
-      `  <Statement>${decision === "approved" ? "Approved." : "Rejected: not this way."}</Statement>`,
-      `  <Source>Fixture conversation of the conformance suite.</Source>`,
+      ...(statement === "" ? [] : [`  <Statement>${statement}</Statement>`]),
+      ...(o.source === undefined ? [] : [`  <Source>${o.source}</Source>`]),
     ];
     if (decision === "approved") {
       for (const c of this.def.checks) {

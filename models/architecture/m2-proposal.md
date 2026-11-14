@@ -62,7 +62,7 @@ Removal criterion, owner-reviewed: no voluntary use of trace checks beyond the r
 
 ## 5. Human-recorded items
 
-Owner active time, waiting time, approval fidelity, escaped-defect severity, cancellation reasons, isolation-failure events and the owner's impression note stay human-recorded. The proposal puts one owner-written entry per change in the control center's state, keyed by the change id, not in the governed repository, whose bundle admits only the contract, `notes.md` and records. The note covers the owner's judgement of the brief and the trace checks against their removal criteria.
+Owner active time, waiting time, the owner's judgement of the brief at the gate, escaped-defect severity, cancellation reasons, isolation-failure events and the owner's impression note stay human-recorded. Approval records hold the decision, never the owner's words (`authorization.md`), so approval fidelity is the owner's own account and is read from no record. The proposal puts one owner-written entry per change in the control center's state, keyed by the change id, not in the governed repository, whose bundle admits only the contract, `notes.md` and records. The note covers the owner's judgement of the brief and the trace checks against their removal criteria.
 
 ## 6. Comparison rules
 

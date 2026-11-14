@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0009-decision-not-conversation revision 1</title>
+<meta name="grace5:change" content="C-0009-decision-not-conversation">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="c8155c36ea913a80ff22e59eda11880f1638b54b0a03bb58f9781a4a2fb95993">
+<meta name="grace5:date" content="2026-11-14">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="1002">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>An approval records a decision, not a conversation, and a version is an owner-requested release</h1>
+  <p class="lead">Brief for approval. Change <code>C-0009-decision-not-conversation</code>, revision 1, 2026-11-14. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>An approval records your decision and nothing else. A new record says the decision is approved, or says it is rejected with your reason. The agent is no longer asked to quote you or to say where you said it.</li>
+        <li>What an approval binds does not change: the hash of the contract, one hash per check, and the hash of the brief you read. Only the echo of the conversation goes.</li>
+        <li>No record already written is rewritten. Every approval in this repository and in a pilot keeps its Source and its sentence, validates as it does today and reads with the same decision and binding; the kernel ignores Source everywhere.</li>
+        <li>A rejected record with no Statement becomes a defect that check reports. A Statement left present but blank is already refused by the shared text type, so this closes the one gap left. An approval's wording is not policed, which is what keeps the records already written validating.</li>
+        <li>A release is a version this repository tags v&lt;version&gt;, and the previous release is the nearest earlier such tag. You ask for a release; one release is one change and may carry any number of closed changes.</li>
+        <li>Only that change bumps package.json, the status line in README and the pin, and adds the migration step for the boundaries its carried changes cross. It verifies an upgrade from the previous release's tag on a clone with one open change.</li>
+        <li>The sentence that made a change altering the state layout, the local ignore file or the skills ship its step in the same change now says the release carrying it ships the step. The existing chain, the pin rule and every existing step stay as they are.</li>
+        <li>This change is not a release: it stays at 0.6.0, writes no step, and its skill edits install at the next release, so it applies the rule it writes down.</li>
+        <li>The reviewer is now handed the approval record with the rest of the hand-over, and must write a blocking finding when a change that is not a release bumps the version, the pin or a step.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-checks</span><b>CK1</b> automated</td><td class="shows">The kernel sources type-check after Source and Statement become optional and the defect for a rejected record with no Statement is added.</td><td class="limits">Nothing about behaviour, and nothing about any document or skill: it reads TypeScript only, and no criterion now claims a check reads prose.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Approval and release cases</span><b>CK2</b> automated</td><td class="shows">The AUTH and REL conformance cases pass: approvals with and without Source, approvals and rejections with their sentences, the legacy shapes, a rejected record with no Statement reported as a defect, and a change closing with the kernel's version and the pin unchanged while no command writes package.json or the pin.</td><td class="limits">Nothing about this repository's own records or a pilot's: the cases are fixtures, and CK6 reads this repository only. Nothing here reads whether a document or a skill states the rule; that is the review's reading.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Worked examples verify</span><b>CK3</b> automated</td><td class="shows">Every worked example validates against the amended approval schema, and its records, hashes and briefs still read.</td><td class="limits">The examples are fixtures written for the purpose; the six closed changes here and a pilot's records are not read by it.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages and reference match</span><b>CK4</b> automated</td><td class="shows">The generated packages carry the four skills as they now read and the version of package.json, and the CLI reference matches the amended help text.</td><td class="limits">Only drift between a source and its generated copy: whether the new sentences are true, complete or in the right skill is not read here.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Version and pin read 0.6.0</span><b>CK5</b> automated</td><td class="shows">The kernel prints grace5 0.6.0 and .grace5/kernel-version holds 0.6.0, so this change cut no release.</td><td class="limits">package.json, README's status line and the absence of a new migration step: the command compares two strings and reads no third file.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Every change reads clean</span><b>CK6</b> automated</td><td class="shows">Each change under .grace5/changes and each under .grace5/changes/closed passes check with exit 0 under the amended schema, the closed changes and C-0007 included, so no record already written broke.</td><td class="limits">The shapes this repository does not contain: a rejected record with no Statement is not written and asserted here, and a defect that only a new record would show stays invisible until CK2's fixture writes one.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Your ruling of 2026-11-14: an approval records a decision, not the conversation. Source is redundant and a new approval omits it. An approval's Statement is the single word approved; a rejection's Statement is its reason and is required.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Also 2026-11-14: not every change makes a version. Creating and installing a version are things you ask for explicitly, and one version carries many changes. A change that is not a release leaves the version, the pin and the steps untouched.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Old records are not rewritten: Source and any Statement already written stay, validate and are read as before, and the kernel ignores Source everywhere.</span></li>
+        <li data-decision="D4"><b>D4</b><span>This change is not a release. It stays at 0.6.0 and ships no migration step, which is the rule applied to itself.</span></li>
+        <li data-decision="D5"><b>D5</b><span>This brief was written by an independent reader and the review will be independent; the cheap-path ruling of 2026-11-13, where the author writes both, is not used.</span></li>
+        <li data-decision="D6"><b>D6</b><span>C-0007-orchestrate-skill stays open and protected and closes before this change's final evidence, so no open change inherits a stale candidate. No branch and no worktree: both run on master.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>An approval record will hold nothing of yours to recognise. The word approved is the same word whoever typed it, while today the quoted sentence is what lets you recognise or disown a record; after this the record's defence is the brief's hash and the review, which reads the conversation only where it has one.</li>
+        <li>Documentation fidelity has no criterion any more. A document or a skill left stating the old rule passes all six checks, and only the reviewer's reading of the diff against the Change stands between you and a stale method.</li>
+        <li>The definition makes the tag the release. A version someone tags is a release by this text, while your decision says creating a version is your explicit request; the kernel cannot tell who asked, so that half is a convention on tagging.</li>
+        <li>The skills change while the version does not. A pilot pinned at 0.6.0 keeps the old skill text until it takes a release of its own, and the pin reads 0.6.0 on both sides, so nothing tells the two states apart.</li>
+        <li>The step obligation moves rather than disappears: a release must add the step for every boundary its carried changes cross, and the only evidence for that is the release's own upgrade verification, which does not exist yet.</li>
+        <li>Two of your decisions share one contract, so one statement answers both. A rejection of the release rule rejects the approval change with it; there is no partial approval of a revision.</li>
+        <li>This change's final evidence waits on C-0007 closing. If it does not close first, evidence taken now stands beside an open change and has to be taken again after it moves.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>One statement on this page: approve, or reject with the reason.</li>
+        <li>Documentation is now judged by the reviewer alone. To know that the method documents and the four skills state the new rule, read the review's rule verdicts, because no criterion and no check names them.</li>
+        <li>If you want a pilot's installed skills to carry the new text, ask for a release; nothing else installs it, and the pin will not show the difference.</li>
+        <li>A release is now defined by a tag, so tagging is the act that creates one: keep v-tags for versions you asked for, or the definition and your decision disagree.</li>
+        <li>If C-0007 is still open when you read this, its closure before this change's final evidence is your sequencing call, as D6 records it.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the kernel sources and their tests under src/, the four skills and their generated packages under packages/, and the method documents under models/architecture/, including the approval schema, commands.md where check's rules live, the generated CLI reference and the ledger, and AGENTS.md and README.md. Under K1 no record is rewritten and every approval already written validates unchanged. Under K2 nothing writes package.json, .grace5/kernel-version or a migration step, and the existing chain, pin rule and steps stay as they are. Under K3 L-05 is amended and L-25 added, each with a removal criterion, and no other mechanism changes. Under K4 the surface shrinks by one required element and one narrative field, grows by one defect in check, and gains no command, record kind or migration step.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no approval record already committed is rewritten, the closed changes and C-0007 included; the history is untouched.</li>
+        <li>N2: the owner is not authenticated. An unused quote is removed and no authority mechanism and no signature is added.</li>
+        <li>N3: no release is cut. The first release under the new rule is a separate change you request.</li>
+        <li>N4: upgrade behaviour, the meaning of the pin and every existing migration step stay as they are.</li>
+        <li>N5: no GRACE 4 state is read or converted.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected=".grace5/changes/C-0007-orchestrate-skill/**">.grace5/changes/C-0007-orchestrate-skill/**</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected="package.json">package.json</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>A5 named CK1 and CK4 for a documentary claim, and neither reads prose. Resolved: A5 is removed, documentation fidelity is a review judgement against the Change, and what was A6 is now A5, covering only that every change in either location reads with no defect.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>The rejection clause in the old A5 had no check behind it. Resolved: it is removed from A5 and kept in A1, where the cases live.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>A1 said a rejection with an empty Statement is a defect, which the shared text type already refuses. Resolved: A1 now says a rejected record with no Statement is a defect, the absent case the amended schema allows and check must report.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Release and the previous release were undefined. Resolved: the Change defines a release as a version this repository tags v&lt;version&gt; and the previous release as the nearest earlier such tag, and A2 and the release rule use that.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>The Change listed the documents it rewrites and omitted commands.md, where check's rules are enumerated. Resolved: commands.md joins the list beside the CLI reference generated from the help text.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>The skills change while the pin and the steps stay, and the standing sentence required such a change to ship its step in the same change. Resolved: the Change and K2 move that obligation to the release carrying the change, the existing chain, pin rule and steps are unchanged, and this change's skill edits install at the next release.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 1002 words against a target of 600, 6 checks against 8. The excess of 402 words is the Change section, which carries two decisions at once, the approval record and the version as a release, and now also defines a release, the previous release and where the step obligation moves; the six checks are under the target of eight.</p>
+  <p>This brief describes contract text with SHA-256 <code>c8155c36ea913a80ff22e59eda11880f1638b54b0a03bb58f9781a4a2fb95993</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, or reject with the reason. Your words are recorded as you say them. An approval authorizes execution. If you say "approved, hold", the agent waits until you start the change or a batch; no hold state is recorded.</p>
+</footer>
+</body>
+</html>

@@ -29,6 +29,7 @@ The author adds no summary, no explanation of intent and no list of what to look
 - For a Trace check, read the capture command itself. Would the same marker sequence appear if the behaviour were broken? Is the origin honest, meaning the command really captures during the run what it reports as live, and takes device and build from the device and not from constants?
 - Rules. Give a verdict for each rule the contract cites: `upheld`, `violated` or `not-applicable`, read against the rule file, not against the constraint's paraphrase.
 - Boundary. `grace5 status` lists changed files as `outside: <path>` and `protected: <path>`. The kernel blocks only the protected ones; judge each outside write and record a finding for any that is not a test of an affected file or is otherwise unjustified.
+- Release discipline. A change that is not a release and bumps the version in `package.json`, the README status line, `.grace5/kernel-version` or the migration table is a blocking finding (`upgrade.md`).
 
 ## Findings
 

@@ -45,6 +45,15 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | AUTH-01 | An approval has no legacy fields, `executes="true"`, `executes="false"`, an `Execution` element, or both legacy fields. | Every shape validates, reports `approved`, runs and closes. The removed execution status and refusal never appear. |
 | AUTH-02 | A rejection carries legacy execution fields, including `executes="true"`. | It validates and reports `rejected`; neither a run nor closure is authorized by the legacy fields. |
 | AUTH-03 | An open approved change carrying `executes="false"` is upgraded from 0.5.0 to 0.6.0. | Only installed skills and the pin change; records remain byte for byte, the candidate is unchanged, status reports `approved`, and `run --start` works. |
+| AUTH-04 | An approval carries no `Source`; its `Statement` is `approved`. | It validates, reports `approved`, runs and closes, and the written record omits `Source`. |
+| AUTH-05 | An approval carries a legacy `Source`. | It validates and behaves identically to AUTH-04: the kernel reads no `Source` and rewrites nothing. |
+| AUTH-06 | A rejected approval carries no `Statement`, then carries its reason. | `check` reports `a rejection carries no Statement as its reason` in the first case; in the second it reports no defect, and neither a run nor a close is authorized. |
+
+## Release discipline
+
+| Id | Case | Required behaviour |
+|---|---|---|
+| REL-01 | A change is prepared, run, reviewed and closed, with a `package.json` present. | `package.json` and `.grace5/kernel-version` are byte for byte as before: no change command writes either. A version moves only in a release change the owner requests (`upgrade.md`). |
 
 ## Closed changes
 

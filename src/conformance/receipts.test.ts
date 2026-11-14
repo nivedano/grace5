@@ -511,6 +511,83 @@ test(
 );
 
 test(
+  "AUTH an approval without Source reports approved, runs and closes",
+  () => {
+    const s = new Scenario({ id: "C-0296-no-source", checks: [automated("CK1")] });
+    s.takeHashes();
+    s.writeBrief();
+    s.writeApproval();
+    s.commit("approved without a source");
+    expect(s.check().defects).toEqual([]);
+    const approval = s.record("approval-1.xml");
+    expect(approval).not.toContain("<Source>");
+    expect(approval).toContain("<Statement>approved</Statement>");
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
+    expect(s.start().code).toBe(0);
+    expect(s.run().code).toBe(0);
+    s.writeReview();
+    expect(s.close().code).toBe(0);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "AUTH a legacy Source validates and is ignored",
+  () => {
+    const s = new Scenario({ id: "C-0297-legacy-source", checks: [automated("CK1")] });
+    s.takeHashes();
+    s.writeBrief();
+    s.writeApproval({ source: "Fixture conversation of the conformance suite." });
+    s.commit("approved with a legacy source");
+    expect(s.record("approval-1.xml")).toContain("<Source>");
+    expect(s.check().defects).toEqual([]);
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
+    expect(s.start().code).toBe(0);
+    expect(s.run().code).toBe(0);
+    s.writeReview();
+    expect(s.close().code).toBe(0);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "AUTH a rejection without a reason is a defect; with a reason it never authorizes a run",
+  () => {
+    const s = new Scenario({ id: "C-0298-rejected-no-reason", checks: [automated("CK1")] });
+    s.takeHashes();
+    s.writeBrief();
+    s.writeApproval({ decision: "rejected", omitStatement: true });
+    s.commit("rejected without a reason");
+    expect(s.check().defects.some((d) => d.includes("a rejection carries no Statement"))).toBe(true);
+    s.writeApproval({ decision: "rejected" });
+    expect(s.check().defects).toEqual([]);
+    expect(hasLine(s.status(), "authorization: rejected")).toBe(true);
+    expect(hasLine(s.start(), "refused: no approval for revision 1")).toBe(true);
+    expect(hasLine(s.close(), "refused: no approval for revision 1")).toBe(true);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "REL a change closes without writing the kernel version or the pin",
+  () => {
+    const s = new Scenario({ id: "C-0299-release", checks: [automated("CK1")] });
+    s.write("package.json", `{\n  "version": "0.0.0-fixture"\n}\n`);
+    s.prepare();
+    const pkg = s.read("package.json");
+    const pin = s.read(".grace5/kernel-version");
+    expect(s.start().code).toBe(0);
+    expect(s.run().code).toBe(0);
+    s.writeReview();
+    expect(s.close().code).toBe(0);
+    expect(s.read("package.json")).toBe(pkg);
+    expect(s.read(".grace5/kernel-version")).toBe(pin);
+    expect(s.check().defects).toEqual([]);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
   "CLOSE review obligations: no review, incomplete review, missing adequacy, a check that does not discriminate",
   () => {
     const s = prepared({ id: "C-0205-review", checks: [automated("CK1")] });
