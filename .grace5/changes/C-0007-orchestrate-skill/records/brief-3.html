@@ -6,12 +6,12 @@
 <title>Brief: C-0007-orchestrate-skill revision 3</title>
 <meta name="grace5:change" content="C-0007-orchestrate-skill">
 <meta name="grace5:revision" content="3">
-<meta name="grace5:contract-sha256" content="0baba52719cb2f2869e6cdb322cd5c33889a152a9e7d3d71ade965918536963b">
+<meta name="grace5:contract-sha256" content="b3ae0d470d3f0b4a53a3a947646ec76f98d0ae1dc8e6b114afcb596bb4b48353">
 <meta name="grace5:date" content="2026-11-14">
 <meta name="grace5:writer" content="independent">
 <meta name="grace5:basis" content="difference"
 <meta name="grace5:previous-revision" content="2">>
-<meta name="grace5:words" content="2356">
+<meta name="grace5:words" content="2200">
 <meta name="grace5:target-words" content="600">
 <meta name="grace5:checks" content="6">
 <meta name="grace5:target-checks" content="8">
@@ -38,7 +38,7 @@ td:first-child span{display:block;color:var(--ink);font-size:15px}
 td:first-child b{color:var(--ink)}
 td.shows{width:40%}
 td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
-.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.manual td:first-child{color:var(--stop)}
 .trace td:first-child::after{content:" (device)";color:var(--stop)}
 .optional td{color:var(--muted)}
 #decisions ul,#findings ul{padding-left:0;list-style:none}
@@ -82,13 +82,13 @@ td:first-child .diff-mark{display:inline}
     <div><ul>
       <li class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The standing isolation rules will permit the already approved serial batch: one active implementer can continue past parked changes in the current worktree. Standalone execution keeps its one-change-per-worktree default. Each parked change retains its original start revision, complete diff and protected boundaries; later source commits invalidate earlier evidence.</li>
       <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span>A run cannot be reported finished while pending or running dispatches remain outstanding: they must be reconciled and canceled first.</li>
-      <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span>Difference briefs gain a mandatory framework convention: one legend, color and visible symbols show additions, modifications and removals. The rule, template and this unapproved brief demonstrate it; approved historical pages retain their exact bytes.</li>
+      <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span>Contracts and briefs gain a mandatory neutral decision-authoring rule: state policy and tradeoffs directly, without conversational attribution or copied speech, while preserving technical literals and responsibilities. Difference briefs use one legend, color and visible symbols for additions, modifications and removals. This unapproved brief previews the convention; approved historical brief and approval-record bytes stay intact.</li>
     </ul></div>
   </section>
   <section id="evidence">
     <h2>What will count as done</h2>
     <div>
-      <p class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The independent reviewer also judges the difference-brief rule, template and rendered current brief against the previous approved revision (A6). Review of the complete implementation and raw rehearsal evidence remains required; passing commands alone establish neither orchestration behavior nor visual fidelity.</p>
+      <p class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The independent reviewer also judges neutral decision statements and the difference convention in the prepare skill, brief rule, template and rendered current brief against the previous approved revision (A6). Review of the complete implementation and raw rehearsal evidence remains required; passing commands alone establish neither orchestration behavior nor visual fidelity.</p>
       <table>
         <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
         <tbody>
@@ -103,21 +103,21 @@ td:first-child .diff-mark{display:inline}
     </div>
   </section>
   <section id="decisions">
-    <h2>Decisions to check against your memory</h2>
+    <h2>Decisions for review</h2>
     <div><ul>
-      <li data-decision="D1"><b>D1</b><span>Yours, 2026-11-13: ship a capable, locally extensible orchestrator with subagents, mostly autonomous and escalating only critical issues. An issue database or containerised implementers must be possible without requiring a particular tool.</span></li>
-      <li data-decision="D2"><b>D2</b><span>Yours, 2026-11-13: take only changes whose current revision is approved for execution; list every other open change as left out.</span></li>
-      <li data-decision="D3"><b>D3</b><span>Yours, 2026-11-13: optional prose files in a known folder give local instructions once to all relevant roles. The kernel gains no schema or validation for them.</span></li>
-      <li data-decision="D4"><b>D4</b><span>Yours, 2026-11-13: park critical stops, keep going where possible and ask all parked questions in one round when nothing else can move.</span></li>
-      <li data-decision="D5"><b>D5</b><span>Author's design: use <code>.grace5/extensions/</code> for local instructions and <code>.grace5/orchestration/runs/</code> for committed ledgers. Both are outside the candidate; extension edits stale no evidence and are outside changes' reviewed diffs.</span></li>
-      <li data-decision="D6"><b>D6</b><span>Author's design: the 0.5.0 to 0.6.0 migration installs the new skill beside packaged skills already installed.</span></li>
-      <li data-decision="D7"><b>D7</b><span>Author's design: without an extension, run changes one at a time in the current worktree.</span></li>
-      <li data-decision="D8"><b>D8</b><span>Author's design: the four critical classes are the floor; extensions may add classes and cannot remove kernel owner gates.</span></li>
-      <li data-decision="D9"><b>D9</b><span>An independent agent reviewer judges one recorded scratch rehearsal and states its limits. Four changes share no affected path or named dependency: a required check cannot pass, a second change also needs an owner observation, a third can close and a fourth is unapproved. Fixture approvals approve nothing real. One all-role extension requires <code>Rehearsal: yes</code> on every run-made commit and grants no authority. A fresh session is told only to run open changes with the skill. Review verifies that the first two park, the third kernel-closes before any owner questions, the fourth is excluded, questions arrive together, trailers and committed ledger exist, and no branch, worktree, push, approval change or orchestrator-written product file occurs. This replaces your manual check.</span></li>
-      <li data-decision="D10"><b>D10</b><span>Your direction, 2026-11-14: retain the existing 0.6.0 version, pin and tag. No release or machine installation without an explicit request; scratch packaged-skill copies stay within the rehearsal fixture. Execute on <code>master</code> without a branch.</span></li>
-      <li data-decision="D11"><b>D11</b><span>Yours, 2026-11-14: “I'm not going to read logs! I need a competent agentic review.” Remove your CK7 observation, use the required independent review for implementation and rehearsal, and report findings concisely.</span></li>
-      <li data-decision="D12" class="diff-added"><b>D12</b><span><span class="diff-mark" aria-label="Added">+</span>Author's proposed response to review F1: keep standalone isolation, but express the approved serial-batch exception in the executor and rule corpus. One active implementer may proceed with parked changes; original start revisions, complete diffs, stale-evidence rules and Protected boundaries remain. No source filtering or concurrent scheduler. Response to F2: reconcile and cancel outstanding pending or running dispatches before declaring the run finished. These fixes await your approval.</span></li>
-      <li data-decision="D13" class="diff-added"><b>D13</b><span><span class="diff-mark" aria-label="Added">+</span>Yours, 2026-11-14: “Make a simple legend and highlight changed items by color, like git diff or similar. this highlighting must be a rule of the framework”. K8 defines the convention, removes repeated per-item status labels and preserves approved historical brief bytes. This extends the pending revision 3; it does not approve its isolation or dispatch fixes.</span></li>
+      <li data-decision="D1"><b>D1</b><span>GRACE 5 ships an orchestrator skill that manages subagents for open changes, works mostly autonomously, escalates only critical issues and supports local extensions. Issue databases and containerised implementers remain possible without a required product or integration.</span></li>
+      <li data-decision="D2"><b>D2</b><span>A run takes only changes whose current revision is approved for execution and lists every other open change as left out with its reason.</span></li>
+      <li data-decision="D3"><b>D3</b><span>Optional prose files in a well-known folder share repository-local instructions across roles. The kernel adds no schema or validation for them.</span></li>
+      <li data-decision="D4"><b>D4</b><span>A change at a critical stop is parked while independent work continues. All parked questions are presented in one round when nothing else can move.</span></li>
+      <li data-decision="D5"><b>D5</b><span>Local instructions live in .grace5/extensions/ and committed run ledgers in .grace5/orchestration/runs/. Both are outside the candidate: extension edits stale no evidence and are outside changes&#39; reviewed source diffs. Ledgers are committed when the run ends.</span></li>
+      <li data-decision="D6"><b>D6</b><span>The existing 0.5.0 to 0.6.0 migration installs the new skill beside packaged skills already present in a repository, rather than requiring a manual copy.</span></li>
+      <li data-decision="D7"><b>D7</b><span>Without an extension, changes run one at a time in the current worktree.</span></li>
+      <li data-decision="D8"><b>D8</b><span>The four critical classes are the minimum escalations. Extensions may add classes but cannot remove kernel owner gates.</span></li>
+      <li data-decision="D9"><b>D9</b><span>An independent agent reviewer judges one recorded rehearsal in a scratch git repository outside this one, initialized by the candidate kernel with its four packaged skills. Four changes edit separate files, share no Affected path and name no dependency: the first has a required automated check that cannot pass inside its boundary; the second also has a fixture manual check naming the owner; the third can close; the fourth is unapproved. The fixture author writes approval records marked as fixtures; they approve nothing real. One extension, .grace5/extensions/commits.md, addresses every role and requires the trailer &quot;Rehearsal: yes&quot; on every run-made commit, granting no authority. A fresh session receives only the instruction to run open changes with grace5-orchestrate. Review establishes that the first two changes park with critical questions, the third kernel-closes before requests for owner answers, the fourth is excluded, questions are presented together, every run-made commit has the trailer, the ledger is committed, no branch/worktree/push or approval change occurred, and the orchestrator wrote no Affected product file. No owner observation is required for this change, and an agent is never recorded as a human observer. Reviewers state the limits of this single rehearsal.</span></li>
+      <li data-decision="D10"><b>D10</b><span>This change creates no release. The existing version 0.6.0, pin and v0.6.0 tag are retained. Framework version creation and machine installation require an explicit owner request. Scratch skill copies stay within the rehearsal fixture. Execution uses master without a branch.</span></li>
+      <li data-decision="D11"><b>D11</b><span>The required independent agent review assesses the rehearsal and implementation and reports concise findings. The owner has no log-reading or manual observation task.</span></li>
+      <li data-decision="D12" class="diff-added"><b>D12</b><span><span class="diff-mark" aria-label="Added">+</span>Resolve F1 by aligning the executor and standing isolation rules: standalone execution retains one change per worktree; serial batches may retain parked changes with one active implementer. Original start revisions, complete diffs, stale-evidence rules and Protected boundaries remain. No source filtering or concurrent scheduler is added. Resolve F2 by reconciling and canceling outstanding pending or running dispatches before reporting completion.</span></li>
+      <li data-decision="D13" class="diff-added"><b>D13</b><span><span class="diff-mark" aria-label="Added">+</span>Contracts and briefs use neutral decision statements without conversational ownership labels or attributed direct speech. Difference briefs use one legend and color plus symbols for additions, modifications and removals, with normal styling for unmodified items. Approved historical brief and approval-record bytes are preserved. Formal approval authority and provenance remain in approval records; this draft change does not approve the pending isolation or dispatch fixes.</span></li>
     </ul></div>
   </section>
   <section id="risks">
@@ -128,10 +128,10 @@ td:first-child .diff-mark{display:inline}
     </ul></div>
   </section>
   <section id="burdens">
-    <h2>What it asks of you</h2>
+    <h2>Approval decisions and effort</h2>
     <div><ul>
       <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span>Rule on D12's proposed reconciliation and dispatch cleanup. Approving the framework's visual convention alone has not approved those pending fixes.</li>
-      <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span>Check that D13 and this preview express your requested difference convention. Independent review judges visual fidelity; no log-reading or manual observation task is added for you.</li>
+      <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span>Review D13 and this preview for the neutral decision-authoring and difference conventions. Independent review judges the presentation; no log-reading or manual observation task is added for the owner.</li>
     </ul></div>
   </section>
   <section id="boundaries">
@@ -140,15 +140,15 @@ td:first-child .diff-mark{display:inline}
       <ul class="writes">
         <li>Affected paths: <code>skills/**</code>, <code>packages/**</code>, <code>src/**</code>, <code>models/architecture/**</code>, <code>package.json</code>, <code>README.md</code> and <code>AGENTS.md</code>. Named surfaces: orchestrator skill, local extensions and upgrade.</li>
         <li>Surface limit: one skill, one migration step and two state directories; no added command, schema, record kind, topic document or validation, and no required product, tracker, container runtime or harness-specific tool.</li>
-        <li>Each lifecycle skill gains its sentence on extensions; the orchestrator cites lifecycle skills and method documents. <span class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The executor's existing isolation instruction also gains the serial-batch exception. The lifecycle skills are otherwise untouched.</span></li>
+        <li>Each lifecycle skill gains its sentence on extensions; the orchestrator cites lifecycle skills and method documents. <span class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The executor's existing isolation instruction also gains the serial-batch exception. The prepare skill gains neutral Decision-authoring instructions. The lifecycle skills are otherwise untouched.</span></li>
         <li class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The executor, method, source-identity rule and L-07 must agree: standalone isolation remains; a serial batch permits parked changes with one active implementer. Preserve every original start revision, every later source commit in the complete diff, evidence invalidation, Protected boundaries and the ban on adopting foreign work.</li>
-        <li>L-24 records the orchestrator and extensions with a removal criterion. <span class="diff-added"><span class="diff-mark" aria-label="Added">+</span>L-07 is amended for serial batches; L-04 records the visual difference-brief convention and its removal criterion.</span></li>
-        <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span><code>brief.md</code> makes the difference convention mandatory and <code>templates/brief.html</code> supplies its style and legend example. Current fidelity entries stay present; removed historical items must not impersonate current entries. Preview it in this unapproved brief, preserve approved historical bytes and add no parser, schema or validation mechanism.</li>
+        <li>L-24 records the orchestrator and extensions with a removal criterion. <span class="diff-added"><span class="diff-mark" aria-label="Added">+</span>L-07 is amended for serial batches; L-04 records neutral decision statements, the visual difference-brief convention and its removal criterion.</span></li>
+        <li class="diff-added"><span class="diff-mark" aria-label="Added">+</span><code>brief.md</code> and the prepare skill require neutral decision statements without conversational attribution or copied speech, preserving technical literals and named responsibilities. Formal approval authority and provenance remain in approval records. The rule and <code>templates/brief.html</code> require the difference convention, with neutral headings, canonical style and a legend example. Current fidelity entries remain; removed historical items must not impersonate current entries. Preview the convention in this unapproved brief; preserve approved historical briefs and approval records. Add no parser, schema or validation mechanism.</li>
         <li>Migration is idempotent, self-verifying, touches no change and writes only kernel-managed paths. Install in existing packaged-skill locations only; refresh the three installed skills. Keep version, pin and tag; no release or machine-wide installation. Execution is on <code>master</code> without a branch.</li>
         <li>Default run: changes in id order, one at a time in the current worktree, closed or parked before the next starts. Concurrency or isolated workspaces require an authorizing extension. Implementer and independent reviewer subagents do the work; the orchestrator implements nothing, reads kernel status, runs close and keeps a resumable committed ledger. <span class="diff-added"><span class="diff-mark" aria-label="Added">+</span>Reconcile and cancel outstanding pending or running dispatches before reporting completion.</span></li>
         <li>Critical stops: reserved owner gates; foreign uncommitted affected work; outward or irreversible actions without standing authority; required-check failures or blocking findings after two fix rounds. Extensions may vary the round count and add classes. Named dependencies or common affected paths make later changes wait; parked questions reach you together when nothing else can move.</li>
         <li>No agent or extension infers approval, execution authorization or owner disposition, writes kernel records by hand during a run, or adopts pre-existing work. Extensions may replace defaults and grant outward-action authority, never kernel owner gates. The kernel does not create, read, write or validate extensions or ledgers; their edits change no candidate.</li>
-        <li>Independent review covers the complete diff and raw D9 rehearsal ledger, session report, commit log, kernel receipts and status, including contrary evidence and later interventions. Its reviewer neither authors implementation nor runs rehearsal; summaries alone are insufficient. Failed behavior blocks; missing evidence leaves review incomplete. <span class="diff-added"><span class="diff-mark" aria-label="Added">+</span>The reviewer also judges A6's authoring rule, template and rendered current brief.</span></li>
+        <li>Independent review covers the complete diff and raw D9 rehearsal ledger, session report, commit log, kernel receipts and status, including contrary evidence and later interventions. Its reviewer neither authors implementation nor runs rehearsal; summaries alone are insufficient. Failed behavior blocks; missing evidence leaves review incomplete. <span class="diff-added"><span class="diff-mark" aria-label="Added">+</span>The reviewer also judges A6's neutral authoring and difference conventions in the prepare skill, rule, template and rendered current brief.</span></li>
       </ul>
       <h3>Left alone on purpose</h3>
       <ul class="exclusions">
@@ -172,9 +172,9 @@ td:first-child .diff-mark{display:inline}
   </section>
 </main>
 <footer>
-  <p id="size">Contract size: 2356 words against a target of 600, 6 checks against 8. Reason for excess: preserves the approved workflow and rehearsal and adds focused review-rule and owner-requested difference-brief authoring corrections.</p>
-  <p>This brief describes contract text with SHA-256 <code>0baba52719cb2f2869e6cdb322cd5c33889a152a9e7d3d71ade965918536963b</code>.</p>
-  <p class="say">To decide, answer in one sentence: approve, or reject with the reason. Your words are recorded as you say them. An approval authorizes execution. If you say "approved, hold", the agent waits until you start the change or a batch; no hold state is recorded.</p>
+  <p id="size">Contract size: 2200 words against a target of 600, 6 checks against 8. Reason for excess: preserves the approved workflow and rehearsal and adds focused review-rule and owner-requested difference-brief authoring corrections.</p>
+  <p>This brief describes contract text with SHA-256 <code>b3ae0d470d3f0b4a53a3a947646ec76f98d0ae1dc8e6b114afcb596bb4b48353</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
 </footer>
 </body>
 </html>
