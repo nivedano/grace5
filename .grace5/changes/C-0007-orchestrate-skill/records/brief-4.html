@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0007-orchestrate-skill revision 4</title>
+<meta name="grace5:change" content="C-0007-orchestrate-skill">
+<meta name="grace5:revision" content="4">
+<meta name="grace5:contract-sha256" content="28fad5e2d341bdbc741a80f3feb6f0c6e243e55e73701dbcc10201fbbbcad504">
+<meta name="grace5:date" content="2026-11-14">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="difference">
+<meta name="grace5:previous-revision" content="3">
+<meta name="grace5:words" content="2223">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Orchestrating approved changes and sharing local instructions</h1>
+  <p class="lead">Brief for approval. Change <code>C-0007-orchestrate-skill</code>, revision 4, 2026-11-14. Difference from approved revision 3, written by an independent reader.</p>
+  <p class="diff-legend" aria-label="Difference legend"><span class="key key-add"><b>+</b> Added</span><span class="key key-mod"><b>~</b> Modified</span><span class="key key-del"><b>−</b> Removed</span><span>Unmarked: same as the previous approved revision.</span></p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div><ul>
+      <li class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>A corrected approval surface replaces revision 3's malformed head metadata with complete, separate binding elements for this revision and its comparison basis. The orchestration behavior, source boundary and six check definitions remain those of approved revision 3.</li>
+    </ul></div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div><table>
+      <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+      <tbody>
+        <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type checking</span><b>CK1</b> automated, required</td><td class="shows">The kernel's static type check completes successfully.</td><td class="limits">Type correctness does not establish orchestration behavior or the adequacy of the checks.</td></tr>
+        <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Kernel conformance tests</span><b>CK2</b> automated, required</td><td class="shows">The test suite passes, including the migration conformance case that must fail when orchestrator installation is absent.</td><td class="limits">Tests cover their exercised cases; they do not establish an unattended session's behavior.</td></tr>
+        <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Worked example compatibility</span><b>CK3</b> automated, required</td><td class="shows">The existing examples still verify, including the brief fidelity examples.</td><td class="limits">This does not prove neutral wording, correct difference highlighting or visual fidelity. Independent review judges A6 against the rule, template and rendered current brief.</td></tr>
+        <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Generated package identity</span><b>CK4</b> automated, required</td><td class="shows">The three packages carry the four skills without drifting from their sources, and the generated CLI reference agrees with its source.</td><td class="limits">For A1 and A2 this establishes package identity only. Independent review must judge actual behavior from the complete implementation diff and D9's raw recorded rehearsal, including contrary evidence and later interventions.</td></tr>
+        <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Retained version and skill</span><b>CK5</b> automated, required</td><td class="shows">The kernel reports <code>grace5 0.6.0</code>, the repository pin is <code>0.6.0</code>, and the packaged orchestrator skill exists.</td><td class="limits">Existence and version agreement establish neither installation behavior nor skill behavior.</td></tr>
+        <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Upgrade with open change</span><b>CK6</b> automated, required</td><td class="shows">The upgrade verifier accepts installation beside existing packaged skills, refresh and idempotence while the open change's hashes and candidate remain intact.</td><td class="limits">The upgrade fixture does not cover every repository layout or a real orchestrated session.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div><ul>
+        <li data-decision="D1"><b>D1</b><span>GRACE 5 ships an orchestrator skill that manages subagents for open changes, works mostly autonomously, escalates only critical issues and supports local extensions. Issue databases and containerised implementers remain possible without a required product or integration.</span></li>
+        <li data-decision="D2"><b>D2</b><span>A run takes only changes whose current revision is approved for execution and lists every other open change as left out with its reason.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Optional prose files in a well-known folder share repository-local instructions across roles. The kernel adds no schema or validation for them.</span></li>
+        <li data-decision="D4"><b>D4</b><span>A change at a critical stop is parked while independent work continues. All parked questions are presented in one round when nothing else can move.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Local instructions live in .grace5/extensions/ and committed run ledgers in .grace5/orchestration/runs/. Both are outside the candidate: extension edits stale no evidence and are outside changes&#39; reviewed source diffs. Ledgers are committed when the run ends.</span></li>
+        <li data-decision="D6"><b>D6</b><span>The existing 0.5.0 to 0.6.0 migration installs the new skill beside packaged skills already present in a repository, rather than requiring a manual copy.</span></li>
+        <li data-decision="D7"><b>D7</b><span>Without an extension, changes run one at a time in the current worktree.</span></li>
+        <li data-decision="D8"><b>D8</b><span>The four critical classes are the minimum escalations. Extensions may add classes but cannot remove kernel owner gates.</span></li>
+        <li data-decision="D9"><b>D9</b><span>An independent agent reviewer judges one recorded rehearsal in a scratch git repository outside this one, initialized by the candidate kernel with its four packaged skills. Four changes edit separate files, share no Affected path and name no dependency: the first has a required automated check that cannot pass inside its boundary; the second also has a fixture manual check naming the owner; the third can close; the fourth is unapproved. The fixture author writes approval records marked as fixtures; they approve nothing real. One extension, .grace5/extensions/commits.md, addresses every role and requires the trailer &quot;Rehearsal: yes&quot; on every run-made commit, granting no authority. A fresh session receives only the instruction to run open changes with grace5-orchestrate. Review establishes that the first two changes park with critical questions, the third kernel-closes before requests for owner answers, the fourth is excluded, questions are presented together, every run-made commit has the trailer, the ledger is committed, no branch/worktree/push or approval change occurred, and the orchestrator wrote no Affected product file. No owner observation is required for this change, and an agent is never recorded as a human observer. Reviewers state the limits of this single rehearsal.</span></li>
+        <li data-decision="D10"><b>D10</b><span>This change creates no release. The existing version 0.6.0, pin and v0.6.0 tag are retained. Framework version creation and machine installation require an explicit owner request. Scratch skill copies stay within the rehearsal fixture. Execution uses master without a branch.</span></li>
+        <li data-decision="D11"><b>D11</b><span>The required independent agent review assesses the rehearsal and implementation and reports concise findings. The owner has no log-reading or manual observation task.</span></li>
+        <li data-decision="D12"><b>D12</b><span>Resolve F1 by aligning the executor and standing isolation rules: standalone execution retains one change per worktree; serial batches may retain parked changes with one active implementer. Original start revisions, complete diffs, stale-evidence rules and Protected boundaries remain. No source filtering or concurrent scheduler is added. Resolve F2 by reconciling and canceling outstanding pending or running dispatches before reporting completion.</span></li>
+        <li data-decision="D13"><b>D13</b><span>Contracts and briefs use neutral decision statements without conversational ownership labels or attributed direct speech. Difference briefs use one legend and color plus symbols for additions, modifications and removals, with normal styling for unmodified items. Approved historical brief and approval-record bytes are preserved. Formal approval authority and provenance remain in approval records; this draft change does not approve the pending isolation or dispatch fixes.</span></li>
+    </ul></div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div><ul>
+      <li class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>The correction concerns the approval binding. A kernel fidelity pass checks countable bindings and entries; independent review must still judge whether this comparison and its rendered presentation faithfully express the contract. Revision 4 adds no runtime risk or new behavioral evidence.</li>
+    </ul></div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div><ul>
+      <li class="diff-modified"><span class="diff-mark" aria-label="Modified">~</span>Approve or reject revision 4 on this corrected brief. A new approval must bind this revision's contract and this page; the approved revision 3 brief and approval remain historical bytes. The correction adds no owner log-reading, bench session or manual observation.</li>
+    </ul></div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Affected paths are <code>skills/**</code>, <code>packages/**</code>, <code>src/**</code>, <code>models/architecture/**</code>, <code>package.json</code>, <code>README.md</code> and <code>AGENTS.md</code>. The named surfaces are the orchestrator skill, local extensions and upgrade.</li>
+        <li>The surface grows by one skill, one migration step and two state directories. No command, schema, record kind, topic document or validation is added; no product, tracker, container runtime or harness-specific tool is required.</li>
+        <li>Every skill gains one sentence to read optional prose files in <code>.grace5/extensions/</code> before working and follow those addressed to its role. Files use one topic each and name their roles in prose. Extensions may replace defaults and grant standing outward-action authority, but cannot grant kernel owner gates. The kernel never creates, reads, writes or validates the folder.</li>
+        <li>The orchestrator cites the three lifecycle skills and method documents. The executor also amends its isolation instruction, and the prepare skill amends Decision authoring to require neutral statements. Those lifecycle skills are otherwise unchanged.</li>
+        <li>The executor, method, source-identity rule and L-07 must agree: standalone execution uses one change per worktree; a serial batch permits parked changes with one active implementer. Preserve original start revisions, every later source commit in each complete diff, evidence invalidation, Protected boundaries and the prohibition on adopting foreign work. No source filtering is added.</li>
+        <li>L-24 records the orchestrator and extensions with a removal criterion. L-07 records the isolation exception. L-04 records neutral decision statements, the visual difference convention and its removal criterion. The brief rule, prepare skill and canonical template require neutral decisions and one legend with color and visible symbols, including in print. All current fidelity entries remain; removed items cannot impersonate current ones. Approved historical briefs and approval records retain their bytes. No parser, schema or validation mechanism is added.</li>
+        <li>The 0.5.0 to 0.6.0 migration is idempotent and self-verifying, declares no touched change, and writes only kernel-managed paths. It installs the orchestrator wherever a packaged skill is already installed, creates no skill location, and refreshes the three installed skills. Keep the existing 0.6.0 version, pin and tag. No release, tag update or machine-wide installation is included; execution uses <code>master</code> without a branch.</li>
+        <li>The run takes only changes status reports approved for execution and lists every other open change with its exclusion reason. Changes run in id order, one at a time in the current worktree, each closed or parked before the next starts. An extension must provide and authorize concurrency or isolated workspaces. Implementer and independent reviewer subagents follow the execute and review skills; the orchestrator implements nothing, reads state only from kernel status, runs close and keeps a resumable ledger under <code>.grace5/orchestration/runs/</code>, committed at run end. Outstanding pending or running dispatches must be reconciled and canceled before completion is reported.</li>
+        <li>Critical stops are reserved owner gates; foreign uncommitted work in Affected paths; outward or irreversible actions without standing authority, including push, deploy, branch or worktree creation; and required-check failures or blocking findings after two fix rounds. A round returns the change to its implementer for product correction inside the contract. Extensions may vary the round count and add stop classes. A named dependency or a common Affected path makes a later change wait for a parked one. Independent changes continue; all parked questions are presented together when nothing else can move. Other decisions are the orchestrator's and go in the ledger.</li>
+        <li>No agent or extension infers approval, execution authorization or owner disposition. The run writes no kernel record by hand and adopts no pre-existing work. Extension and ledger edits are outside the candidate and reviewed source diff; the kernel never creates, reads, writes or validates ledgers.</li>
+        <li>Independent review covers the complete implementation diff and D9's raw rehearsal ledger, session report, commit log, kernel receipts and status, including contrary evidence and after-run interventions. Its reviewer neither authors implementation nor runs rehearsal; a preparer's summary or supporting audit alone is insufficient. Failed behavior is blocking; missing evidence leaves review incomplete. The reviewer also judges A6 against the authoring rule, template and rendered current brief, and states the limits of the single rehearsal. No owner observation is required.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: a run does not prepare, brief or approve changes; changes unapproved for execution are listed and left out.</li>
+        <li>N2: no kernel reading, schema, naming rule or validation of extension files or run ledgers.</li>
+        <li>N3: no shipped extension or integration with an issue database, container runtime or other tool; each repository writes its own.</li>
+        <li>N4: no kernel overlap detection or concurrent scheduler; the method's deferred proposal stays deferred.</li>
+        <li>N5: no pilot skill installation or pilot extensions; each pilot takes the version on the owner's flag.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div><p>None. No implausible criterion/check association, undefined term, contradiction, uncovered Change boundary or missing cited path was identified. CK4 establishes package identity for A1/A2; K7 assigns behavioral judgment to independent review. CK3 covers fidelity-example compatibility for A6; independent review judges its presentation.</p></div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 2223 words against a target of 600, 6 checks against 8. Reason for excess: retains the approved orchestration and evidence contract while reissuing only its corrected approval surface. No runtime behavior, source boundary or check definition changes.</p>
+  <p>This brief describes contract text with SHA-256 <code>28fad5e2d341bdbc741a80f3feb6f0c6e243e55e73701dbcc10201fbbbcad504</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>
