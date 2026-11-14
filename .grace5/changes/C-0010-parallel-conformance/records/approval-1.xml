@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0010-parallel-conformance" revision="1" contract-sha256="b209128fa1dea45a34941159938fccf24833fa8e12b9be3a6d0bb3e8efd7babe" brief-sha256="f5cb3173e2e585158b72983d79225faabf4af17d0e9de95fe4e17582657ac4bd" date="2026-11-14" owner="nivedano" decision="approved" recorded-by="Copilot">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="f98a757072a9d61435e6a77813dba7afc5c67de3df68b330ee9fba98b8a436fb"/>
+  <Bound check="CK3" definition-sha256="fca3eba24f472b6fa400fb3167f79dcf398be12c6b513395a3a0bb0c8ffc390c"/>
+</Approval>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0010-parallel-conformance revision 1</title>
+<meta name="grace5:change" content="C-0010-parallel-conformance">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="b209128fa1dea45a34941159938fccf24833fa8e12b9be3a6d0bb3e8efd7babe">
+<meta name="grace5:date" content="2026-11-14">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="763">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="3">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>The conformance suite runs its files in parallel and no file dominates a worker, so a full suite run takes a fraction of today&#x27;s serial time</h1>
+  <p class="lead">Brief for approval. Change <code>C-0010-parallel-conformance</code>, revision 1, 2026-11-14. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>A full conformance run takes a fraction of today&#x27;s serial time: the suite&#x27;s test files are rearranged by topic until no file holds a disproportionate share of the tests, so a parallel run&#x27;s wall time approximates its slowest file rather than the sum of all files.</li>
+        <li>The measured bar: the parallel run&#x27;s recorded elapsed time comes under half the recorded serial baseline of 396.6 seconds. Parallel execution alone, before any rearrangement, was measured at 230 seconds on this host, so the rearrangement itself must close the remaining gap.</li>
+        <li>The suite&#x27;s inventory is untouched: no test, assertion or helper is changed, added or removed. A committed baseline of the suite&#x27;s test titles, taken before the rearrangement, is the reference a check compares against, so anything lost, renamed or added fails the run.</li>
+        <li>Daily use runs the parallel form: the test script of package.json runs bun test --parallel, and the serial command remains valid.</li>
+        <li>AGENTS.md states the measured duration of the parallel run, in place of today&#x27;s &quot;bun test (about four minutes)&quot; line.</li>
+        <li>Nothing outside the conformance suite, the test script and that one AGENTS.md line is written: no command, schema, record kind, skill, tool or validation mechanism is added.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The project still compiles: bun run check (tsc --noEmit) type-checks the kernel and the rearranged conformance files together, so the rearranged files compile and import unchanged. This is the contract&#x27;s evidence that the rearrangement is mechanical.</td><td class="limits">Type-checking exercises no behaviour. It cannot show that any test runs or passes, that the suite&#x27;s totals hold, that the serial command still works, or anything of AGENTS.md, which it never reads.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Parallel suite run</span><b>CK2</b> automated</td><td class="shows">The whole suite passes under the runner&#x27;s parallel mode with the same totals as the recorded serial baseline: 94 tests, one POSIX-only skip (the FL-01 signal test, skipped on Windows), zero failures, 1407 expect() calls. The receipt records the run&#x27;s elapsed time, the figure the speed criterion is judged on.</td><td class="limits">The under-half judgment is not the check&#x27;s: no check carries a timing threshold, so whether the recorded elapsed time beats half of 396.6 seconds is decided in review on host-dependent numbers (the same serial suite measured 676 seconds under concurrent load).</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Test-title baseline comparison</span><b>CK3</b> automated</td><td class="shows">The set of test titles after the rearrangement equals the committed baseline exactly: the check collects every test title from the .test.ts files of src/conformance, sorts both sides, and fails naming every title lost and gained, so nothing is lost, renamed or added.</td><td class="limits">Titles are compared as text only: a test body weakened or re-ordered behind an unchanged title passes, and the extraction reads just the double-quoted test titles of .test.ts files directly under src/conformance, so the guard is exactly as wide as that pattern. What the unchanged tests still assert is review&#x27;s to judge.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The requirement is a shorter suite run, not a smaller suite: the length sits in scratch-repository construction and real CLI spawns, not in case count, so the cut comes from parallelism and file arrangement and the 57 documented cases stay untouched.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The runner&#x27;s own file-level parallelism is the whole mechanism. Measured on this host: 396.6 seconds serial (C-0007 run 4) against 230 seconds parallel before any rearrangement, with identical totals.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The largest files are split by topic until none dominates a worker; the split is mechanical and is guarded by a committed title baseline rather than a new validation mechanism.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The test script of package.json runs the parallel form for daily use; the serial command remains valid and is not re-verified by a dedicated check.</span></li>
+        <li data-decision="D5"><b>D5</b><span>No check carries a timing threshold: speed is evidenced by the recorded elapsed time of the parallel receipt against the recorded serial baseline, and judged in review.</span></li>
+        <li data-decision="D6"><b>D6</b><span>No release: the version, the pin, the tag and the migration steps stay as they are; a release remains a separate owner-requested change.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The bar rests on an arithmetic premise no check measures: 230 seconds parallel before rearrangement is already above half the serial baseline (198.3 seconds), so meeting the criterion depends entirely on how the rearrangement redistributes the slowest file&#x27;s time. No check measures per-file time, and sharding and custom runners are excluded, so there is no fallback if splitting by topic is not enough.</li>
+        <li>The numbers are one host&#x27;s: the same serial suite measured 676 seconds under concurrent load. A parallel receipt recorded under load can miss the bar with no regression, and with no threshold in any check the judgment, with no recorded tolerance, falls to review.</li>
+        <li>The title baseline guards titles, not assertions: a test body weakened behind an unchanged title passes every check, and for the six cases whose tests carry no case id in their titles, which test serves which case is readable only from the test bodies. Review is the remaining guard.</li>
+        <li>The serial command&#x27;s continued validity is asserted, not verified: no dedicated check runs it, so a file-level dependency introduced by the split would surface only when someone runs the serial form.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Rule on the speed tradeoff with no automated threshold: the under-half judgment is made in review on the parallel receipt&#x27;s recorded elapsed time, and the decision rests on one host&#x27;s numbers (396.6 seconds serial recorded, 676 under load, 230 parallel before rearrangement).</li>
+        <li>Accept the unverified serial form: the serial command remains valid without a dedicated re-verification check; its continued working rests on the rearrangement being mechanical and type-checked.</li>
+        <li>The AGENTS.md duration line carries no check: it stays part of the Change and is verified by the independent review of the complete diff, the method&#x27;s normal home for a documentation line.</li>
+        <li>No bench session and no manual procedure is part of the contract: all three checks are automated, and the owner&#x27;s effort is this brief and the approval decision itself.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>The conformance suite under src/conformance/**: test files rearranged by topic, with no test, assertion or helper changed, added or removed.</li>
+        <li>The title baseline, committed beside the tests as src/conformance/test-titles.txt and taken before the rearrangement.</li>
+        <li>The test script of package.json, set to bun test --parallel; the serial command remains valid.</li>
+        <li>One line of AGENTS.md: the measured duration of the parallel run.</li>
+        <li>The surface grows by nothing else: no command, schema, record kind, skill, tool or validation mechanism is added.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no conformance case is added, removed or weakened; the 57 documented cases and today&#x27;s tests are the fixed inventory, including the six cases whose tests today carry no case id in their titles.</li>
+        <li>N2: no kernel, CLI, schema, record, skill or package change, and no new tool in src/tools/.</li>
+        <li>N3: no hard timing threshold in any check; speed is evidenced by recorded elapsed time and judged in review, because a machine-dependent ceiling fails on load, not on regression.</li>
+        <li>N4: no release; the version, the pin, the tag and the migration steps stay as they are (models/architecture/upgrade.md).</li>
+        <li>N5: no CI sharding and no custom runner; the runner&#x27;s own parallel flag is the whole mechanism.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="src/*.ts">src/*.ts</li>
+        <li data-protected="src/commands/**">src/commands/**</li>
+        <li data-protected="src/upgrade/**">src/upgrade/**</li>
+        <li data-protected="src/tools/**">src/tools/**</li>
+        <li data-protected="skills/**">skills/**</li>
+        <li data-protected="packages/**">packages/**</li>
+        <li data-protected="models/**">models/**</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>A2: a criterion its check could not plausibly serve. CK2 (bun test --parallel) records the parallel run&#x27;s elapsed time but never reads AGENTS.md, so the clause &quot;and AGENTS.md states the measured figure&quot; was served by no check of the contract. Resolved: the clause is removed from A2; the AGENTS.md duration line remains part of the Change and is verified by the independent review of the complete diff, the method&#x27;s normal home for a documentation line, and no check is stretched to serve it.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>N4: a cited path that did not exist as written. No upgrade.md was at the repository root; the only upgrade.md in the repository is models/architecture/upgrade.md, and the contract&#x27;s other method-document citations (K2, K4) are fully qualified paths from the root. Resolved: the parenthetical is now the fully qualified models/architecture/upgrade.md, matching the citation style of K2 and K4.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 763 words against a target of 600, 3 checks against 8. The excess over the word target is the recorded measurements, the serial and parallel timings and the test totals, and the fixed-inventory constraints, stated in the contract rather than referenced, because the decision rests on the measured numbers.</p>
+  <p>This brief describes contract text with SHA-256 <code>b209128fa1dea45a34941159938fccf24833fa8e12b9be3a6d0bb3e8efd7babe</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>

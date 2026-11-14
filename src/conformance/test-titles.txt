@@ -1,0 +1,89 @@
+AUTH a legacy Source validates and is ignored
+AUTH a rejection without a reason is a defect; with a reason it never authorizes a run
+AUTH an approval with no Statement validates and runs
+AUTH an approval without Source reports approved, runs and closes
+AUTH rejection ignores legacy fields and never authorizes a run
+AUTH-03 upgrade from 0.5.0 only refreshes skills and the pin; a legacy false approval stays unchanged and can start
+CHECK prints the contract hash, each definition hash and the size against target
+CHECK reads CRLF as LF for the contract hash and reports an open brief finding
+CL-01 close writes close.xml, then moves the whole change directory under closed/, and the moved change validates unchanged
+CL-02 a closed change refuses run and close with the fixed phrase, under closed/ and when not yet moved
+CL-03 a directory under closed/ without close.xml is malformed, run and close refuse it, and other changes are unaffected
+CL-04 init refuses an id that exists open or closed and writes nothing for it
+CL-05 the listing shows the open changes, counts every closed one moved or not, and --all lists them
+CLI an unknown command is a usage error and exits 2
+CLOSE review obligations: no review, incomplete review, missing adequacy, a check that does not discriminate
+CLOSED a closed change refuses further runs
+FL-01 a run killed outright is reported as interrupted and close refuses
+FL-01 a run stopped by a signal writes an interrupted receipt (POSIX only)
+FL-02 a change that starts on a red check records the failure in the start run and proceeds
+FL-03 writing only records and notes after a passing run leaves the candidate unchanged and demands no rerun
+FL-04 a defective draft brief does not stop bound checks
+FL-04 a material amendment not yet approved, then rejected: bound checks run, amended and new checks are refused, close refuses
+FL-05 unrelated edits before the start are listed as Preexisting, never staged or committed, and close refuses a dirty tree
+FL-06 a contract that is not well-formed XML is listed as malformed beside a valid change
+FL-06 another malformed change does not affect status of a valid change and is reported as malformed
+FL-07 a complete diff that touches a protected path is reported by status and close refuses
+FL-08 a contract edited after approval without a new revision is reported as altered and treated as unapproved
+FS-01 an id-only command that exits 0 claims command-completion and nothing else
+FS-02 trace markers all present but out of order fail and name the first marker not found in order
+FS-03 a replayed old log is labelled replay or unattributed, never live, and refused where live is required
+FS-04 a live trace with no device identity, or a mismatched one, is refused where the Environment declares it
+FS-05 a manual observation that is failed, blocked or not-attempted makes close refuse
+FS-06 a manual observation naming a build that does not satisfy the declared one is refused when recorded
+FS-06 a manual observation recorded on an earlier candidate is stale and close refuses
+FS-07 an unresolved blocking finding in the current review makes close refuse
+FS-08 a review that covers an earlier candidate makes close refuse
+FS-09 a cancelled check is never counted as passed
+FS-09 a skipped check is never counted as passed
+FS-10 receipts that passed on an earlier candidate are stale after the source changed and close refuses
+FS-11 a manual-only change with a procedure and no recorded observation makes close refuse
+FS-12 no approval for the current revision: run and close refuse
+FS-12 no brief for the current revision, or a brief edited after approval: close refuses
+FS-13 a pass followed by a later failure of the same check on the same candidate: the failure is current and close refuses
+FS-14 a brief of an older revision is history and is no defect
+FS-14 a current brief with a stale or missing contract hash is a defect
+FS-14 check exposes the omitted protected path of examples/defective-brief
+FS-14 check reports a brief that omits a protected path
+FS-15 unresolvable start revision is reported before a dirty tree
+FS-15 unresolvable start revision refuses close (RV-01)
+FS-16 review must cover the complete diff (RV-02)
+FS-17 owner-disposed needs the owner's words (RV-03)
+FS-18 a check the review says does not discriminate refuses close
+FS-18 violated rule refuses close (RV-05)
+HAPPY a change with one automated, one live trace and one manual check closes and close.xml names what satisfied it
+RECEIPT Definition holds the canonical definition text and definition-sha256 is its hash
+RECEIPT Observation fields: by, at, build, environment, reference and what was seen
+RECEIPT Result attributes: check, kind, required, definition hash, verdict, claim, cwd, exit, elapsed, log, log hash, environment
+RECEIPT Run attributes: binding, numbering, run id, interval, status, start, source revision, dirty, candidate, kernel
+RECEIPT Trace provenance fields: origin, origin-source, run-echo, capture interval, device, build, matched, expected
+RECEIPT check commands receive GRACE5_RUN_ID, GRACE5_CHANGE, GRACE5_CHECK, GRACE5_SOURCE_REVISION and GRACE5_CANDIDATE
+REL a change closes without writing the kernel version or the pin
+RUN every form is refused before a start run, and a second start run is refused
+RV-04 a defective brief holds close
+RV-06 changed definition voids only that check
+RV-07 refusals are on standard error
+RV-08 a result recorded dirty does not count once the tree is clean again
+RV-09 an approval that does not bind every check does not close
+RV-10 run refuses a change whose approved brief has a fidelity defect
+STATUS prints the documented lines, with next last, and closed once the change is closed
+TRACE min and max bound how often a marker occurs before the next one
+UP-01 a command other than status, upgrade and the flags refuses a pin behind the kernel with the fixed phrase, and a missing pin reads as 0.1.0
+UP-02 upgrade refuses outside a git repository, and a change id or --all on it is a usage error; nothing is written
+UP-03 upgrade --plan prints one line per step and pin bump from the pinned version to the kernel's, and writes nothing
+UP-04 upgrade on a repository without a pin runs the chain from 0.1.0: closed siblings move under closed/ with their logs, the local ignore file is written and no project file, the pin is written after each step
+UP-05 upgrade is idempotent: a repository already in shape upgrades without moving or appending anything, and an upgraded one is up to date
+UP-06 a failing step stops the upgrade with failed: <from> -> <to>: <reason>, the pin at the last completed version, and a rerun resumes there
+UP-07 every step refreshes the grace5-* skill directories that exist under .agents/skills/ or .claude/skills/ from the packaged skills, and creates no new location
+UP-08 the post-upgrade check fails the upgrade when a change reads with another hash or a new defect
+UP-09 init writes the pin with the kernel's version and the local ignore file when it creates .grace5/, reports them as existing afterwards, and is refused on a stale pin
+UP-10 a pin ahead of the kernel is refused with kernel too old by every command including upgrade, and status reports it
+UP-11 a pin equal to the kernel's version lets every command run, and upgrade says up to date
+UP-12 upgrade proceeds without a flag with open changes present, stale installed skills and no local ignore file, lists the changes as open, untouched, leaves their candidate, dirty state and evidence as before, and the post-upgrade check covers them; --accept-evidence-loss is a usage error everywhere
+UP-13 upgrade refuses, with no override, a step that would write an open change, naming the step and the ids; the kernel's own steps declare the closed siblings they move and nothing open
+UP-14 the kernel-managed paths are outside the candidate, the dirty state and the complete diff: a write under .grace5/ or an installed grace5-* skill directory changes no evidence and is never outside or protected, while a repository's own skill beside them is source
+UP-15 writing the pin leaves every candidate and the dirty state unchanged: the pin is a kernel-managed path outside both, so a result recorded before an upgrade still counts after it
+UP-16 an unreadable pin is refused by every command but status with the fixed phrase, and status reports state: unreadable
+UP-17 status names the kernel a counted result was recorded with when it differs from the running one
+UP-18 a result recorded by 0.3.0 on a pinned tree, or by 0.4.0 on a tree with .grace5/README.md, is on an earlier candidate under this kernel, while a result this kernel records counts after the pin changes
+UP-19 the 0.5.0 to 0.6.0 step installs orchestrate only beside existing packaged skills, is idempotent and self-verifying, and leaves open changes untouched
