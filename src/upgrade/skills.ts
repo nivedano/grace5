@@ -46,6 +46,22 @@ function installedSkills(root: string, packaged: string): { readonly rel: string
   return found;
 }
 
+const ORCHESTRATE_SKILL = "grace5-orchestrate";
+
+/** The orchestrator directories missing beside an installed packaged skill; no new skill location qualifies. */
+export function missingOrchestrateSkills(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
+  const installed = new Set(installedSkills(root, packaged).map((skill) => skill.rel));
+  return SKILL_LOCATIONS
+    .filter((location) => [...installed].some((rel) => rel.startsWith(`${location}/`)) && !installed.has(`${location}/${ORCHESTRATE_SKILL}`))
+    .map((location) => `${location}/${ORCHESTRATE_SKILL}`);
+}
+
+/** Opens only the missing orchestrator directories; the chain's ordinary refresh mirrors their packaged files. */
+export function installOrchestrateSkill(root: string, packaged = PACKAGED_SKILLS_DIR): void {
+  if (!packagedSkillNames(packaged).includes(ORCHESTRATE_SKILL)) throw new Error(`the packaged skill is missing: ${ORCHESTRATE_SKILL}`);
+  for (const rel of missingOrchestrateSkills(root, packaged)) mkdirSync(join(root, rel), { recursive: true });
+}
+
 /** The files of one installed skill directory the mirror would write or remove: a file whose bytes differ, is missing, or is not packaged. */
 function mirrorDifference(source: string, target: string): string[] {
   const wanted = new Set(listFiles(source));

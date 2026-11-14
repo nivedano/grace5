@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0007-orchestrate-skill" revision="1" contract-sha256="6999102460464928c78ca12b6bb8c654b000789ab59620c9855d7ec3e35a17b8" brief-sha256="80cd915fec786fd50a3cd84a39cecaa684a50a72224034c5ccd12212579c6ede" date="2026-11-14" owner="nivedano" decision="approved" recorded-by="Codex (implementation author)">
+  <Statement>I approve</Statement>
+  <Source>The owner's message in this Codex conversation after the link to records/brief-1.html and the request to approve revision 1 of C-0007-orchestrate-skill.</Source>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="597e73d3a9219302ca39eba1c97677df42ba7b801ed838288a4bfb709eb30ec7"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="b45283eb0a3ffe3e55d079c30c9bdd7f97ba6f23365a6b3439fc2473258afcbe"/>
+  <Bound check="CK6" definition-sha256="16fc38ac22c8ab0d04e6866896dacf8e5936c6034bfd6edccd57466a915c73c0"/>
+  <Bound check="CK7" definition-sha256="97dd5c291bd682ad3fa149a5d51ec36dac04191ba3a4f14202c9afa4e8325081"/>
+</Approval>

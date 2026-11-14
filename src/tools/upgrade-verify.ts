@@ -3,8 +3,8 @@
 // the local ignore file, list the same changes as closed, report the same contract and definition hashes as before, and
 // leave the project's .gitignore byte for byte as it was (CK6 of C-0006-kernel-managed-paths).
 // With --with-open-change (CK6 of C-0005-upgrade-with-open-changes) an open change is laid out beside the closed ones
-// first and a stale grace5-prepare skill is installed and committed; the upgrade must proceed, list the change as open
-// and untouched, refresh the skill, and leave the change open with the candidate it had before either write.
+// first and stale prepare/execute skills are installed in both supported locations; the upgrade must install orchestrate
+// alongside them, list the change as open and untouched, and leave its candidate unchanged.
 // The hashes before the upgrade are read with the kernel's own reader, because `check` refuses a stale pin.
 
 import { spawnSync } from "node:child_process";
@@ -24,13 +24,14 @@ const OPEN_CHANGE = "C-0099-open";
 const EXAMPLE_CONTRACT = join(ROOT, "models", "architecture", "examples", "A-small-fix", "contract.xml");
 /** The stale skill installed in the clone with --with-open-change: a kernel-managed path, so outside the candidate. */
 const STALE_SKILL = ".agents/skills/grace5-prepare";
+const SECOND_STALE_SKILL = ".claude/skills/grace5-execute";
 /** The steps of this kernel's chain from the unpinned state, in order. */
 const STEP_LINES = [
   "step: 0.1.0 -> 0.2.0: ",
   "step: 0.2.0 -> 0.3.0: ",
   "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0",
   `step: 0.4.0 -> 0.5.0: write the local ignore file ${LOCAL_IGNORE_PATH}`,
-  "step: 0.5.0 -> 0.6.0: refresh the installed skills to 0.6.0",
+  "step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0",
 ];
 
 interface Output {
@@ -60,13 +61,18 @@ function layOutOpenChange(clone: string): void {
   writeFileSync(join(dir, "contract.xml"), example.replace(`<Contract id="${idAttribute[1] ?? ""}"`, `<Contract id="${OPEN_CHANGE}"`));
 }
 
-/** Installs a stale copy of the prepare skill where a pilot keeps it, and commits it, so that the tree itself differs. */
+/** Installs stale packaged skills in both supported locations and commits them, so that the tree itself differs. */
 function installStaleSkill(clone: string): void {
-  const dir = join(clone, STALE_SKILL);
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "SKILL.md"), "stale text of the prepare skill, installed by an earlier kernel\n");
-  git(clone, ["add", "--", STALE_SKILL]);
-  git(clone, ["commit", "-q", "-m", `install a stale ${STALE_SKILL}`]);
+  for (const [rel, text] of [
+    [STALE_SKILL, "stale text of the prepare skill, installed by an earlier kernel\n"],
+    [SECOND_STALE_SKILL, "stale text of the execute skill, installed by an earlier kernel\n"],
+  ] as const) {
+    const dir = join(clone, rel);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "SKILL.md"), text);
+    git(clone, ["add", "--", rel]);
+  }
+  git(clone, ["commit", "-q", "-m", `install stale ${STALE_SKILL} and ${SECOND_STALE_SKILL}`]);
 }
 
 function candidateLine(root: string, id: string): string | undefined {
@@ -131,6 +137,19 @@ async function main(withOpenChange: boolean): Promise<number> {
     if (withOpenChange) {
       if (refreshedLines === stepLines.length && skillsLines === 0) ok(`refreshed: ${STALE_SKILL} once per step (${String(refreshedLines)})`);
       else fail(`expected refreshed: ${STALE_SKILL} ${String(stepLines.length)} times and no skills: none installed line, got ${String(refreshedLines)} and ${String(skillsLines)}`);
+      const secondRefreshed = upgrade.lines.filter((line) => line === `refreshed: ${SECOND_STALE_SKILL}`).length;
+      if (secondRefreshed === stepLines.length) ok(`refreshed: ${SECOND_STALE_SKILL} once per step (${String(secondRefreshed)})`);
+      else fail(`expected refreshed: ${SECOND_STALE_SKILL} ${String(stepLines.length)} times, got ${String(secondRefreshed)}`);
+      for (const location of [".agents/skills", ".claude/skills"]) {
+        const orchestrate = join(clone, location, "grace5-orchestrate");
+        const orchestrateLine = `refreshed: ${location}/grace5-orchestrate`;
+        if (upgrade.lines.filter((line) => line === orchestrateLine).length === 1) ok(orchestrateLine);
+        else fail(`expected ${orchestrateLine} once, got ${String(upgrade.lines.filter((line) => line === orchestrateLine).length)}`);
+        const installedOrchestrate = readIfPresent(join(orchestrate, "SKILL.md"));
+        const packagedOrchestrate = readFileSync(join(PACKAGED_SKILLS_DIR, "grace5-orchestrate", "SKILL.md"), "utf8");
+        if (installedOrchestrate === packagedOrchestrate) ok(`${location}/grace5-orchestrate/SKILL.md equals the packaged skill`);
+        else fail(`${location}/grace5-orchestrate/SKILL.md differs from the packaged skill after the upgrade`);
+      }
       const installed = readIfPresent(join(clone, STALE_SKILL, "SKILL.md"));
       const packaged = readFileSync(join(PACKAGED_SKILLS_DIR, "grace5-prepare", "SKILL.md"), "utf8");
       if (installed === packaged) ok(`${STALE_SKILL}/SKILL.md equals the packaged skill`);

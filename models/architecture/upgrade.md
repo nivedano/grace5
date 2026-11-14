@@ -25,8 +25,8 @@ A change that is open when the kernel moves ahead of the pin is finished with th
 A migration step is kernel code for one version boundary whose state layout, local ignore file or skills differ: `from`, `to`, one sentence that describes it, `apply`, `verify`, and one declaration read before anything is written, `touches`. The rules:
 
 - Idempotent: applied to state already in the shape of `to`, it changes nothing.
-- Self-verifying: `verify` fails loudly, with the reason, when the state is not in the shape of `to`; the chain never continues past an unverified step. It receives the packaged skills directory the refresh used, so a step that counts the installed skills as part of its shape compares against the same files.
-- Every step also refreshes the `grace5-*` skill directories wherever they already exist under `.agents/skills/` or `.claude/skills/`, from the kernel's packaged skills, mirroring each packaged skill directory in place, and creates no new location. A `grace5-*` directory the kernel does not package is left alone. The step reports `refreshed: <path>` per directory, or `skills: none installed`.
+- Self-verifying: `verify` fails loudly, with the reason, when the state is not in the shape of `to`; the chain never continues past an unverified step. Both `apply` and `verify` receive the packaged skills directory the refresh uses, so a step that installs skills or counts them as part of its shape uses the same files.
+- Every step also refreshes the `grace5-*` skill directories wherever they already exist under `.agents/skills/` or `.claude/skills/`, from the kernel's packaged skills, mirroring each packaged skill directory in place, and creates no new location. The 0.5.0 to 0.6.0 step first installs `grace5-orchestrate` beside any existing packaged skill in each such location. A `grace5-*` directory the kernel does not package is left alone. The step reports `refreshed: <path>` per directory, or `skills: none installed`.
 - Declared writes: `touches` returns the change ids, open or closed, whose directories the step would write in this repository. A step never writes a change it did not declare, and never writes a path that is not kernel-managed (`source-identity.md`): the state directory and the installed skills, and in particular no project file.
 - A boundary between two versions without a step is a pin bump: nothing but the pin changes.
 
@@ -36,7 +36,7 @@ A migration step is kernel code for one version boundary whose state layout, loc
 | 0.2.0 to 0.3.0 | Writes the pin. | None. |
 | 0.3.0 to 0.4.0 | Refreshes the installed skills to 0.4.0: nothing beyond the refresh every step performs, since 0.4.0 changed the skills and nothing else in the state; verifies that every installed `grace5-*` skill file equals the packaged one. | None. |
 | 0.4.0 to 0.5.0 | Writes the local ignore file `.grace5/.gitignore` and verifies it carries both lines; nothing else. | None. |
-| 0.5.0 to 0.6.0 | Refreshes the installed skills and verifies they match the package; no change directory or record is written. Legacy approval execution fields are ignored by the kernel. | None. |
+| 0.5.0 to 0.6.0 | Installs `grace5-orchestrate` in every skill location that already holds a packaged skill, and nowhere else, refreshes the installed skills and verifies the orchestrator is present where required and every installed skill matches the package; no change directory or record is written. Legacy approval execution fields are ignored by the kernel. | None. |
 
 A kernel change that alters the state layout, the local ignore file or the skills ships its step in the same change, and the conformance list gains a case for it.
 

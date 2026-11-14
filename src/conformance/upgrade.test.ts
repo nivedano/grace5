@@ -1,4 +1,4 @@
-// Conformance cases UP-01 .. UP-18 of models/architecture/conformance.md: the version pin, the refusals, grace5 upgrade,
+// Conformance cases UP-01 .. UP-19 of models/architecture/conformance.md: the version pin, the refusals, grace5 upgrade,
 // and the kernel-managed paths outside the candidate. UP-06, UP-08 and UP-13 also drive the chain runner with injected
 // steps, because the kernel's own steps cannot be made to fail at the second link, to alter a contract from outside, or
 // to write an open change.
@@ -6,8 +6,8 @@
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { applyUpgrade } from "../upgrade/chain";
-import { STEPS, type Step } from "../upgrade/steps";
+import { applyUpgrade, snapshot, snapshotDifference } from "../upgrade/chain";
+import { refreshSkills, STEPS, type Step } from "../upgrade/steps";
 import { HEX64, LOCAL_IGNORE_PATH, LOCAL_IGNORE_TEXT, PIN_PATH, REPO_ROOT, TEST_TIMEOUT, attr, automated, contractXml, disposeAll, hasLine, kernelVersion, prepared, sha256, type CliResult, type ContractDef, type Scenario } from "./helper";
 
 afterAll(() => disposeAll());
@@ -161,7 +161,7 @@ test(
     expect(hasLine(plan, /^step: 0\.2\.0 -> 0\.3\.0: .*kernel-version.*$/)).toBe(true);
     expect(hasLine(plan, "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0")).toBe(true);
     expect(hasLine(plan, LOCAL_IGNORE_STEP)).toBe(true);
-    expect(hasLine(plan, "step: 0.5.0 -> 0.6.0: refresh the installed skills to 0.6.0")).toBe(true);
+    expect(hasLine(plan, "step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0")).toBe(true);
     const versions = versionsOf(plan);
     expect(versions[0]).toBe("0.1.0");
     expect(versions.at(-1)).toBe(VERSION);
@@ -357,9 +357,9 @@ test(
     expect(hasLine(upgrade, "refreshed: .claude/skills/grace5-execute")).toBe(true);
     expect(hasLine(upgrade, "refreshed: .agents/skills/grace5-prepare")).toBe(true);
     expect(upgrade.out).not.toContain("skills: none installed");
-    // Two directories refreshed once per step; a pin bump refreshes nothing (F3 of review 1 of C-0004-upgrade-command).
+    // Two existing directories refresh once per step; the final step also installs and refreshes orchestrate in both.
     expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(5);
-    expect(upgrade.lines.filter((l) => l.startsWith("refreshed:")).length).toBe(2 * upgrade.lines.filter((l) => l.startsWith("step:")).length);
+    expect(upgrade.lines.filter((l) => l.startsWith("refreshed:")).length).toBe(2 * upgrade.lines.filter((l) => l.startsWith("step:")).length + 2);
 
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
     expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
@@ -371,8 +371,93 @@ test(
     expect(s.exists(".claude/skills/grace5-review")).toBe(false);
     expect(s.exists(".agents/skills/grace5-execute")).toBe(false);
     expect(s.exists(".agents/skills/grace5-review")).toBe(false);
+    expect(s.read(".claude/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
+    expect(s.read(".agents/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
     expect(s.exists("skills")).toBe(false);
     expect(s.exists("packages")).toBe(false);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "UP-19 the 0.5.0 to 0.6.0 step installs orchestrate only beside existing packaged skills, is idempotent and self-verifying, and leaves open changes untouched",
+  async () => {
+    const s = prepared({ id: "C-0530-orchestrate-upgrade", checks: [automated("CK1")] });
+    s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare\n");
+    // This location has a skill directory, but no packaged skill, so it does not qualify for installation.
+    s.write(".claude/skills/grace5-local/SKILL.md", "repository-owned skill\n");
+    s.commit("fixture at 0.5.0 with one installed packaged skill");
+    expect(s.start().code).toBe(0);
+    s.pin("0.5.0");
+
+    const step = STEPS.find((candidate) => candidate.from === "0.5.0" && candidate.to === "0.6.0");
+    expect(step).toBeDefined();
+    if (step === undefined) throw new Error("missing the 0.5.0 to 0.6.0 migration step");
+    expect(step.touches(s.repo)).toEqual([]);
+
+    const beforeCandidate = candidateLine(s);
+    const beforeChanges = await snapshot(s.repo);
+    const receiptBefore = s.receipt();
+    const runCountBefore = s.runNumbers().length;
+    const readRecords = (): [string, string][] => fs.readdirSync(s.recordsDir).sort()
+      .filter((name) => fs.statSync(path.join(s.recordsDir, name)).isFile())
+      .map((name) => [name, fs.readFileSync(path.join(s.recordsDir, name)).toString("hex")]);
+    const recordsBefore = readRecords();
+
+    // Applying the step once and twice, with the runner's mirror after each application, produces the same tree.
+    step.apply(s.repo);
+    expect(refreshSkills(s.repo)).toContain(".agents/skills/grace5-orchestrate");
+    step.verify(s.repo);
+    const orchestrateDir = path.join(s.repo, ".agents/skills/grace5-orchestrate");
+    const onceFiles = fs.readdirSync(orchestrateDir).sort();
+    const onceBytes = onceFiles.map((name) => [name, fs.readFileSync(path.join(orchestrateDir, name)).toString("hex")]);
+    const oncePorcelain = s.porcelain();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    const twiceFiles = fs.readdirSync(orchestrateDir).sort();
+    const twiceBytes = twiceFiles.map((name) => [name, fs.readFileSync(path.join(orchestrateDir, name)).toString("hex")]);
+    expect(twiceFiles).toEqual(onceFiles);
+    expect(twiceBytes).toEqual(onceBytes);
+    expect(s.porcelain()).toBe(oncePorcelain);
+    expect(s.read(".agents/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
+    expect(s.exists(".claude/skills/grace5-orchestrate")).toBe(false);
+    expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
+    expect(s.exists(".agents/skills/grace5-review")).toBe(false);
+
+    // The step refuses a missing install and a changed installed copy.
+    fs.rmSync(path.join(s.repo, ".agents/skills/grace5-orchestrate"), { recursive: true, force: true });
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-orchestrate/SKILL.md"), "drifted\n");
+    expect(() => step.verify(s.repo)).toThrow();
+
+    // No location is made when the repository has no installed packaged skills.
+    const empty = prepared({ id: "C-0531-no-installed-skills", checks: [automated("CK1")] });
+    step.apply(empty.repo);
+    refreshSkills(empty.repo);
+    step.verify(empty.repo);
+    expect(empty.exists(".agents/skills")).toBe(false);
+    expect(empty.exists(".claude/skills")).toBe(false);
+
+    // Restore the valid shape and exercise the real command's 0.5.0→0.6.0 chain on the open change.
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    const upgrade = s.cli(["upgrade"]);
+    expect(upgrade.code).toBe(0);
+    expect(upgrade.lines).toContain("step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0");
+    expect(upgrade.lines).toContain(`checked: ${s.id}`);
+    expect(s.readPin()).toBe("0.6.0\n");
+
+    expect(candidateLine(s)).toBe(beforeCandidate);
+    const afterChanges = await snapshot(s.repo);
+    expect(snapshotDifference(beforeChanges, afterChanges)).toBeUndefined();
+    expect(s.receipt()).toBe(receiptBefore);
+    expect(s.runNumbers()).toHaveLength(runCountBefore);
+    expect(readRecords()).toEqual(recordsBefore);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
   },
   TEST_TIMEOUT,
 );
@@ -624,10 +709,10 @@ test(
     const checkBefore = s.read(`.grace5/changes/${s.id}/contract.xml`);
     const upgrade = s.cli(["upgrade"]);
     expect(upgrade.code).toBe(0);
-    expect(upgrade.lines.filter((line) => /^(step|bump):/.test(line))).toEqual(["step: 0.5.0 -> 0.6.0: refresh the installed skills to 0.6.0"]);
+    expect(upgrade.lines.filter((line) => /^(step|bump):/.test(line))).toEqual(["step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0"]);
     expect(s.readPin()).toBe("0.6.0\n");
     expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
-    expect(s.porcelain().split("\n").filter(Boolean).map((line) => line.slice(3)).sort()).toEqual([".agents/skills/grace5-prepare/SKILL.md", PIN_PATH].sort());
+    expect(s.porcelain().split("\n").filter(Boolean).map((line) => line.slice(3)).sort()).toEqual([".agents/skills/grace5-prepare/SKILL.md", ".agents/skills/grace5-orchestrate/SKILL.md", PIN_PATH].sort());
     expect(fs.readdirSync(s.recordsDir).sort().map((name) => [name, fs.readFileSync(path.join(s.recordsDir, name)).toString("hex")])).toEqual(records);
     expect(s.read(`.grace5/changes/${s.id}/contract.xml`)).toBe(checkBefore);
     expect(candidateLine(s)).toBe(before);

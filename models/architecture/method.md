@@ -13,8 +13,8 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 | Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` while the change is open, and under `.grace5/changes/closed/<id>/` once `close` has moved it (`commands.md`) |
 | Records | `brief-<rev>.html`, `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/` |
 | Commands | `grace5 init`, `check`, `run`, `status`, `close`, `upgrade`; `--help` and `--version` |
-| State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, `.grace5/.gitignore`, the local ignore file that keeps the run logs out of git, and the migration steps `upgrade` composes from the pin to the kernel's version (`upgrade.md`) |
-| Skills | prepare, execute, review, in `skills/`; the harness packages in `packages/` are generated from them and never edited |
+| State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, `.grace5/.gitignore`, the local ignore file that keeps the run logs out of git, and the migration steps `upgrade` composes from the pin to the kernel's version (`upgrade.md`); optional local instructions in `.grace5/extensions/` and run ledgers in `.grace5/orchestration/runs/`, neither read nor written by the kernel |
+| Skills | prepare, execute, review, orchestrate, in `skills/`; the harness packages in `packages/` are generated from them and never edited |
 | Tools of this repository | `src/tools/`: the package generator, the CLI reference generator, the example verifier and the upgrade verifier (`upgrade-verify.ts`, which upgrades a clone of this repository at the previous version's tag); not part of the installed CLI |
 | Documents | this method and its topic files (`commands.md`, `authorization.md`, `brief.md`, `source-identity.md`, `trace-provenance.md`, `evidence-records.md`, `upgrade.md`), the schemas in `schemas/`, the brief template in `templates/`, the worked examples in `examples/`, `conformance.md`, `rationale-ledger.md`, `retirement.md`, `m2-proposal.md` (a proposal to the measurement method, not part of the kernel), `cli-reference.md` generated from the help text |
 
@@ -61,6 +61,10 @@ A check is required unless it says `required="false"`. Markers are plain substri
 `grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. Without an id it lists the open changes and counts the closed ones. A malformed change is reported as malformed and never hides a valid one. Its first line names the kernel's version and the pin of the state, and every other command refuses state pinned to another version until `grace5 upgrade` has brought it to the kernel's (`upgrade.md`).
 
 A material revision of behaviour, boundary, constraints or checks increments `revision`, gets a difference-only brief and a new approval; git preserves the previous revision. Until it is approved, only the checks whose definitions the last approval bound may run.
+
+## Local extensions
+
+A repository may keep optional prose instruction files in `.grace5/extensions/`, one topic per file, each naming the roles it addresses. Every skill's reader reads the files before working and follows those addressed to its role. An extension may replace a skill's default and grant standing authority for outward-facing actions; it cannot grant an approval, an observation, an owner disposition or any other gate the kernel reserves (`authorization.md`, `evidence-records.md`). The kernel never creates, reads, writes or validates the folder or its files. The same is true of `.grace5/orchestration/`, where the orchestrator keeps its committed run ledgers (`grace5-orchestrate`); both directories are inside the state directory and outside the candidate (`source-identity.md`).
 
 ## Wire boundaries
 

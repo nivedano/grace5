@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0007-orchestrate-skill" revision="1" contract-sha256="6999102460464928c78ca12b6bb8c654b000789ab59620c9855d7ec3e35a17b8" n="2" run-id="6a710d5d68374eb68dbaf6e06fde5d94" started="2026-11-14T07:49:06.289Z" ended="2026-11-14T07:49:24.966Z" status="completed" source-revision="bdb771b8f946a55c12694d116333921ebf5c14a2" dirty="true" candidate="4e965b7a2d2a141cd9df912ff2a81d1796988c99f747ed14eb054bcd3b34294a" kernel="grace5 0.6.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="4430" log="records/logs/run-2/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=180
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="4015" log="records/logs/run-2/CK3.log" log-sha256="a26e3f0ca8da733373d9ff00a6c3f29583e1fe2ad3ee7cb56108f2e03eedccc0">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run examples:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b" verdict="failed" cwd="." exit="1" elapsed-ms="510" log="records/logs/run-2/CK4.log" log-sha256="ba2552cb241c8050a0a6cce05a56ef4f6f656fca6789fbbed4f8b241b70d9921">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+    <Reason>exit 1</Reason>
+  </Result>
+  <Result check="CK5" kind="automated" required="true" definition-sha256="b45283eb0a3ffe3e55d079c30c9bdd7f97ba6f23365a6b3439fc2473258afcbe" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="151" log="records/logs/run-2/CK5.log" log-sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855">
+    <Definition>kind=automated
+id=CK5
+required=true
+cwd=.
+budget=60
+command=bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; const skill = fs.existsSync('packages/skills/grace5-orchestrate/SKILL.md'); process.exit(out === 'grace5 0.6.0' &amp;&amp; pin === '0.6.0' &amp;&amp; skill ? 0 : 1)"
+</Definition>
+  </Result>
+  <Result check="CK6" kind="automated" required="true" definition-sha256="16fc38ac22c8ab0d04e6866896dacf8e5936c6034bfd6edccd57466a915c73c0" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="9565" log="records/logs/run-2/CK6.log" log-sha256="0717a41f3bf50112fcee629b26f6a78706741deb7047ffd7dd69d74d483cf1fd">
+    <Definition>kind=automated
+id=CK6
+required=true
+cwd=.
+budget=300
+command=bun src/tools/upgrade-verify.ts --with-open-change
+</Definition>
+  </Result>
+</Run>

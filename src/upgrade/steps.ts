@@ -9,15 +9,15 @@ import { dirname, join } from "node:path";
 import { CHANGES_DIR, STATE_DIR } from "../git";
 import { changesDir, CLOSED_DIR, closedDir, listChanges } from "../state";
 import { PIN_PATH, readPin, writePin } from "./pin";
-import { skillDifferences } from "./skills";
+import { installOrchestrateSkill, missingOrchestrateSkills, skillDifferences } from "./skills";
 
 export interface Step {
   readonly from: string;
   readonly to: string;
   /** One sentence, printed in the plan. */
   readonly describe: string;
-  /** Brings the state to the shape of `to`. Throws with the reason on failure. Applied to state already in shape, it changes nothing. */
-  apply(root: string): void;
+  /** Brings the state to the shape of `to`. Throws with the reason on failure. Applied to state already in shape, it changes nothing; `packaged` is the directory the refresh uses. */
+  apply(root: string, packaged?: string): void;
   /** Throws with the reason when the state is not in the shape of `to`; `packaged` is the packaged skills directory the refresh used, the kernel's own by default. */
   verify(root: string, packaged?: string): void;
   /** The ids, open or closed, of the changes whose directories `apply` would write in this repository. */
@@ -138,10 +138,20 @@ const writeTheLocalIgnore: Step = {
 
 /** The steps in version order. A boundary between two versions without a step is a pin bump. */
 export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills, writeTheLocalIgnore, {
-  ...refreshTheSkills,
   from: "0.5.0",
   to: "0.6.0",
-  describe: "refresh the installed skills to 0.6.0",
+  describe: "install grace5-orchestrate beside the installed skills and refresh them to 0.6.0",
+  apply(root, packaged) {
+    installOrchestrateSkill(root, packaged);
+  },
+  verify(root, packaged) {
+    const missing = missingOrchestrateSkills(root, packaged);
+    if (missing.length > 0) throw new Error(`the orchestrator skill is missing: ${missing.join(", ")}`);
+    refreshTheSkills.verify(root, packaged);
+  },
+  touches() {
+    return [];
+  },
 }];
 
 // The packaged skills, their locations and the refresh live in skills.ts; re-exported for the chain runner and the tools.

@@ -5,6 +5,8 @@ description: Use when a GRACE 5 change has an owner approval and the work has to
 
 # Execute a GRACE 5 change
 
+Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
+
 File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. At any point `grace5 status <id>` tells you where you are; its last line, `next:`, is the obligation to work on.
 
 ## Before starting

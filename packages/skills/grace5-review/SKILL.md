@@ -5,6 +5,8 @@ description: Use when a GRACE 5 change has final evidence on a clean committed r
 
 # Review a GRACE 5 change
 
+Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
+
 File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. `evidence-records.md` defines the review record and what `grace5 close` reads from it.
 
 ## Handing over

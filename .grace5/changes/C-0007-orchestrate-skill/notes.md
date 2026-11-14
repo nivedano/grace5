@@ -18,7 +18,18 @@ Never approved; sequence and technical detail only.
 7. Version 0.6.0 in `package.json`, `bun run package`, pin by `upgrade` in this repository.
 8. Rehearsal for CK7: scratch repository under the system temp directory, four changes as E1 says, approvals recorded there by the author as fixtures of the scratch repository (they are test data, not approvals of anything real; say so in the scratch README), one extension file `commits.md` with the trailer rule, a fresh subagent as the orchestrating session. The owner reads the ledger and report; record the observation in the owner's words.
 
-## Open points
+## Execution, 2026-11-14
 
-- C-0006-kernel-managed-paths is open in this worktree at `next: close`, with an untracked `review-1.xml` this session did not write. Do not touch it; C-0007's start run will not list it (kernel-managed path). Starting C-0007 before C-0006 closes puts two changes in one worktree; ask the owner at the go-ahead.
+- The owner approved revision 1 with "I approve" after receiving `records/brief-1.html`; the verbatim statement and the check/brief hashes are in `records/approval-1.xml`. Work is on `master` as D10 authorizes. The starting source tree is clean; C-0006 and C-0008 are closed.
+- C-0008 already introduced version 0.6.0, the 0.5.0 to 0.6.0 skills-refresh step and the repository pin. Extend that step with the orchestrator installation rather than adding a second boundary or reverting C-0008's approval semantics. The version and pin need no rewrite.
+- Tag `v0.6.0` already exists before this change starts. Do not move or overwrite an existing tag; report this delivery limitation to the owner when the change reaches closure.
+- Mechanical test updates, fixture setup and packaging generation are delegated as AGENTS.md requires. The lead authors the skill, kernel behavior and method documentation, verifies the resulting diff and commits with the change trailer.
+- Run 1 is the clean start at `bdb771b8f946a55c12694d116333921ebf5c14a2`: CK1, CK2, CK3, CK4 and CK6 passed; CK5 failed because the orchestrator package did not exist. No `Preexisting` source path was recorded. The full suite took about eight minutes on this Windows host.
+- Run 2 is dirty iteration evidence: CK1, CK3, CK5 and CK6 passed; CK4 caught a late skill wording change missing from the generated packages. Regeneration resolved it; the failed receipt is preserved.
+- Targeted upgrade tests (UP-03, UP-07, UP-19 and AUTH-03) pass, as do type checking, package verification and contract validation. UP-19 exercises install/no-install boundaries, missing and drifted copies, once-versus-twice stability and unchanged open-change hashes, receipt bytes, candidate and counted evidence.
+- The fourth rehearsal fixture uses a rejected approval rather than legacy `executes="false"`: C-0008 now ignores that field, so only a non-approved current revision demonstrates exclusion faithfully. No actual contract or approval is changed for this fixture choice.
+
+## Preparation history
+
+- At preparation C-0006-kernel-managed-paths was open at `next: close`; it has since closed, so that worktree concern no longer applies.
 - Fix-round bound default: two rounds, then park. Dispatch deadline default: stated by the orchestrator in the ledger per dispatch, from the sum of the change's check budgets.

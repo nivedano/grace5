@@ -113,7 +113,7 @@ export async function applyUpgrade(input: UpgradeInput): Promise<number> {
     try {
       if (link.kind === "step") {
         // Applied, the skills refreshed, then verified: a step may count the installed skills as part of its shape.
-        link.step.apply(root);
+        link.step.apply(root, input.packagedSkills);
         const refreshed = refreshSkills(root, input.packagedSkills);
         if (refreshed.length === 0) print("skills: none installed");
         for (const path of refreshed) print(`refreshed: ${path}`);
