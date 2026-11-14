@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0007-orchestrate-skill" revision="5" contract-sha256="311ea63339a1f16abf47ccde39eb0e8e7170a884a50ab89e263e990336d88bfc" brief-sha256="39ec5dcf23796edb6df11161ae506f174db62264747dcc928c38e1efb39ba63d" date="2026-11-14" owner="nivedano" decision="approved" recorded-by="Copilot">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="597e73d3a9219302ca39eba1c97677df42ba7b801ed838288a4bfb709eb30ec7"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="b45283eb0a3ffe3e55d079c30c9bdd7f97ba6f23365a6b3439fc2473258afcbe"/>
+  <Bound check="CK6" definition-sha256="16fc38ac22c8ab0d04e6866896dacf8e5936c6034bfd6edccd57466a915c73c0"/>
+</Approval>

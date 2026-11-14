@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0007-orchestrate-skill" revision="5" contract-sha256="311ea63339a1f16abf47ccde39eb0e8e7170a884a50ab89e263e990336d88bfc" n="6" run-id="dca59c71dfe140a894fea8f1c6489ed8" started="2026-11-14T17:36:49.021Z" ended="2026-11-14T17:37:00.148Z" status="completed" source-revision="8ae2841613bce495277e5a7e3f2767d7581faa12" dirty="false" candidate="24d77d36f2783feaff7d7e3dc9ef2efc34f5109085e82633229704d392ac9f8c" kernel="grace5 0.6.0">
+  <Result check="CK6" kind="automated" required="true" definition-sha256="16fc38ac22c8ab0d04e6866896dacf8e5936c6034bfd6edccd57466a915c73c0" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="11124" log="records/logs/run-6/CK6.log" log-sha256="0717a41f3bf50112fcee629b26f6a78706741deb7047ffd7dd69d74d483cf1fd">
+    <Definition>kind=automated
+id=CK6
+required=true
+cwd=.
+budget=300
+command=bun src/tools/upgrade-verify.ts --with-open-change
+</Definition>
+  </Result>
+</Run>
