@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0008-approval-executes" revision="2" contract-sha256="b7bd370b8783f04c5b0c2c40e7d81c62e89a7864a525f14cfdd7f24f7b568b86" brief-sha256="2b3503a3b46701559995af58879ce5b52c8b70f9dac8bb2846464d0d7b462059" date="2026-11-14" owner="nivedano" decision="approved" recorded-by="Codex (implementation author)">
+  <Statement>approved</Statement>
+  <Source>The owner's message in this Codex conversation immediately after the link to records/brief-2.html and the request to approve revision 2's focused verification scope. The brief was self-authored as D3 authorizes.</Source>
+  <Bound check="CK1" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5"/>
+  <Bound check="CK2" definition-sha256="c709dd51ea36a3e62763b1455d684f91d9e8927c734714f4f1430cbb531047ab"/>
+  <Bound check="CK3" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47"/>
+  <Bound check="CK4" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b"/>
+  <Bound check="CK5" definition-sha256="252635bbd9ad256874f746d138d2029349b93c6aa5652a663d141059be738291"/>
+  <Bound check="CK6" definition-sha256="16fc38ac22c8ab0d04e6866896dacf8e5936c6034bfd6edccd57466a915c73c0"/>
+</Approval>
