@@ -36,6 +36,14 @@ Never approved; sequence and technical detail only.
 - During final evidence, a separate unapproved `C-0009-decision-not-conversation` appeared. It was neither authored, staged nor executed by this session and remains untouched.
 - CK7 is not recorded; no review or close has been attempted for C-0007. Next action is the owner's actual CK7 observation on source candidate `0537fd4b3bd9d8aca1211422e4b3c8d77cd01f926df01d5330cd6d06166270ba`, then independent `grace5-review` and kernel closure. No release/tag action or machine-wide installation is authorized as a consequence of closure.
 
+## Revision 2: independent agent review replaces the owner observation
+
+- The owner rejected the observation burden in the conversation: "I'm not going to read logs! I need a competent agentic review." This is direction to revise the evidence requirement, not a fabricated CK7 observation or an approval of a brief that did not yet exist.
+- Returned to `grace5-prepare` before amending the contract. Revision 2 removes Manual CK7 and its Environment declaration; the recorded rehearsal specification moves into D9. K7 requires the existing mandatory independent reviewer, who neither implemented the change nor ran the rehearsal, to inspect the complete diff and raw rehearsal artifacts, including contrary evidence and after-run interventions. A failed behavior becomes a blocking finding; missing evidence makes review incomplete. No agent is presented as the owner or as a human observer, and no schema or record kind is added.
+- A1 and A2 retain their behavioral requirements and are judged by that independent review; their CK4 association establishes that the delivered package is the reviewed skill text. The contract explicitly says this association is not behavioral proof, so a package verification pass is never presented as a substitute for expert review.
+- All six remaining check definitions and the source candidate are unchanged, so run 3's CK1 through CK6 results continue to count. No product code, framework version, tag or machine installation changes are part of this revision. D10 now reflects the owner's explicit release/install instruction rather than the superseded tagging proposal.
+- An independent brief-writing subagent, given only the current contract, previous contract/brief and method documents, wrote `records/brief-2.html` and returned no mechanical findings. Contract/brief validation passes with six checks and eleven decisions. The owner gate for revision 2 remains pending; no new approval has been recorded. After that gate, use the existing `grace5-review` handover and evidence packet paths above; the owner receives a concise findings report and is not asked to inspect logs.
+
 ## Preparation history
 
 - At preparation C-0006-kernel-managed-paths was open at `next: close`; it has since closed, so that worktree concern no longer applies.

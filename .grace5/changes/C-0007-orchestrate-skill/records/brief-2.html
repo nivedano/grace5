@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0007-orchestrate-skill revision 2</title>
+<meta name="grace5:change" content="C-0007-orchestrate-skill">
+<meta name="grace5:revision" content="2">
+<meta name="grace5:contract-sha256" content="f5246c37ee53a718de1bd0812a4156106a551eb02a727e61b7bd4d0488fb3864">
+<meta name="grace5:date" content="2026-11-14">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="difference">
+<meta name="grace5:previous-revision" content="1">
+<meta name="grace5:words" content="1819">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="6">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child::after{content:" (yours)";color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Expert review replaces your rehearsal observation</h1>
+  <p class="lead">Brief for approval. Change <code>C-0007-orchestrate-skill</code>, revision 2, 2026-11-14. Difference from revision 1, written by: independent reader. Changed items are marked below.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>You receive a concise independent agent review of the implementation and recorded rehearsal. The owner-run manual check CK7 is removed: you have no log-reading or manual-observation task for this change.</li>
+        <li>The reviewer must inspect the complete implementation diff and raw rehearsal evidence, including contrary evidence and interventions after the run. A summary or supporting audit alone cannot stand in for that review. Failed behavior blocks completion; missing evidence leaves review incomplete.</li>
+        <li>The existing 0.6.0 version, pin and <code>v0.6.0</code> tag stay as they are. This change authorizes no release, tag update or machine-wide installation. Scratch skill copies are confined to the rehearsal fixture; execution remains on <code>master</code> without a branch.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <p><strong>Changed:</strong> CK7 and its owner observation are removed. K7 and D9 require an independent reviewer who neither authored the implementation nor ran the rehearsal. The reviewer judges A1 and A2 using the complete diff, raw ledger, session report, commit log, kernel receipts and status, including contrary evidence and later interventions.</p>
+      <p>The bounded scratch rehearsal still has four independent, one-file changes: a required check that cannot pass inside its boundary; a change needing an owner manual observation; one that can close; and one whose current revision is unapproved. The first two must be parked, the third kernel-close before any owner questions, and the fourth be excluded. Questions arrive together; all run-made commits carry the extension's trailer; the ledger is committed; the run changes no approval, makes no branch, worktree or push, and its orchestrator writes no affected product file.</p>
+      <p>This proves only the observed rehearsal. It does not establish behavior on dependent or large changes, foreign uncommitted work, resume, concurrent work, or authority-granting extensions. Commit trailers alone cannot show extension compliance by a subagent that makes no commit. Reviewers must state these evidential limits. Fixture approvals approve nothing real; an agent is never recorded as an owner or human observer.</p>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>The kernel type-checks</span><b>CK1</b> automated, unchanged</td><td class="shows">The kernel and migration code pass the type checker.</td><td class="limits">This does not exercise orchestration behavior or validate skill prose.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>The test suite passes</span><b>CK2</b> automated, unchanged</td><td class="shows">Conformance tests pass, including migration installation beside existing packaged skills, no new locations, repeated application without further change, and unchanged change hashes and candidate. The added case must fail when the migration is absent.</td><td class="limits">Review must assess whether the tests discriminate those failures. They do not run an agent through the skill.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>The worked examples verify</span><b>CK3</b> automated, unchanged</td><td class="shows">The method's examples still verify under the kernel.</td><td class="limits">The examples do not demonstrate agent orchestration.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Packages match their sources</span><b>CK4</b> automated; association changed</td><td class="shows">The three packages carry the four source skills without drift, and the CLI reference matches the help text. Newly linked to A1 and A2, this establishes the packaged skill's identity.</td><td class="limits">It proves no orchestration behavior or extension compliance. Those judgments belong to the independent review required by K7, using D9's recorded rehearsal.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Version and pin agree</span><b>CK5</b> automated, unchanged</td><td class="shows">The CLI reports <code>grace5 0.6.0</code>, the repository pin reads 0.6.0, and the packaged orchestrator skill file exists.</td><td class="limits">This checks neither tag preservation nor absence of a machine-wide installation; review must inspect compliance with D10.</td></tr>
+          <tr class="automated" data-check="CK6" data-kind="automated" data-required="true"><td><span>Upgrade preserves an open change</span><b>CK6</b> automated, unchanged</td><td class="shows">The upgrade verifier succeeds in its constructed repository with an open change and verifies preserved hashes and candidate.</td><td class="limits">A fixture does not establish behavior in every repository and performs no pilot upgrade.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions to check against your memory</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Unchanged; yours, 2026-11-13: ship a capable orchestrator with subagents, mostly autonomous and locally extensible, escalating only critical issues. An issue database or containerised implementers must be possible without requiring a particular tool.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Unchanged; yours, 2026-11-13: take only changes whose current revision is approved for execution; list every other open change as left out.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Unchanged; yours, 2026-11-13: optional prose files in a known folder give local instructions once to all relevant roles. The kernel adds no schema or validation for them.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Unchanged; recorded as yours, 2026-11-13: park every critical stop, keep going where possible, and ask all parked questions in one round when nothing else can move.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Unchanged; author's design: extensions live in <code>.grace5/extensions/</code>, committed run ledgers in <code>.grace5/orchestration/runs/</code>. Both are outside the candidate, so extension edits stale no evidence and lie outside changes' reviewed diffs.</span></li>
+        <li data-decision="D6"><b>D6</b><span>Unchanged; author's design: the 0.5.0 to 0.6.0 migration installs the new skill beside packaged skills already installed.</span></li>
+        <li data-decision="D7"><b>D7</b><span>Unchanged; author's design: without an extension, run changes one at a time in the current worktree.</span></li>
+        <li data-decision="D8"><b>D8</b><span>Unchanged; author's design: the four critical classes are the floor; extensions may add classes and cannot remove kernel owner gates.</span></li>
+        <li data-decision="D9"><b>D9</b><span><strong>Changed:</strong> an independent agent reviewer judges one recorded scratch rehearsal and its limits. Four changes share no affected path or named dependency; fixture approvals approve nothing real. An all-role extension requires <code>Rehearsal: yes</code> on every run-made commit and grants no authority. A fresh session receives only the instruction to run open changes with the skill. The reviewer verifies the parked, closed and excluded changes, grouped questions, trailers, committed ledger and prohibited actions described above. This replaces your manual check.</span></li>
+        <li data-decision="D10"><b>D10</b><span><strong>Changed:</strong> your direction, 2026-11-14: this is no release. Keep the existing 0.6.0 version, pin and tag unchanged; no machine installation without an explicit request. Scratch packaged-skill copies stay within the rehearsal fixture. Work on <code>master</code> without a branch.</span></li>
+        <li data-decision="D11"><b>D11</b><span><strong>New:</strong> yours, 2026-11-14: “I'm not going to read logs! I need a competent agentic review.” Remove your CK7 observation, use the required independent review for implementation and rehearsal, and report findings concisely.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>Your direct rehearsal observation is replaced by the reviewer's judgment. The contract requires raw evidence and reviewer independence, but the six automated checks cannot establish that the agent behaved correctly.</li>
+        <li>One bounded rehearsal remains the behavioral sample. Review can identify failures and evidence gaps; a clean review cannot establish reliable behavior in unexercised situations. Contrary evidence and interventions after the run must remain visible to that reviewer.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>What it asks of you</h2>
+    <div>
+      <ul>
+        <li>Rule on the revised evidence arrangement in D9 and K7: an independent reviewer reads the raw material and reports findings concisely. Your former ten-minute CK7 log-reading and observation task is removed.</li>
+        <li>Confirm D10 and D11 match your directions: retain the existing version and tag, authorize no release or machine installation, and receive competent agent review. Any request for such distribution remains a separate owner decision.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Unchanged affected paths: <code>skills/**</code>, <code>packages/**</code>, <code>src/**</code>, <code>models/architecture/**</code>, <code>package.json</code>, <code>README.md</code> and <code>AGENTS.md</code>. The named surfaces remain the orchestrator skill, local extensions and upgrade.</li>
+        <li>Unchanged surface limit: one skill, one migration step and two state directories; no added command, schema, record kind, topic document or validation, and no required product, tracker, container runtime or harness-specific tool.</li>
+        <li>Unchanged: each existing lifecycle skill gains only its sentence about extensions. The new skill cites the lifecycle skills and method documents. The method defines extensions in one section, source identity adds the packaged skill name, and rationale entry L-24 gives a removal criterion.</li>
+        <li>Unchanged: migration is idempotent and self-verifying, touches no change, writes only kernel-managed paths, installs only in existing packaged-skill locations and refreshes the three installed skills.</li>
+        <li>Unchanged run boundaries: one change at a time in id order in the current worktree by default; concurrency or isolated workspaces need an authorizing extension. Implementer and independent reviewer subagents do the work; the orchestrator reads kernel status, performs close and keeps a resumable, committed ledger.</li>
+        <li>Unchanged critical stops cover reserved owner gates, foreign uncommitted affected work, outward or irreversible actions without standing authority, and failed required checks or blocking findings after two fix rounds. Extensions may vary the round count and add classes. Named dependencies or common affected paths cause later changes to wait; parked questions reach you together.</li>
+        <li>Unchanged: no agent or extension sets or infers approval, execution authorization or owner disposition, writes kernel records by hand during a run, or adopts pre-existing work. Extensions may replace defaults and grant outward-action authority, but cannot grant kernel owner gates. The kernel never reads, writes or validates extensions or ledgers; editing them changes no candidate.</li>
+        <li><strong>Changed:</strong> the independent review must cover the complete implementation diff and raw rehearsal evidence under K7 and D9. Its reviewer must neither author the implementation nor run the rehearsal. Failed behavior blocks; missing evidence leaves review incomplete.</li>
+        <li><strong>Changed:</strong> keep the existing version, pin and tag; no release, tag update or machine-wide installation. The scratch rehearsal is outside this repository and confines its packaged-skill copies to that fixture. This change executes on <code>master</code> without a branch.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1, unchanged: a run does not prepare, brief or approve changes; unapproved changes are listed and left out.</li>
+        <li>N2, unchanged: no kernel reading, schema, naming rule or validation of extension files or run ledgers.</li>
+        <li>N3, unchanged: no shipped extension or integration with an issue database, container runtime or other tool; each repository writes its own.</li>
+        <li>N4, unchanged: no kernel overlap detection or concurrent scheduler; the method's deferred proposal stays deferred.</li>
+        <li>N5, unchanged: no pilot skill installation or pilot extensions; each pilot takes the version on your flag.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <p>All protected paths are unchanged.</p>
+      <ul class="protected">
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/decisions/**">models/decisions/**</li>
+        <li data-protected="CLAUDE.md">CLAUDE.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <p>None. No mechanical finding was identified in the contract: no implausible criterion/check association, undefined term, contradiction, uncovered Change boundary, or missing cited path. CK4 supplies package identity only; K7 explicitly requires the independent review to judge A1 and A2's behavior.</p>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 1819 words against a target of 600, 6 checks against 8. Reason for excess: revision 2 retains the approved orchestration behavior and describes the bounded rehearsal for expert review.</p>
+  <p>This brief describes contract text with SHA-256 <code>f5246c37ee53a718de1bd0812a4156106a551eb02a727e61b7bd4d0488fb3864</code>.</p>
+  <p class="say">To decide, answer in one sentence: approve, or reject with the reason. Your words are recorded as you say them. An approval authorizes execution. If you say "approved, hold", the agent waits until you start the change or a batch; no hold state is recorded.</p>
+</footer>
+</body>
+</html>
