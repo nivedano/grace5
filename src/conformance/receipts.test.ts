@@ -551,6 +551,25 @@ test(
 );
 
 test(
+  "AUTH an approval with no Statement validates and runs",
+  () => {
+    const s = new Scenario({ id: "C-0300-no-statement", checks: [automated("CK1")] });
+    s.takeHashes();
+    s.writeBrief();
+    s.writeApproval({ omitStatement: true });
+    s.commit("approved with no statement");
+    expect(s.check().defects).toEqual([]);
+    expect(s.record("approval-1.xml")).not.toContain("<Statement>");
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
+    expect(s.start().code).toBe(0);
+    expect(s.run().code).toBe(0);
+    s.writeReview();
+    expect(s.close().code).toBe(0);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
   "AUTH a rejection without a reason is a defect; with a reason it never authorizes a run",
   () => {
     const s = new Scenario({ id: "C-0298-rejected-no-reason", checks: [automated("CK1")] });

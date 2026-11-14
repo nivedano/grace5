@@ -840,7 +840,7 @@ export class Scenario {
       `<footer>`,
       `  <p id="size">Contract size: ${info.words} words against a target of 600, ${info.checks} checks against 8.</p>`,
       `  <p>This brief describes contract text with SHA-256 <code>${info.contractSha}</code>.</p>`,
-      `  <p class="say">To decide, answer in one sentence: approve, or reject with the reason. Your words are recorded as you say them.</p>`,
+      `  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>`,
       `</footer>`,
       `</body>`,
       `</html>`,

@@ -57,3 +57,11 @@ Working notes only; not part of the contract. Sequence and technical detail live
 - Owner, 2026-11-14: `decision=approved`, `ordering=start C-0009 now`. C-0007 stays open and is not written; its final evidence is rerun after this change, which the execute skill's recovery rule covers. This overrides D6's ordering sentence only; the isolation part of D6 stands (C-0007 protected, no branch, no worktree, master).
 - The approval record is written by grace5 0.6.0, so it carries one factual `Source` line; the change removes `Source` from records written after it.
 
+## Review 1 and the fixes it prompted
+
+- Independent review 1: 0 blocking, 5 non-blocking; authorization, upgrade, rationale-ledger and AGENTS.md upheld; no outside or protected path.
+- Fixed before close: the fixture brief in `helper.ts` still told the owner their words are recorded; it now carries the template's sentence. AUTH-04 was joined by a case for an approved record with no `Statement`, which the amended schema permits and the old one refuses.
+- Not fixed, and recorded as non-blocking: AUTH-05 and REL-01 are compatibility guards that pass before the change, so A1's "fails without the change" overstates them; the approved brief-1.html keeps its old sentence because editing it would break the approval's brief hash; the L-23 wording edit stretches K3 narrowly.
+- The fixes change the source candidate, so final evidence is rerun and review 2 covers the new candidate; review 1 stays as history.
+
+
