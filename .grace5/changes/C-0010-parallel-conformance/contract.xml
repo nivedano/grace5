@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0010-parallel-conformance" revision="1" title="The conformance suite runs its files in parallel and no file dominates a worker, so a full suite run takes a fraction of today's serial time">
+  <Problem>Explicit owner requirement of 2026-11-14: the conformance suite takes too long to run and its length must be cut. A full serial run is recorded at 396.6 seconds (C-0007 run 4, CK2) and measured at 676 seconds under concurrent load on this host; 94 tests sit in six files, the largest holding twenty, so the runner's file-level parallelism cannot engage and every evidence run of every future change pays the whole length. The length is in scratch-repository construction and real CLI spawns, not in case count: reducing the 57 documented cases would cut the framework's core coverage, which the owner's requirement does not ask for.</Problem>
+  <Change>The suite's test files are rearranged by topic until no file holds a disproportionate share of the tests, so that a parallel run's wall time approximates its slowest file rather than the sum of all; no test, assertion or helper is changed, added or removed, and a committed baseline of the suite's test titles, taken before the rearrangement, is the reference a check compares against. The test script of package.json runs bun test --parallel, the serial command remains valid, and AGENTS.md states the measured duration of the parallel run. Nothing outside the conformance suite, the test script and that one AGENTS.md line is written.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="AGENTS.md">The surface grows by nothing: no command, schema, record kind, skill, tool or validation mechanism is added; the change rearranges test files, adds the title baseline beside them, sets the parallel flag in the test script and updates the duration line of AGENTS.md.</Constraint>
+    <Constraint id="K2" rule="models/architecture/conformance.md">Every documented case keeps at least the tests it has today; no case is added, removed, renamed or weakened, and the title baseline check fails on any test the rearrangement loses, renames or adds.</Constraint>
+    <Constraint id="K3">The kernel, CLI, schemas, records, skills, packages and method documents are Protected and untouched; the parallel flag changes no test semantics, and the serial command remains valid without a dedicated re-verification check, the rearrangement being mechanical and type-checked.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">No mechanism enters the rationale ledger: parallel execution is the test runner's own flag and the title baseline is a fixture of the conformance suite, not a kernel validation.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">No conformance case is added, removed or weakened; the 57 documented cases and today's tests are the fixed inventory, including the six cases whose tests today carry no case id in their titles.</NonGoal>
+    <NonGoal id="N2">No kernel, CLI, schema, record, skill or package change, and no new tool in src/tools/.</NonGoal>
+    <NonGoal id="N3">No hard timing threshold in any check: speed is evidenced by the recorded elapsed time of receipts and judged in review, because a machine-dependent ceiling fails on load, not on regression.</NonGoal>
+    <NonGoal id="N4">No release: the version, the pin, the tag and the migration steps stay as they are (models/architecture/upgrade.md).</NonGoal>
+    <NonGoal id="N5">No CI sharding and no custom runner: the runner's own parallel flag is the whole mechanism.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK2">The whole suite passes under bun test --parallel with the same totals as the serial baseline recorded in C-0007's run 4: 94 tests, one POSIX-only skip, zero failures, 1407 expect() calls.</Criterion>
+    <Criterion id="A2" checks="CK2">The parallel run's recorded elapsed time is under half the recorded serial baseline of 396.6 seconds.</Criterion>
+    <Criterion id="A3" checks="CK3">The set of test titles after the rearrangement equals the committed baseline exactly: nothing is lost, renamed or added.</Criterion>
+    <Criterion id="A4" checks="CK1">The kernel still type-checks: the rearranged files compile and import unchanged.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/conformance/**</Path>
+    <Path>package.json</Path>
+    <Path>AGENTS.md</Path>
+    <Name>conformance suite</Name>
+    <Name>test script</Name>
+    <Protected>src/*.ts</Protected>
+    <Protected>src/commands/**</Protected>
+    <Protected>src/upgrade/**</Protected>
+    <Protected>src/tools/**</Protected>
+    <Protected>skills/**</Protected>
+    <Protected>packages/**</Protected>
+    <Protected>models/**</Protected>
+    <Protected>CLAUDE.md</Protected>
+    <Protected>README.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="180">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="480">
+      <Command>bun test --parallel</Command>
+    </Automated>
+    <Automated id="CK3" budget="60">
+      <Command>bun -e "const fs=require('fs');const path=require('path');const dir='src/conformance';const q=String.fromCharCode(34);const re=new RegExp('test(?:\\.skipIf\\([^)]*\\))?\\(\\s*'+q+'([^'+q+']*)'+q,'g');const titles=[];for(const f of fs.readdirSync(dir).filter(f=>f.endsWith('.test.ts'))){const s=fs.readFileSync(path.join(dir,f),'utf8');for(const m of s.matchAll(re))titles.push(m[1])}titles.sort();const base=fs.readFileSync(path.join(dir,'test-titles.txt'),'utf8').split(/\r?\n/).filter(Boolean).sort();const lost=base.filter(t=>!titles.includes(t));const gained=titles.filter(t=>!base.includes(t));if(lost.length||gained.length||base.length===0){console.error('titles: baseline '+base.length+', now '+titles.length+', lost: '+lost.join(' ; ')+', gained: '+gained.join(' ; '));process.exit(1)}console.log('titles: '+titles.length)"</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The owner's requirement is a shorter suite run, not a smaller suite: the length is in scratch-repository construction and real CLI spawns, so the cut comes from parallelism and file arrangement, and the documented case inventory is untouched.</Decision>
+    <Decision id="D2">The runner's own file-level parallelism is the mechanism, measured on this host at 396.6 seconds serial (C-0007 run 4) and 230 seconds parallel before any rearrangement, with identical totals.</Decision>
+    <Decision id="D3">The largest files are split by topic until none dominates a worker; the split is mechanical and is guarded by a committed title baseline rather than a new validation mechanism.</Decision>
+    <Decision id="D4">The test script of package.json runs the parallel form for daily use; the serial command remains valid and is not re-verified by a dedicated check.</Decision>
+    <Decision id="D5">No check carries a timing threshold; the speed criterion is the recorded elapsed time of the parallel receipt against the recorded serial baseline, judged in review.</Decision>
+    <Decision id="D6">No release: the version, pin, tag and migration steps are untouched; a release remains a separate owner-requested change.</Decision>
+  </Decisions>
+</Contract>
