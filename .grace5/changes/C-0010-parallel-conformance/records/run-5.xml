@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0010-parallel-conformance" revision="1" contract-sha256="b209128fa1dea45a34941159938fccf24833fa8e12b9be3a6d0bb3e8efd7babe" n="5" run-id="f14d00b235f9493c8d7d3078a266afc9" started="2026-11-14T21:55:04.101Z" ended="2026-11-14T21:57:12.349Z" status="completed" source-revision="1e86ed6db54ec7c67dbe203c4c286f1ceeaee460" dirty="false" candidate="5dbd103533e89fa007bd2e7625f706c1b6e4be40c230d8e282361c15ccece1d6" kernel="grace5 0.6.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="5225" log="records/logs/run-5/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=180
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="f98a757072a9d61435e6a77813dba7afc5c67de3df68b330ee9fba98b8a436fb" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="122927" log="records/logs/run-5/CK2.log" log-sha256="130694a01cbcd5f05d5ced25b03587b5b25750bc34d333fb0cdaf862367614f2">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=480
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="fca3eba24f472b6fa400fb3167f79dcf398be12c6b513395a3a0bb0c8ffc390c" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="87" log="records/logs/run-5/CK3.log" log-sha256="30f719c91fc96a96367b08eb6258e379ab4b5845ebf62d0901664b052d63548f">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=60
+command=bun -e "const fs=require('fs');const path=require('path');const dir='src/conformance';const q=String.fromCharCode(34);const re=new RegExp('test(?:\\.skipIf\\([^)]*\\))?\\(\\s*'+q+'([^'+q+']*)'+q,'g');const titles=[];for(const f of fs.readdirSync(dir).filter(f=&gt;f.endsWith('.test.ts'))){const s=fs.readFileSync(path.join(dir,f),'utf8');for(const m of s.matchAll(re))titles.push(m[1])}titles.sort();const base=fs.readFileSync(path.join(dir,'test-titles.txt'),'utf8').split(/\r?\n/).filter(Boolean).sort();const lost=base.filter(t=&gt;!titles.includes(t));const gained=titles.filter(t=&gt;!base.includes(t));if(lost.length||gained.length||base.length===0){console.error('titles: baseline '+base.length+', now '+titles.length+', lost: '+lost.join(' ; ')+', gained: '+gained.join(' ; '));process.exit(1)}console.log('titles: '+titles.length)"
+</Definition>
+  </Result>
+</Run>

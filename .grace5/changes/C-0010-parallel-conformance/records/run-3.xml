@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0010-parallel-conformance" revision="1" contract-sha256="b209128fa1dea45a34941159938fccf24833fa8e12b9be3a6d0bb3e8efd7babe" n="3" run-id="73a0fb82c0924964b1220902135d94e6" started="2026-11-14T21:47:01.738Z" ended="2026-11-14T21:47:01.832Z" status="completed" source-revision="6808b6a42f49d6d9d5031c9aac24be64799b8265" dirty="true" candidate="324e5546b39517087e4bfac42fa2090f1a9457fff77b18c38faae2b3a2b8b4bf" kernel="grace5 0.6.0">
+  <Result check="CK3" kind="automated" required="true" definition-sha256="fca3eba24f472b6fa400fb3167f79dcf398be12c6b513395a3a0bb0c8ffc390c" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="91" log="records/logs/run-3/CK3.log" log-sha256="30f719c91fc96a96367b08eb6258e379ab4b5845ebf62d0901664b052d63548f">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=60
+command=bun -e "const fs=require('fs');const path=require('path');const dir='src/conformance';const q=String.fromCharCode(34);const re=new RegExp('test(?:\\.skipIf\\([^)]*\\))?\\(\\s*'+q+'([^'+q+']*)'+q,'g');const titles=[];for(const f of fs.readdirSync(dir).filter(f=&gt;f.endsWith('.test.ts'))){const s=fs.readFileSync(path.join(dir,f),'utf8');for(const m of s.matchAll(re))titles.push(m[1])}titles.sort();const base=fs.readFileSync(path.join(dir,'test-titles.txt'),'utf8').split(/\r?\n/).filter(Boolean).sort();const lost=base.filter(t=&gt;!titles.includes(t));const gained=titles.filter(t=&gt;!base.includes(t));if(lost.length||gained.length||base.length===0){console.error('titles: baseline '+base.length+', now '+titles.length+', lost: '+lost.join(' ; ')+', gained: '+gained.join(' ; '));process.exit(1)}console.log('titles: '+titles.length)"
+</Definition>
+  </Result>
+</Run>
