@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0009-decision-not-conversation" revision="1" contract-sha256="c8155c36ea913a80ff22e59eda11880f1638b54b0a03bb58f9781a4a2fb95993" n="3" run-id="6eb776ce124e4c7194599ace9fe555b2" started="2026-11-14T15:33:08.113Z" ended="2026-11-14T15:34:13.143Z" status="completed" source-revision="7e2d90d384a1cc1f33543dc359356dfc83c28e02" dirty="false" candidate="24d77d36f2783feaff7d7e3dc9ef2efc34f5109085e82633229704d392ac9f8c" kernel="grace5 0.6.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="b27f6bdd35d79f03bc0c3ea461c9ddbd11960b3302cf79e6ba848a339f1ccbb5" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="2955" log="records/logs/run-3/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=180
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="43f8a0964de858db9a48afc8ea72a3908370f8edf76b49dc4d3cccfbfc5f419a" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="51759" log="records/logs/run-3/CK2.log" log-sha256="33b6883dd50e2d933a5a534de6ebf130b180cd1bf1e426db325fc06a95ab4c74">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=180
+command=bun test src/conformance/receipts.test.ts src/conformance/failure.test.ts src/conformance/upgrade.test.ts --test-name-pattern "AUTH|REL"
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="3a1b563cc9d6f6a6a8e7e8d41421ea14e297f1a96663e086372036c089b6fd47" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="3960" log="records/logs/run-3/CK3.log" log-sha256="a26e3f0ca8da733373d9ff00a6c3f29583e1fe2ad3ee7cb56108f2e03eedccc0">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run examples:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="a2697c3dc38ba7b772fa3f56b469dde69471f946c6b933def90bbbedbcae571b" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="489" log="records/logs/run-3/CK4.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK5" kind="automated" required="true" definition-sha256="252635bbd9ad256874f746d138d2029349b93c6aa5652a663d141059be738291" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="141" log="records/logs/run-3/CK5.log" log-sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855">
+    <Definition>kind=automated
+id=CK5
+required=true
+cwd=.
+budget=60
+command=bun -e "const fs = require('fs'); const out = require('child_process').execFileSync('bun', ['src/cli.ts', '--version']).toString().trim(); const pin = fs.existsSync('.grace5/kernel-version') ? fs.readFileSync('.grace5/kernel-version', 'utf8').trim() : ''; process.exit(out === 'grace5 0.6.0' &amp;&amp; pin === '0.6.0' ? 0 : 1)"
+</Definition>
+  </Result>
+  <Result check="CK6" kind="automated" required="true" definition-sha256="ce0d6933534b74d42960d355405012ef9d2b3d2a4097a92a0ae07a819508ed82" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="5716" log="records/logs/run-3/CK6.log" log-sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855">
+    <Definition>kind=automated
+id=CK6
+required=true
+cwd=.
+budget=180
+command=bun -e "const fs=require('fs'),path=require('path'),cp=require('child_process'); const ids=[]; for (const root of ['.grace5/changes','.grace5/changes/closed']) { for (const n of fs.readdirSync(root)) { if (n === 'closed') continue; const p=path.join(root,n); if (fs.statSync(p).isDirectory()) ids.push(n); } } for (const id of ids) { const r=cp.spawnSync('bun',['src/cli.ts','check',id]); if (r.status !== 0) { process.stdout.write(r.stdout); process.stderr.write(r.stderr); process.exit(1); } }"
+</Definition>
+  </Result>
+</Run>
