@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0010-parallel-conformance" revision="1" contract-sha256="b209128fa1dea45a34941159938fccf24833fa8e12b9be3a6d0bb3e8efd7babe" date="2026-11-14T22:17:29.631Z" source-revision="0c870c0a287cb85d6b1f37e72e8765b521a4cd58" candidate="5dbd103533e89fa007bd2e7625f706c1b6e4be40c230d8e282361c15ccece1d6" start-revision="da60b716a256837acd89601fa8af2e1342c27751" brief="brief-1.html" approval="approval-1.xml" review="1" kernel="grace5 0.6.0">
+  <Satisfied check="CK1" kind="automated" run="5" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="5" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="5" claim="command-completion"/>
+</Close>
