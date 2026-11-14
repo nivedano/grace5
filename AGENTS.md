@@ -20,4 +20,4 @@ GRACE 5 is a kernel for owner-approved, evidence-closed changes. This repository
 
 ## Checks
 
-`bun run check`, `bun test` (about four minutes), `bun run examples:verify`, `bun run package:verify`.
+`bun run check`, `bun test` (about two minutes with the runner's parallel flag, which the `test` script sets; the serial form remains valid), `bun run examples:verify`, `bun run package:verify`.

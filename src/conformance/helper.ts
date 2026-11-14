@@ -3,6 +3,8 @@
 // the kernel is driven as a subprocess and its records are read as text.
 
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { expect } from "bun:test";
+import { type Step } from "../upgrade/steps";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -1039,4 +1041,109 @@ export function waitForExit(child: ChildProcess, timeoutMs: number): Promise<num
       resolve(code);
     });
   });
+}
+
+// ------------------------------------------------------- shared upgrade fixtures
+// Moved verbatim from upgrade.test.ts by C-0010 so the split topic files share one copy.
+
+export const UPGRADE_VERSION = kernelVersion();
+/** The line the 0.2.0 to 0.4.0 kernels wrote into a project's .gitignore; this kernel leaves it alone wherever it finds it. */
+export const OLD_PROJECT_IGNORE_LINE = ".grace5/changes/closed/*/records/logs/";
+export const PACKAGED_SKILLS = path.join(REPO_ROOT, "packages", "skills");
+export const LOCAL_IGNORE_STEP = `step: 0.4.0 -> 0.5.0: write the local ignore file ${LOCAL_IGNORE_PATH}`;
+
+export const behind = (pin: string): string => `refused: repository state is at ${pin}, kernel is ${UPGRADE_VERSION}: run grace5 upgrade`;
+export const ahead = (pin: string): string => `refused: repository state is at ${pin}, kernel is ${UPGRADE_VERSION}: kernel too old`;
+export const unreadable = (reason: string): string => `refused: repository pin is unreadable: ${PIN_PATH} is not a version: ${reason}`;
+export const closedPath = (id: string): string => `.grace5/changes/closed/${id}`;
+
+/** An injected step for the chain runner: one that touches no change unless the case says otherwise. */
+export function fixtureStep(step: Omit<Step, "touches"> & Partial<Pick<Step, "touches">>): Step {
+  return { touches: () => [], ...step };
+}
+
+/** The `candidate:` line of `status <id>`. */
+export function candidateLine(s: Scenario, id = s.id): string {
+  const line = s.cli(["status", id]).lines.find((l) => l.startsWith("candidate: "));
+  if (line === undefined) throw new Error(`status ${id} printed no candidate line`);
+  return line;
+}
+
+/** Starts, changes the product, takes final evidence, writes the review and closes. Nothing is committed after the run, so the logs stay untracked. */
+export function closeFully(s: Scenario): CliResult {
+  expect(s.start().code).toBe(0);
+  s.changeProduct("the wanted line");
+  expect(s.run().code).toBe(0);
+  s.writeReview();
+  const close = s.close();
+  expect(close.code).toBe(0);
+  return close;
+}
+
+/** A second change in the same repository, prepared and closed; the scenario then speaks for that change. */
+export function closeSecond(s: Scenario, def: ContractDef): void {
+  s.writeContract(def);
+  s.prepare();
+  closeFully(s);
+}
+
+/** A repository as the 0.1.0 kernel left it: the closed change a sibling under .grace5/changes/, no pin, no ignore file anywhere. */
+export function asVersion010(s: Scenario): void {
+  fs.renameSync(s.closedChangeDir, s.openChangeDir);
+  s.pin(undefined);
+  fs.rmSync(path.join(s.repo, ".gitignore"), { force: true });
+  fs.rmSync(path.join(s.repo, LOCAL_IGNORE_PATH), { force: true });
+}
+
+/** The versions a plan or an applied chain walks through, read from its step and bump lines; must start at `from` and end at the kernel's version. */
+export function versionsOf(result: CliResult): string[] {
+  const versions: string[] = [];
+  for (const line of result.lines) {
+    const m = /^(step|bump): (\d+\.\d+\.\d+) -> (\d+\.\d+\.\d+): .+$/.exec(line);
+    if (!m) continue;
+    if (versions.length === 0) versions.push(m[2] ?? "");
+    expect(versions.at(-1)).toBe(m[2]);
+    versions.push(m[3] ?? "");
+  }
+  return versions;
+}
+
+export function readSkill(rel: string): string {
+  return fs.readFileSync(path.join(PACKAGED_SKILLS, rel), "utf8");
+}
+
+// ------------------------------------------------------------- review-gaps fixtures
+// Moved verbatim from review-gaps.test.ts by C-0010 so the split topic files share one copy.
+
+export function streamLines(text: string): string[] {
+  return text.split(/\r?\n/).map((l) => l.trimEnd()).filter((l) => l !== "");
+}
+
+export function expectRefusal(s: Scenario, close: CliResult, phrase: string | RegExp): void {
+  expect(close.code).toBe(1);
+  expect(hasLine(close, typeof phrase === "string" ? `refused: ${phrase}` : phrase)).toBe(true);
+  expect(s.hasRecord("close.xml")).toBe(false);
+}
+
+/** Started, product changed and committed, final evidence taken: only the review is missing. */
+export function evidenced(def: ContractDef): { s: Scenario; startHead: string } {
+  const s = prepared(def);
+  const startHead = s.head();
+  expect(s.start().code).toBe(0);
+  s.changeProduct("the wanted line");
+  expect(s.run().code).toBe(0);
+  return { s, startHead };
+}
+
+/** Rewrites history: one orphan commit holds the same tree, the old branch and its objects are gone. */
+export function loseHistory(s: Scenario, startHead: string): void {
+  const branch = s.git("rev-parse", "--abbrev-ref", "HEAD").trim();
+  s.git("checkout", "-q", "--orphan", "rewritten");
+  s.git("add", "-A");
+  s.git("commit", "-q", "-m", "history rewritten");
+  s.git("branch", "-D", branch);
+  s.git("reflog", "expire", "--expire=now", "--all");
+  s.git("gc", "-q", "--prune=now");
+  const probe = spawnSync("git", ["cat-file", "-e", `${startHead}^{commit}`], { cwd: s.repo, encoding: "utf8" });
+  expect(probe.status).not.toBe(0);
 }

@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "bun test",
+    "test": "bun test --parallel",
     "examples:verify": "bun src/tools/examples-verify.ts",
     "package": "bun src/tools/package.ts",
     "package:verify": "bun src/tools/package.ts --verify",
