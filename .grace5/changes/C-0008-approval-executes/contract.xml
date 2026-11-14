@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Contract id="C-0008-approval-executes" revision="1" title="An approval authorizes execution; holding a change for a batch is not a kernel state">
+<Contract id="C-0008-approval-executes" revision="2" title="An approval authorizes execution; holding a change for a batch is not a kernel state">
   <Problem>The approval record carries a second decision, executes, with its own status value "approved for execution" beside "approved", a later Execution element, and the refusal "approval does not authorize execution". The owner ruled on 2026-11-13 that this state is useless: approved means the change can be executed, and "do not execute now" means hold it until a batch is run, a scheduling instruction with no decision behind it. Two pilot changes stand refused today for lack of a word nobody needed to record.</Problem>
   <Change>An approval authorizes execution. The schema keeps the executes attribute and the Execution element as optional for records already written, and the kernel ignores both; a new record carries neither. The authorization states are unapproved, approved, rejected and altered after approval; among approval reasons run refuses only "no approval for revision n", and the phrase "approval does not authorize execution" is removed everywhere, as is the defect that a rejected approval must say executes="false". The brief's closing line and the prepare skill ask the owner for one statement, approve or reject with the reason, and say that an approval worded to defer the start, such as "approved, hold", is an approval the agent does not act on until the owner starts the change or a batch, and is recorded nowhere; the execute skill requires the state approved. authorization.md, commands.md, conformance.md, m2-proposal.md and the ledger entry L-05 are rewritten to this. The conformance cases that asserted the second state are replaced by cases that an approval without the attribute runs, that a record with executes false or an Execution element runs the same, and that the removed phrase and status value are never printed. The version becomes 0.6.0, with a 0.5.0 to 0.6.0 step that refreshes the installed skills and touches no change; this repository's pin is written to 0.6.0 by this change directly.</Change>
   <Constraints>
@@ -41,8 +41,8 @@
     <Automated id="CK1" budget="180">
       <Command>bun run check</Command>
     </Automated>
-    <Automated id="CK2" budget="600">
-      <Command>bun test</Command>
+    <Automated id="CK2" budget="120">
+      <Command>bun test src/conformance/receipts.test.ts src/conformance/upgrade.test.ts src/conformance/failure.test.ts --test-name-pattern "AUTH|UP-07|FL-04"</Command>
     </Automated>
     <Automated id="CK3" budget="120">
       <Command>bun run examples:verify</Command>
@@ -62,5 +62,7 @@
     <Decision id="D2">Old approval records keep their attribute and validate; the kernel reads every approval as authorization. No pilot record is rewritten; a pilot takes the rule with grace5 upgrade.</Decision>
     <Decision id="D3">This change takes the cheap path the owner asked for on 2026-11-13: the brief and the review are written by the lead, marked self, and no subagent is used.</Decision>
     <Decision id="D4">The version is 0.6.0, tagged v0.6.0 when this change closes; the change executes on master in the home repository while C-0007-orchestrate-skill, another session's draft, stays open and protected; no branch is created.</Decision>
+    <Decision id="D5">Owner, 2026-11-14: "no timeout tests any more. close the issue finally I ASK THIRD TIME!" The FL-09 wall-clock timeout test and its conformance declaration are removed; the runtime budget mechanism is unchanged.</Decision>
+    <Decision id="D6">Author's proposal for approval in revision 2: CK2 runs the focused approval, legacy-record upgrade, skill-refresh and bound-check amendment cases, with a 120-second budget, instead of the entire conformance suite. The other five checks, release behavior and write boundary are unchanged. Closure does not claim a fresh full-suite pass.</Decision>
   </Decisions>
 </Contract>
