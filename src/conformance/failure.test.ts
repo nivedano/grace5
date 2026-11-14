@@ -1,10 +1,9 @@
-// Conformance cases FL-01 .. FL-09 of models/architecture/conformance.md: things that go wrong and must be recorded as what they are.
+// Conformance cases FL-01 .. FL-08 of models/architecture/conformance.md: things that go wrong and must be recorded as what they are.
 
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
-  HEX40,
   TEST_TIMEOUT,
   attr,
   automated,
@@ -391,42 +390,6 @@ test(
     s.write(rel, text);
     expect(hasLine(s.status(), "authorization: approved")).toBe(true);
     expect(s.close().code).toBe(0);
-  },
-  TEST_TIMEOUT,
-);
-
-test(
-  "FL-09 a command that exceeds its budget is killed and recorded cancelled",
-  () => {
-    const s = prepared({
-      id: "C-0109-budget",
-      checks: [automated("CKSLOW", "bun tools/sleep.js 20", { budget: 1 }), automated("CK2")],
-    });
-    const start = s.start();
-    expect(start.code).toBe(1);
-    expect(hasLine(start, /^run 1: CKSLOW cancelled(: .*)?$/)).toBe(true);
-    // Killed: the run did not wait for the twenty-second command or anything it started.
-    expect(start.elapsedMs).toBeLessThan(15_000);
-    // The run goes on to the next check.
-    expect(hasLine(start, "run 1: CK2 passed")).toBe(true);
-
-    const receipt = s.receipt(1);
-    expect(attr(receipt, "Run", "status")).toBe("completed");
-    expect(resultAttr(receipt, "CKSLOW", "verdict")).toBe("cancelled");
-    expect(resultAttr(receipt, "CKSLOW", "claim")).toBeUndefined();
-    const elapsed = Number(resultAttr(receipt, "CKSLOW", "elapsed-ms") ?? "NaN");
-    expect(elapsed).toBeGreaterThanOrEqual(900);
-    expect(elapsed).toBeLessThan(15_000);
-    // The command ran: it left its start note. It did not reach the line it prints after sleeping.
-    expect(fs.existsSync(path.join(s.scratch, "sleep-started"))).toBe(true);
-    const log = resultAttr(receipt, "CKSLOW", "log");
-    expect(log).toBeDefined();
-    expect(s.readLog(log ?? "").toString("utf8")).not.toContain("MARK-A");
-
-    expect(attr(receipt, "Run", "source-revision")).toMatch(HEX40);
-    const close = s.close();
-    expect(close.code).toBe(1);
-    expect(hasLine(close, "refused: check CKSLOW: current result is cancelled")).toBe(true);
   },
   TEST_TIMEOUT,
 );

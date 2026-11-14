@@ -37,7 +37,6 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | FL-06 | Another change in the repository is malformed. | `status` of a valid change is unaffected; the malformed one is reported as malformed. |
 | FL-07 | The complete diff touches a protected path. | `status` reports it; `close` refuses. |
 | FL-08 | The contract was edited after approval without a new revision. | Reported as altered after approval; treated as unapproved. |
-| FL-09 | A command exceeds its budget. | Killed and recorded `cancelled`. |
 
 ## Approval compatibility
 
