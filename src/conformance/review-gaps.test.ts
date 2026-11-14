@@ -91,7 +91,7 @@ test(
     s.writeBrief({ omitProtected: ["src/secret/**"] });
     s.writeApproval();
     s.commit("prepare with a defective brief");
-    expect(hasLine(s.status(), "authorization: approved for execution")).toBe(true);
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
 
     const start = s.start();
     expect(start.code).toBe(1);
@@ -225,7 +225,7 @@ test(
     const { s } = evidenced(rev1);
     expect(hasLine(s.status(), "check CK2: passed, counts")).toBe(true);
 
-    // Revision 2 changes CK2's command and is approved for execution. The source does not change.
+    // Revision 2 changes CK2's command and is approved. The source does not change.
     s.writeContract({ id: rev1.id, revision: 2, checks: [automated("CK1"), automated("CK2", "bun tools/env.js")] });
     s.takeHashes();
     s.writeBrief();
@@ -233,7 +233,7 @@ test(
     s.writeReview();
 
     const status = s.status();
-    expect(hasLine(status, "authorization: approved for execution")).toBe(true);
+    expect(hasLine(status, "authorization: approved")).toBe(true);
     expect(hasLine(status, "check CK1: passed, counts")).toBe(true);
     expect(hasLine(status, "check CK2: passed, does not count: definition changed since the result")).toBe(true);
     expectRefusal(s, s.close(), "check CK2: definition changed since the result");

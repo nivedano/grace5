@@ -114,7 +114,7 @@ test(
     s.commit("a change under closed/ that was never closed");
 
     const listing = s.cli(["status"]);
-    expect(hasLine(listing, new RegExp(`^${s.id}: approved for execution, next: .+$`))).toBe(true);
+    expect(hasLine(listing, new RegExp(`^${s.id}: approved, next: .+$`))).toBe(true);
     expect(hasLine(listing, new RegExp(`^${stray}: malformed: .*close\\.xml.*$`))).toBe(true);
     expect(hasLine(listing, "closed changes: 0")).toBe(true);
     const all = s.cli(["status", "--all"]);

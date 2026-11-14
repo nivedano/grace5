@@ -36,6 +36,7 @@ A migration step is kernel code for one version boundary whose state layout, loc
 | 0.2.0 to 0.3.0 | Writes the pin. | None. |
 | 0.3.0 to 0.4.0 | Refreshes the installed skills to 0.4.0: nothing beyond the refresh every step performs, since 0.4.0 changed the skills and nothing else in the state; verifies that every installed `grace5-*` skill file equals the packaged one. | None. |
 | 0.4.0 to 0.5.0 | Writes the local ignore file `.grace5/.gitignore` and verifies it carries both lines; nothing else. | None. |
+| 0.5.0 to 0.6.0 | Refreshes the installed skills and verifies they match the package; no change directory or record is written. Legacy approval execution fields are ignored by the kernel. | None. |
 
 A kernel change that alters the state layout, the local ignore file or the skills ships its step in the same change, and the conformance list gains a case for it.
 

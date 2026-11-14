@@ -272,7 +272,7 @@ async function runInner(options: RunOptions): Promise<number> {
   if (state.malformed !== undefined || contract === undefined || state.report === undefined) return refuse(`change is malformed: ${state.malformed ?? ""}`);
   // commands.md, Details settled in implementation: a defect of the contract or of a record holds a run at any time,
   // a defect of the current revision's brief only once that revision is approved, so a draft brief never stops the bound checks.
-  const approved = state.authorization === "approved" || state.authorization === "approved for execution";
+  const approved = state.authorization === "approved";
   const holding = state.blocking.find((defect) => approved || !state.briefDefects.includes(defect));
   if (holding !== undefined) return refuse(`change has defects: ${holding}`);
   const source = state.source;
@@ -280,7 +280,6 @@ async function runInner(options: RunOptions): Promise<number> {
   if (source.revision === undefined || source.candidate === undefined) return refuse("no source revision");
   if (state.executionApproval === undefined) {
     if (state.authorization === "altered after approval") return refuse("contract altered after approval");
-    if (state.authorization === "approved") return refuse("approval does not authorize execution");
     return refuse(`no approval for revision ${String(contract.revision)}`);
   }
   if (options.start && state.startRun !== undefined) return refuse(`a start run exists: run-${String(state.startRun.n)}`);

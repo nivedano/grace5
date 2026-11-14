@@ -5,6 +5,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { briefDefects, readBrief } from "../brief";
 import { readContract } from "../contract";
+import { loadRecords } from "../records";
+import { evaluate, listClosedChanges } from "../state";
 
 const EXAMPLES = resolve(import.meta.dir, "..", "..", "models", "architecture", "examples");
 const DEFECTIVE = "defective-brief";
@@ -18,6 +20,7 @@ async function defectsOf(dir: string): Promise<string[]> {
   const contract = report.contract;
   if (contract === undefined) return defects;
   const records = join(dir, "records");
+  defects.push(...(await loadRecords(dir, contract.id)).defects);
   const briefs = existsSync(records) ? readdirSync(records).filter((name) => /^brief-[1-9][0-9]*\.html$/.test(name)).sort() : [];
   if (briefs.length === 0) defects.push("no brief");
   for (const name of briefs) {
@@ -46,6 +49,15 @@ async function main(): Promise<number> {
     else {
       failed = true;
       console.log(`${name}: FAILED, ${defects.join("; ")}`);
+    }
+  }
+  const root = resolve(EXAMPLES, "..", "..", "..");
+  for (const id of listClosedChanges(root)) {
+    const state = await evaluate(root, id);
+    if (state.defects.length === 0) console.log(`${id}: historical records clean`);
+    else {
+      failed = true;
+      console.log(`${id}: FAILED, ${state.defects.join("; ")}`);
     }
   }
   return failed ? 1 : 0;

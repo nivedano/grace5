@@ -102,7 +102,7 @@ test(
     const listing = s.cli(["status"]);
     expect(listing.code).toBe(0);
     expect(listing.lines[0]).toBe(`kernel: ${VERSION}, state: 0.2.0, run grace5 upgrade`);
-    expect(hasLine(listing, new RegExp(`^${s.id}: approved for execution, next: .+$`))).toBe(true);
+    expect(hasLine(listing, new RegExp(`^${s.id}: approved, next: .+$`))).toBe(true);
     expect(s.cli(["--version"]).code).toBe(0);
     expect(s.cli(["--help"]).code).toBe(0);
     expect(s.cli(["check", "--help"]).code).toBe(0);
@@ -161,6 +161,7 @@ test(
     expect(hasLine(plan, /^step: 0\.2\.0 -> 0\.3\.0: .*kernel-version.*$/)).toBe(true);
     expect(hasLine(plan, "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0")).toBe(true);
     expect(hasLine(plan, LOCAL_IGNORE_STEP)).toBe(true);
+    expect(hasLine(plan, "step: 0.5.0 -> 0.6.0: refresh the installed skills to 0.6.0")).toBe(true);
     const versions = versionsOf(plan);
     expect(versions[0]).toBe("0.1.0");
     expect(versions.at(-1)).toBe(VERSION);
@@ -582,7 +583,7 @@ test(
     expect(status.out).not.toContain("outside:");
 
     const listing = s.cli(["status", "--all"]);
-    expect(hasLine(listing, new RegExp(`^${open}: approved for execution, next: .+$`))).toBe(true);
+    expect(hasLine(listing, new RegExp(`^${open}: approved, next: .+$`))).toBe(true);
     expect(hasLine(listing, `${closed}: closed`)).toBe(true);
     expect(listing.lines.at(-1)).toBe("closed changes: 1");
     const check = s.check(open);
@@ -606,6 +607,33 @@ test(
     }
     expect(s.porcelain()).toBe(taken);
     expect(s.readPin()).toBeUndefined();
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "AUTH-03 upgrade from 0.5.0 only refreshes skills and the pin; a legacy false approval stays unchanged and can start",
+  () => {
+    const s = prepared({ id: "C-0529-legacy-approval", checks: [automated("CK1")] });
+    s.writeApproval({ executes: false });
+    s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare skill\n");
+    s.pin("0.5.0");
+    s.commit("a pilot at 0.5.0 with a legacy approval");
+    const before = candidateLine(s);
+    const records = fs.readdirSync(s.recordsDir).sort().map((name) => [name, fs.readFileSync(path.join(s.recordsDir, name)).toString("hex")]);
+    const checkBefore = s.read(`.grace5/changes/${s.id}/contract.xml`);
+    const upgrade = s.cli(["upgrade"]);
+    expect(upgrade.code).toBe(0);
+    expect(upgrade.lines.filter((line) => /^(step|bump):/.test(line))).toEqual(["step: 0.5.0 -> 0.6.0: refresh the installed skills to 0.6.0"]);
+    expect(s.readPin()).toBe("0.6.0\n");
+    expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
+    expect(s.porcelain().split("\n").filter(Boolean).map((line) => line.slice(3)).sort()).toEqual([".agents/skills/grace5-prepare/SKILL.md", PIN_PATH].sort());
+    expect(fs.readdirSync(s.recordsDir).sort().map((name) => [name, fs.readFileSync(path.join(s.recordsDir, name)).toString("hex")])).toEqual(records);
+    expect(s.read(`.grace5/changes/${s.id}/contract.xml`)).toBe(checkBefore);
+    expect(candidateLine(s)).toBe(before);
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
+    expect(s.check().defects).toEqual([]);
+    expect(s.start().code).toBe(0);
   },
   TEST_TIMEOUT,
 );
@@ -643,14 +671,14 @@ test(
     expect(s.porcelain()).toBe(clean);
 
     // The kernel's own steps: the move declares the closed siblings, the pin, skill and local ignore steps nothing; an open change is never declared.
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], [], [], []]);
+    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], [], [], [], []]);
     s.pin(VERSION);
     closeFully(s);
     s.commit("close the first change");
     fs.renameSync(s.closedChangeDir, s.openChangeDir);
     s.pin(undefined);
     s.commit("the closed change as a sibling, as a 0.1.0 kernel left it");
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], [], [], []]);
+    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], [], [], [], []]);
 
     // So the command proceeds: the sibling moves, the open change is untouched.
     const upgrade = s.cli(["upgrade"]);

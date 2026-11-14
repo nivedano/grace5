@@ -39,6 +39,14 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | FL-08 | The contract was edited after approval without a new revision. | Reported as altered after approval; treated as unapproved. |
 | FL-09 | A command exceeds its budget. | Killed and recorded `cancelled`. |
 
+## Approval compatibility
+
+| Id | Case | Required behaviour |
+|---|---|---|
+| AUTH-01 | An approval has no legacy fields, `executes="true"`, `executes="false"`, an `Execution` element, or both legacy fields. | Every shape validates, reports `approved`, runs and closes. The removed execution status and refusal never appear. |
+| AUTH-02 | A rejection carries legacy execution fields, including `executes="true"`. | It validates and reports `rejected`; neither a run nor closure is authorized by the legacy fields. |
+| AUTH-03 | An open approved change carrying `executes="false"` is upgraded from 0.5.0 to 0.6.0. | Only installed skills and the pin change; records remain byte for byte, the candidate is unchanged, status reports `approved`, and `run --start` works. |
+
 ## Closed changes
 
 | Id | Case | Required behaviour |
@@ -55,7 +63,7 @@ The kernel's conformance suite has at least one test per case below. A test fail
 |---|---|---|
 | UP-01 | A command other than `status`, `upgrade` and the flags runs on a repository whose pin is behind the kernel, or whose `.grace5/` has no pin. | Refused with `repository state is at <pin>, kernel is <version>: run grace5 upgrade`, a missing pin read as 0.1.0; nothing is written and no receipt exists. `status` answers in both forms, its first line `kernel: <version>, state: <pin>, run grace5 upgrade`; `--help` and `--version` are never refused. |
 | UP-02 | `upgrade` runs outside a git repository. | Refused with `not a git repository`; nothing is written. A change id or `--all` on `upgrade` is a usage error. |
-| UP-03 | `upgrade --plan`. | One line per link from the pinned version to the kernel's, `step: <from> -> <to>: <description>` or `bump: <from> -> <to>: ...`, consecutive versions, the 0.3.0 to 0.4.0 link a step that refreshes the installed skills, the 0.4.0 to 0.5.0 link a step that writes the local ignore file `.grace5/.gitignore`; nothing is written and no `writes:` line is printed; exit 0. |
+| UP-03 | `upgrade --plan`. | One line per link from the pinned version to the kernel's, `step: <from> -> <to>: <description>` or `bump: <from> -> <to>: ...`, consecutive versions, the 0.3.0 to 0.4.0 link a step that refreshes the installed skills, the 0.4.0 to 0.5.0 link a step that writes the local ignore file `.grace5/.gitignore`, the 0.5.0 to 0.6.0 link a step that only refreshes the skills; nothing is written and no `writes:` line is printed; exit 0. |
 | UP-04 | `upgrade` on a repository without a pin whose closed changes are siblings under `.grace5/changes/`, or already under `closed/`, with no ignore file anywhere. | The chain runs from 0.1.0: every closed sibling moves under `closed/` with its untracked logs, the local ignore file `.grace5/.gitignore` is written with its two lines and git then lists no log under the moved change as untracked, no project file is written, `pinned:` is printed after each link, the pin reads the kernel's version, the listing shows every change closed, and each change reports the same hashes and no defect. |
 | UP-05 | `upgrade` on a repository already in the shape of a step, or on one at the kernel's version. | A step applied to state in its shape moves and writes nothing, a line an earlier kernel wrote into the project's `.gitignore` is left byte for byte, and a step applied twice leaves the tree as after once; an upgraded repository answers `up to date: <version>` and nothing changes. |
 | UP-06 | A step fails. | `failed: <from> -> <to>: <reason>`, exit 1, no `upgraded:` line; the pin is at the last completed version (unchanged when the first step fails), and the next `upgrade` resumes from there. |

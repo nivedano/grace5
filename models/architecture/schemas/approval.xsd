@@ -14,7 +14,7 @@
           <xs:attribute name="check" type="xs:NCName" use="required"/>
           <xs:attribute name="definition-sha256" type="Sha256" use="required"/>
         </xs:complexType></xs:element>
-        <!-- Execution: present only when the owner authorized execution in a later statement than the approval. The one permitted addition to a written approval record. -->
+        <!-- Legacy Execution element: accepted for records already written and ignored by the kernel. New records omit it. -->
         <xs:element name="Execution" minOccurs="0"><xs:complexType>
           <xs:sequence>
             <xs:element name="Statement" type="Text"/>
@@ -31,8 +31,8 @@
       <xs:attribute name="decision" use="required"><xs:simpleType><xs:restriction base="xs:string">
         <xs:enumeration value="approved"/><xs:enumeration value="rejected"/>
       </xs:restriction></xs:simpleType></xs:attribute>
-      <!-- executes: whether the same statement authorizes execution. -->
-      <xs:attribute name="executes" type="xs:boolean" use="required"/>
+      <!-- Legacy executes attribute: accepted for records already written and ignored by the kernel. New records omit it. -->
+      <xs:attribute name="executes" type="xs:boolean" use="optional"/>
       <xs:attribute name="recorded-by" type="Text" use="required"/>
     </xs:complexType>
   </xs:element>

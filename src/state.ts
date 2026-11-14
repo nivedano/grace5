@@ -13,7 +13,7 @@ export const CLOSED_DIR = "closed";
 /** Why a directory under closed/ without its close record is malformed. */
 export const CLOSE_RECORD_MISSING = `records/close.xml is missing: a change under ${CHANGES_DIR}${CLOSED_DIR}/ must carry it`;
 
-export type Authorization = "unapproved" | "approved" | "approved for execution" | "rejected" | "altered after approval";
+export type Authorization = "unapproved" | "approved" | "rejected" | "altered after approval";
 
 export interface SourceState {
   readonly git: Git;
@@ -129,7 +129,7 @@ function authorizationOf(contract: Contract, sha256: string, approval: Approval 
   if (approval === undefined) return "unapproved";
   if (approval.decision === "rejected") return "rejected";
   if (approval.contractSha256 !== sha256) return "altered after approval";
-  return approval.executes ? "approved for execution" : "approved";
+  return "approved";
 }
 
 function authorizationObligation(authorization: Authorization, revision: number): string | undefined {
@@ -140,8 +140,6 @@ function authorizationObligation(authorization: Authorization, revision: number)
     case "altered after approval":
       return "contract altered after approval";
     case "approved":
-      return "approval does not authorize execution";
-    case "approved for execution":
       return undefined;
   }
 }
@@ -234,10 +232,7 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     defects.push(...currentBriefDefects);
     // Check rule 7.
     for (const record of records.approvals.values()) {
-      if (record.decision === "rejected") {
-        if (record.executesAttribute) defects.push(`${record.file}: a rejected approval has executes="true"`);
-        continue;
-      }
+      if (record.decision === "rejected") continue;
       if (record.revision !== contract.revision || record.contractSha256 !== report.sha256) continue;
       for (const check of contract.checks) {
         const bound = record.bound.filter((b) => b.check === check.id);
@@ -248,13 +243,13 @@ export async function evaluate(root: string, id: string, sharedSource?: SourceSt
     }
   }
 
-  // Which approval governs execution: the current one when it authorizes it; while the current revision is
-  // unapproved, rejected or altered, the last earlier approval that did, for the checks it still binds.
+  // The current approval governs execution; while the current revision is unapproved, rejected or altered,
+  // the last approval governs the checks it still binds. Legacy execution fields have no meaning.
   let executionApproval: Approval | undefined;
   if (contract !== undefined) {
-    if (authorization === "approved for execution") executionApproval = approval;
-    else if (authorization !== "approved") {
-      const earlier = [...records.approvals.values()].filter((a) => a.decision === "approved" && a.executes && a.revision <= contract.revision);
+    if (authorization === "approved") executionApproval = approval;
+    else {
+      const earlier = [...records.approvals.values()].filter((a) => a.decision === "approved" && a.revision <= contract.revision);
       executionApproval = earlier.sort((a, b) => b.revision - a.revision)[0];
     }
   }

@@ -363,7 +363,7 @@ test(
     const before = h.statusBefore;
     expect(hasLine(before, `change: ${HAPPY.id}`)).toBe(true);
     expect(hasLine(before, /^revision: 1\b/)).toBe(true);
-    expect(hasLine(before, "authorization: approved for execution")).toBe(true);
+    expect(hasLine(before, "authorization: approved")).toBe(true);
     expect(hasLine(before, `start: ${h.startHead}`)).toBe(true);
     expect(hasLine(before, `candidate: ${h.candidate} (clean)`)).toBe(true);
     expect(hasLine(before, "check CK1: passed, counts")).toBe(true);
@@ -468,30 +468,44 @@ test(
   TEST_TIMEOUT,
 );
 
+for (const legacy of [{}, { executes: true }, { executes: false }, { execution: true }, { executes: false, execution: true }]) {
+  test(
+    `AUTH approval runs and closes with legacy fields ${JSON.stringify(legacy)}`,
+    () => {
+      const s = new Scenario({ id: "C-0204-execution", checks: [automated("CK1")] });
+      s.takeHashes();
+      s.writeBrief();
+      s.writeApproval(legacy);
+      s.commit("approved");
+      expect(s.check().defects).toEqual([]);
+      const status = s.status();
+      expect(hasLine(status, "authorization: approved")).toBe(true);
+      expect(status.out).not.toContain("approved for execution");
+      expect(status.out).not.toContain("approval does not authorize execution");
+      const start = s.start();
+      expect(start.code).toBe(0);
+      expect(hasLine(start, "run 1: CK1 passed")).toBe(true);
+      expect(s.run().code).toBe(0);
+      s.writeReview();
+      expect(s.close().code).toBe(0);
+    },
+    TEST_TIMEOUT,
+  );
+}
+
 test(
-  "AUTH an approval that does not authorize execution runs nothing until the Execution statement is recorded",
+  "AUTH rejection ignores legacy fields and never authorizes a run",
   () => {
-    const s = new Scenario({ id: "C-0204-execution", checks: [automated("CK1")] });
+    const s = new Scenario({ id: "C-0294-rejected", checks: [automated("CK1")] });
     s.takeHashes();
     s.writeBrief();
-    s.writeApproval({ executes: false });
-    s.commit("approved, not yet for execution");
-
-    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
-    const refused = s.start();
-    expect(refused.code).toBe(1);
-    expect(hasLine(refused, "refused: approval does not authorize execution")).toBe(true);
-    expect(s.runNumbers()).toEqual([]);
-    const close = s.close();
-    expect(close.code).toBe(1);
-    expect(hasLine(close, "refused: approval does not authorize execution")).toBe(true);
-
-    s.writeApproval({ executes: false, execution: true });
+    s.writeApproval({ decision: "rejected", executes: true, execution: true });
+    s.commit("rejected with legacy fields");
     expect(s.check().defects).toEqual([]);
-    expect(hasLine(s.status(), "authorization: approved for execution")).toBe(true);
-    const start = s.start();
-    expect(start.code).toBe(0);
-    expect(hasLine(start, "run 1: CK1 passed")).toBe(true);
+    expect(hasLine(s.status(), "authorization: rejected")).toBe(true);
+    expect(hasLine(s.start(), "refused: no approval for revision 1")).toBe(true);
+    expect(s.runNumbers()).toEqual([]);
+    expect(hasLine(s.close(), "refused: no approval for revision 1")).toBe(true);
   },
   TEST_TIMEOUT,
 );

@@ -67,7 +67,7 @@ No record is deleted or rewritten to supersede it. Git and the numbering hold th
 
 `grace5 close` checks these in order and refuses at the first unmet one, naming it.
 
-1. `check` reports no defect in the contract or in an approval, run or review record; then the contract's hash equals the hash in the current revision's approval, and that approval is `approved`, authorizes execution and binds every check; then `check` reports no defect in the current revision's brief.
+1. `check` reports no defect in the contract or in an approval, run or review record; then the contract's hash equals the hash in the current revision's approval, and that approval is `approved` and binds every check; then `check` reports no defect in the current revision's brief.
 2. A brief exists for the current revision with the same contract hash, and its own hash equals the approval's `brief-sha256`.
 3. A start run exists and its source revision can be resolved in the repository.
 4. The working tree has no dirty source path.

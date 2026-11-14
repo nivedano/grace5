@@ -28,7 +28,7 @@ The unit of exposure stays the change: a `C-NNNN` bundle with a `contract.xml`; 
 |---|---|
 | `contract.xml` | `id`, `revision`, `Criterion/@checks`, check ids and kinds, `Decision/@id` |
 | `brief-<rev>.html` | `meta` elements `grace5:date`, `grace5:writer`, `grace5:basis`, `grace5:words`, `grace5:target-words`, `grace5:checks`, `grace5:target-checks`; data attributes `data-check`, `data-kind`, `data-required`, `data-decision`, `data-finding`; the prose is not read |
-| `approval-<rev>.xml` | `date`, `decision`, `executes`, `brief-sha256`, `Bound/@check`, `@definition-sha256` |
+| `approval-<rev>.xml` | `date`, `decision`, `brief-sha256`, `Bound/@check`, `@definition-sha256` |
 | `run-<n>.xml` | `n`, `started`, `ended`, `status`, `start`, `dirty`, `candidate`, `kernel`, `Preexisting`; per `Result`: `check`, `kind`, `required`, `definition-sha256`, `verdict`, `claim`, `elapsed-ms`, and `Trace/@origin`, `@origin-source`, `@run-echo` |
 | `review-<n>.xml` | `date`, `independence`, `status`, `Finding/@id`, `@severity`, `@status`, `Adequacy/@check`, `@discriminates` |
 | `close.xml` | `date`, `kernel`, `candidate`, `review`, `Satisfied/@check`, `@run`, `@claim` |

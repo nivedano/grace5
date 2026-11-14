@@ -1,6 +1,6 @@
 ---
 name: grace5-execute
-description: Use when a GRACE 5 change has an owner approval that authorizes execution and the work has to be carried out, verified with receipts, handed to review and closed. Also use to recover an interrupted or refused run.
+description: Use when a GRACE 5 change has an owner approval and the work has to be carried out, verified with receipts, handed to review and closed. Also use to recover an interrupted or refused run.
 ---
 
 # Execute a GRACE 5 change
@@ -9,7 +9,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 ## Before starting
 
-- `grace5 status` must report `authorization: approved for execution`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first, which proceeds past an open change no step writes, and when it refuses because a step touches this change, close it with the previous kernel (run from a checkout at the previous tag) or abandon it (`upgrade.md`).
+- `grace5 status` must report `authorization: approved`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first, which proceeds past an open change no step writes, and when it refuses because a step touches this change, close it with the previous kernel (run from a checkout at the previous tag) or abandon it (`upgrade.md`).
 - One change per worktree. Never create a branch or a worktree without the owner's consent; ask where the work should happen and use what they name.
 - Run `grace5 run <id> --start` once. It records the start revision, the dirty paths already present and the starting state of the checks (`commands.md`).
 - Pre-existing dirty work is identified, never adopted: do not stage, stash, commit or tidy it. Tell the owner what the receipt lists; the final tree must be clean (`source-identity.md`).

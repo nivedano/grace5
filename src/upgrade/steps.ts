@@ -137,7 +137,12 @@ const writeTheLocalIgnore: Step = {
 };
 
 /** The steps in version order. A boundary between two versions without a step is a pin bump. */
-export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills, writeTheLocalIgnore];
+export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills, writeTheLocalIgnore, {
+  ...refreshTheSkills,
+  from: "0.5.0",
+  to: "0.6.0",
+  describe: "refresh the installed skills to 0.6.0",
+}];
 
 // The packaged skills, their locations and the refresh live in skills.ts; re-exported for the chain runner and the tools.
 export { PACKAGED_SKILLS_DIR, SKILL_LOCATIONS, packagedSkillNames, refreshSkills, skillDifferences } from "./skills";

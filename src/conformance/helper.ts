@@ -381,7 +381,7 @@ export interface ApprovalOptions {
   revision?: number;
   decision?: "approved" | "rejected";
   executes?: boolean;
-  /** Adds the later Execution statement of authorization.md. */
+  /** Legacy fields, emitted only when explicitly requested to test compatibility. */
   execution?: boolean;
   /** Check ids left without a Bound element. */
   omitBound?: string[];
@@ -836,7 +836,7 @@ export class Scenario {
       `<footer>`,
       `  <p id="size">Contract size: ${info.words} words against a target of 600, ${info.checks} checks against 8.</p>`,
       `  <p>This brief describes contract text with SHA-256 <code>${info.contractSha}</code>.</p>`,
-      `  <p class="say">To decide, answer in one sentence: approve, approve and go ahead, or reject with the reason. Your words are recorded as you say them.</p>`,
+      `  <p class="say">To decide, answer in one sentence: approve, or reject with the reason. Your words are recorded as you say them.</p>`,
       `</footer>`,
       `</body>`,
       `</html>`,
@@ -850,12 +850,12 @@ export class Scenario {
     const rev = o.revision ?? this.revision;
     const info = this.requirePrepared(rev);
     const decision = o.decision ?? "approved";
-    const executes = decision === "rejected" ? false : (o.executes ?? true);
+    const legacyExecutes = o.executes === undefined ? "" : ` executes="${o.executes}"`;
     const briefSha = sha256(fs.readFileSync(path.join(this.recordsDir, `brief-${rev}.html`)));
     const lines = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
-      `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="${today()}" owner="Fixture Owner" decision="${decision}" executes="${executes}" recorded-by="conformance suite">`,
-      `  <Statement>${decision === "approved" ? (executes ? "Approved, go ahead." : "Approved.") : "Rejected: not this way."}</Statement>`,
+      `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="${today()}" owner="Fixture Owner" decision="${decision}"${legacyExecutes} recorded-by="conformance suite">`,
+      `  <Statement>${decision === "approved" ? "Approved." : "Rejected: not this way."}</Statement>`,
       `  <Source>Fixture conversation of the conformance suite.</Source>`,
     ];
     if (decision === "approved") {

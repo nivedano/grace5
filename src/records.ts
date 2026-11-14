@@ -21,9 +21,6 @@ export interface Approval extends Binding {
   readonly file: string;
   readonly briefSha256: string;
   readonly decision: "approved" | "rejected";
-  /** The approving statement, or a later Execution element, authorizes execution. */
-  readonly executes: boolean;
-  readonly executesAttribute: boolean;
   readonly bound: readonly { readonly check: string; readonly definitionSha256: string }[];
 }
 
@@ -159,14 +156,11 @@ function binding(root: XmlElement): Binding {
 }
 
 function readApproval(root: XmlElement, file: string): Approval {
-  const executesAttribute = xsBoolean(root.attributes["executes"], false);
   return {
     ...binding(root),
     file,
     briefSha256: attr(root, "brief-sha256"),
     decision: attr(root, "decision") === "approved" ? "approved" : "rejected",
-    executes: executesAttribute || childNamed(root, "Execution") !== undefined,
-    executesAttribute,
     bound: childrenNamed(root, "Bound").map((b) => ({ check: attr(b, "check"), definitionSha256: attr(b, "definition-sha256") })),
   };
 }

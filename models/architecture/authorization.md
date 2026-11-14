@@ -19,9 +19,11 @@ An approval exists only when the owner said so about this brief. "Proceed", "kee
 
 ## Execution authorization
 
-One statement may approve and authorize execution ("Approved, go ahead"); the record then has `executes="true"`. If the owner approved without authorizing execution, `executes` is `false` and nothing runs; a later go-ahead is recorded by adding one `Execution` element with that statement, the one addition a written approval record ever receives. No second statement is required when the first one covered both.
+An approval authorizes execution. There is one approved state, `approved`, and no second decision or later authorization. New records carry neither `executes` nor `Execution`. The schema accepts both legacy fields in records already written, and the kernel ignores them for either decision; no record is rewritten.
 
-`grace5 run` refuses when the current revision has no approval that authorizes execution, except for the checks a previous approval still binds (below). Before approval the author may run project commands directly while preparing; those runs produce no receipts and are evidence of nothing.
+The owner answers the brief in one statement: approve, or reject with the reason. An approval worded to defer the start, such as "approved, hold", is still an approval: the agent waits until the owner starts the change or a batch. That is a scheduling instruction, recorded nowhere in kernel state.
+
+`grace5 run` refuses when the current revision has no approval, except for the checks a previous approval still binds (below). Before approval the author may run project commands directly while preparing; those runs produce no receipts and are evidence of nothing.
 
 ## Material revisions
 

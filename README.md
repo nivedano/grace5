@@ -16,7 +16,7 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 
 ## Status
 
-Version 0.5.0. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
+Version 0.6.0. An approval authorizes execution; legacy execution fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Upgrading
 

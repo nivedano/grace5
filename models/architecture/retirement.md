@@ -15,7 +15,7 @@ This list names the GRACE 4 mechanisms and skills that do not migrate to GRACE 5
 | G-7 | The five assertion modes and the nested lifecycle commands | Five flat commands: `init`, `check`, `run`, `status`, `close`. `run` has start, targeted and final forms over the same check definitions; no form changes what is asserted | [x] |
 | G-8 | The required context quintet | Nothing. `grace5 init` writes a small entry point linking the project's existing documents (`commands.md`) | [x] |
 | G-9 | The unique-id-as-tag-name XML convention and its custom grammar | Conventional XML with attribute ids (`id`, `ref`, `check`) and one XSD per artifact | [x] |
-| G-10 | The four approval states, the half-approval error, the draft-only lint mode, the re-approval window rules and the mandatory second owner statement | `approval-<rev>.xml` with decision `approved` or `rejected` and an optional `executes` flag in the same statement | [x] |
+| G-10 | The four approval states, the half-approval error, the draft-only lint mode, the re-approval window rules and the mandatory second owner statement | `approval-<rev>.xml` with decision `approved` or `rejected`; approval authorizes execution | [x] |
 | G-11 | Any migration engine, GRACE 3 or 4 parser, forwarding alias or compatibility layer | Nothing. Old archives stay readable in the old tooling | [x] |
 | G-12 | Verbatim copying of any file from the old repository | Re-implementation from an independent specification | [x] Checked by the independent review of C-0001-kernel against the old repository's source and skills (rule verdict in its review record) |
 

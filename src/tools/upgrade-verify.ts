@@ -30,6 +30,7 @@ const STEP_LINES = [
   "step: 0.2.0 -> 0.3.0: ",
   "step: 0.3.0 -> 0.4.0: refresh the installed skills to 0.4.0",
   `step: 0.4.0 -> 0.5.0: write the local ignore file ${LOCAL_IGNORE_PATH}`,
+  "step: 0.5.0 -> 0.6.0: refresh the installed skills to 0.6.0",
 ];
 
 interface Output {
@@ -118,12 +119,12 @@ async function main(withOpenChange: boolean): Promise<number> {
     const expected = `upgraded: ${UNPINNED_VERSION} -> ${version}`;
     if (upgrade.code === 0 && upgrade.lines.includes(expected)) ok(expected);
     else fail(`upgrade exited ${String(upgrade.code)} without the line ${expected}`);
-    // The chain of this kernel is four steps and no bump.
+    // The chain of this kernel is five steps and no bump.
     const stepLines = upgrade.lines.filter((line) => line.startsWith("step: "));
     const bumpLines = upgrade.lines.filter((line) => line.startsWith("bump: ")).length;
     const inOrder = stepLines.length === STEP_LINES.length && STEP_LINES.every((prefix, i) => (stepLines[i] ?? "").startsWith(prefix));
-    if (inOrder && bumpLines === 0) ok("plan: four steps ending with the local ignore file, no bump");
-    else fail(`plan has ${String(stepLines.length)} step and ${String(bumpLines)} bump lines, expected the four steps ending with the local ignore file: ${stepLines.join(" | ")}`);
+    if (inOrder && bumpLines === 0) ok("plan: five steps ending with the skill refresh, no bump");
+    else fail(`plan has ${String(stepLines.length)} step and ${String(bumpLines)} bump lines, expected the five steps ending with the skill refresh: ${stepLines.join(" | ")}`);
     if (upgrade.lines.some((line) => line.startsWith("writes:") || line.startsWith("evidence of open changes"))) fail("upgrade printed a writes: or evidence line; neither exists");
     const skillsLines = upgrade.lines.filter((line) => line === "skills: none installed").length;
     const refreshedLines = upgrade.lines.filter((line) => line === `refreshed: ${STALE_SKILL}`).length;

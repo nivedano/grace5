@@ -173,6 +173,8 @@ test(
       checks: [automated("CK1"), automated("CK2", "bun tools/pass.js", { budget: 30 })],
     };
     const s = prepared(rev1);
+    // An earlier legacy approval still binds its checks, even with the old false flag.
+    s.writeApproval({ executes: false });
     expect(s.start().code).toBe(0);
 
     // Revision 2: CK1 untouched, CK2 amended, CK3 new. No approval yet.
@@ -281,11 +283,11 @@ test(
     expect(withBad.code).toBe(alone.code);
     expect(withBad.lines).toEqual(alone.lines);
     expect(hasLine(withBad, `change: ${s.id}`)).toBe(true);
-    expect(hasLine(withBad, "authorization: approved for execution")).toBe(true);
+    expect(hasLine(withBad, "authorization: approved")).toBe(true);
     expect(withBad.out).not.toContain("malformed");
 
     const listing = s.cli(["status"]);
-    expect(hasLine(listing, new RegExp(`^${s.id}: approved for execution, next: .+$`))).toBe(true);
+    expect(hasLine(listing, new RegExp(`^${s.id}: approved, next: .+$`))).toBe(true);
     expect(hasLine(listing, new RegExp(`^${bad}: malformed: .+$`))).toBe(true);
 
     // The gate is strict for the malformed one, and the valid one still runs.
@@ -308,7 +310,7 @@ test(
     s.write(`.grace5/changes/${bad}/contract.xml`, contractXml({ id: bad, checks: [automated("CK1")] }).replace("</Contract>", ""));
     s.commit("a second change that does not parse");
     const listing = s.cli(["status"]);
-    expect(hasLine(listing, new RegExp(`^${s.id}: approved for execution, next: .+$`))).toBe(true);
+    expect(hasLine(listing, new RegExp(`^${s.id}: approved, next: .+$`))).toBe(true);
     expect(hasLine(listing, new RegExp(`^${bad}: malformed: .+$`))).toBe(true);
     const status = s.status();
     expect(hasLine(status, `change: ${s.id}`)).toBe(true);
@@ -367,7 +369,7 @@ test(
     expect(s.start().code).toBe(0);
     expect(s.run().code).toBe(0);
     s.writeReview();
-    expect(hasLine(s.status(), "authorization: approved for execution")).toBe(true);
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
 
     // The same revision number, different bytes.
     const rel = `.grace5/changes/${s.id}/contract.xml`;
@@ -378,7 +380,7 @@ test(
     const status = s.status();
     expect(hasLine(status, /^revision: 1\b/)).toBe(true);
     expect(hasLine(status, "authorization: altered after approval")).toBe(true);
-    expect(hasLine(status, "authorization: approved for execution")).toBe(false);
+    expect(hasLine(status, "authorization: approved")).toBe(false);
     expect(hasLine(status, "next: contract altered after approval")).toBe(true);
     const close = s.close();
     expect(close.code).toBe(1);
@@ -387,7 +389,7 @@ test(
 
     // Restored to the approved text, the hash matches the approval again.
     s.write(rel, text);
-    expect(hasLine(s.status(), "authorization: approved for execution")).toBe(true);
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
     expect(s.close().code).toBe(0);
   },
   TEST_TIMEOUT,

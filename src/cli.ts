@@ -96,7 +96,7 @@ Checks, for the selected change:
   5. Every XML record present validates against its schema and names this change.
   6. The brief of the contract's current revision carries the current contract hash and
      passes every mechanical fidelity rule; briefs of other revisions are not checked.
-  7. An approved approval has one Bound per check; a rejected one has executes="false".
+  7. An approved approval has one Bound per check.
 
 Output:
   contract-sha256: <hash>        SHA-256 of contract.xml with CRLF read as LF
@@ -197,7 +197,7 @@ With a change, one fact per line:
   change: <id>
   malformed: <first error>            only when the change fails validation
   revision: <n>                       the contract revision
-  authorization: <state>              unapproved, approved, approved for execution, rejected
+  authorization: <state>              unapproved, approved, rejected
                                       or altered after approval
   start: <revision>                   the start revision, or none
   candidate: <hash> (clean|dirty)     the candidate of HEAD and the state of the working tree
