@@ -358,7 +358,7 @@ test(
     expect(hasLine(upgrade, "refreshed: .agents/skills/grace5-prepare")).toBe(true);
     expect(upgrade.out).not.toContain("skills: none installed");
     // Two directories refreshed once per step; a pin bump refreshes nothing (F3 of review 1 of C-0004-upgrade-command).
-    expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(4);
+    expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(5);
     expect(upgrade.lines.filter((l) => l.startsWith("refreshed:")).length).toBe(2 * upgrade.lines.filter((l) => l.startsWith("step:")).length);
 
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
