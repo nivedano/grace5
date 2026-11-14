@@ -13,7 +13,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 - Read the repository and its rule files first. Ask the owner only what is theirs to decide: behaviour, boundary, what is left alone, what evidence they accept, what burden they take on (a bench session, a manual procedure).
 - Do not ask procedural questions. Sequence, file choice and technique are yours and go to `notes.md`.
-- Every answer that settles something becomes one Decision, in the owner's words.
+- Record settled policies and tradeoffs as neutral Decision statements. Do not copy dialogue or add conversational speaker labels and dates; keep technical literals and required responsibilities explicit. Record formal approval authority and provenance separately under the owner gate.
 
 ## Contract
 

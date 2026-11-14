@@ -61,5 +61,15 @@ Never approved; sequence and technical detail only.
 
 ## Preparation history
 
+## Revision 3 execution
+
+- Revision 3 approval is recorded in `records/approval-3.xml`, binding contract `b3ae0d470d3f0b4a53a3a947646ec76f98d0ae1dc8e6b114afcb596bb4b48353` and brief `99c4a597e723aa2c9232de9e5b65bb63f568818ea3244f50b05389bfc40eaa25`. The approval statement is recorded only in the approval record; decision prose remains neutral.
+- Applied the prepared source and formatting patches after authorization. Method/executor/source identity and L-07 now express the serial-batch exception and full-diff consequences (F1). The orchestrator reconciles and cancels outstanding pending/running dispatches before completion (F2). The prepare skill, brief rule/template and L-04 require neutral decisions and one difference legend. No contract/check definition, version, pin or tag changed during execution; no machine-wide installation occurred.
+- Mechanical package regeneration, type checking and package verification passed. Generated copies derive from canonical skills; the framework source changes remain inside Affected and touch no Protected path. C-0009 remains unapproved and untouched.
+- Browser-control host remains unavailable. A standalone local HTML render using the installed Edge engine, with isolated temporary profiles and no desktop interaction, succeeded with sandbox escalation; the sandboxed attempt produced no output. Render artifacts: `D:/cache/uv/grace5-c0007-review-fixes/visual/brief-top.png` and `brief-full.png`. Full-page image shows readable legend, highlights, neutral decisions and preserved plain items. Prior contrast checks remain valid. Fragment-only captures were blank and are not treated as evidence.
+- Rendering exposed an existing defect in the now-approved brief-3 HTML: the grace5:basis meta opening tag lacks its terminator and the following previous-revision element ends with an extra terminator, producing a stray greater-than character at the top. The source template has a valid basis element; a correct complete difference-head example was added to prevent the same authoring mistake. Approved brief bytes were not edited or their approval hash replaced. The independent re-review must assess the approved artifact's defect and its impact; no clean verdict is inferred from kernel fidelity checks alone.
+
+## Earlier preparation history
+
 - At preparation C-0006-kernel-managed-paths was open at `next: close`; it has since closed, so that worktree concern no longer applies.
 - Fix-round bound default: two rounds, then park. Dispatch deadline default: stated by the orchestrator in the ledger per dispatch, from the sum of the change's check budgets.
