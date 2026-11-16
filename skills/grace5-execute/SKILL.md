@@ -22,7 +22,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - Never bump the version or pin or register migration boundaries or rows; a release is a separate owner-requested act (`upgrade.md`).
 - Keep sequence, technical detail and discovered sub-steps in `notes.md`.
 - Iterate with `grace5 run <id> --check <check>...`. A receipt taken on a dirty tree is for iteration only.
-- Commit with a `Change: <id>` trailer. Commit receipts and notes as you go; committing records never invalidates evidence.
+- Commit through the change-commit routine, which constructs and verifies the `Change: <id>` trailer instead of relying on memory: where the harness has no verified commit facility, `bun src/tools/change-commit.ts --change <id> --message <subject> -- <paths>...` commits exactly the named paths with `git commit --only` and reads the created commit back — its parsed `Change: <id>` trailer and its changed-path list — before accepting it, refusing an empty selection, a path with no modified content and any read-back mismatch. Use it for every change-owned commit: product, test, evidence and observation records, the review record and the close move. Commit receipts and notes as you go; committing records never invalidates evidence. A batch-only ledger commit that carries no change's records follows its actual ownership and is not assigned to a change.
 - If the work shows that a boundary, a constraint or a check must change, stop that part. Do not edit `contract.xml` in passing and do not bend a check until it passes. Go back to `grace5-prepare` for a material revision; `authorization.md` lists what may continue meanwhile.
 
 ## Final evidence
