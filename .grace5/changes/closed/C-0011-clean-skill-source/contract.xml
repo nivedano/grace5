@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Contract id="C-0011-clean-skill-source" revision="1" title="The kernel refreshes installed skills only from committed skill text and pins LF for every text file">
+<Contract id="C-0011-clean-skill-source" revision="2" title="The kernel refreshes installed skills only from committed skill text and pins LF for every text file">
   <Problem>Explicit owner decision of 2026-11-16: the kernel must not install uncommitted skill text into a governed repository, and the repository must pin LF. Observed failure: the running checkout can be modified in exactly the files a refresh reads, and `git status` on those files is the only thing between them and every governed repository. Observed failure: without `.gitattributes`, a fresh clone with `core.autocrlf=true` checks out CRLF and `bun run package:verify` reports drift for every generated file, failing a release check on a platform rather than on a defect. Installed-skill drift remains outside the target contract.</Problem>
   <Change>`grace5 upgrade` refuses before it prints the plan and before it writes anything when the chain contains a migration step and the running kernel checkout's `skills/` or `packages/skills/` differs from its `HEAD`; the refusal names each modified path and exits 1. A pin bump reads no skills and is not refused; a checkout without `.git` is not checked. `.gitattributes` pins `eol=lf` for text; the index is already LF and no blob is renormalised. The refusal is stated in the command help, `upgrade.md`, `commands.md` and a new conformance case; no installed skill byte, state layout, command, flag, schema or record changes.</Change>
   <Constraints>
@@ -59,12 +59,12 @@
     <Automated id="CK3" budget="120">
       <Command>bun run package:verify</Command>
     </Automated>
-    <Trace id="CK4" origin="live" budget="30">
+    <Trace id="CK4" origin="any" budget="30">
       <Command>git check-attr eol -- skills/grace5-prepare/SKILL.md packages/skills/grace5-prepare/SKILL.md</Command>
       <Expect>skills/grace5-prepare/SKILL.md: eol: lf</Expect>
       <Expect>packages/skills/grace5-prepare/SKILL.md: eol: lf</Expect>
     </Trace>
-    <Trace id="CK5" origin="live" budget="60">
+    <Trace id="CK5" origin="any" budget="60">
       <Command>bun src/cli.ts upgrade --help</Command>
       <Expect>kernel skills are modified relative to HEAD</Expect>
     </Trace>
