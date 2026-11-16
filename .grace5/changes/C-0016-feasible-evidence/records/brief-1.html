@@ -6,13 +6,13 @@
 <title>Brief: C-0016-feasible-evidence revision 1</title>
 <meta name="grace5:change" content="C-0016-feasible-evidence">
 <meta name="grace5:revision" content="1">
-<meta name="grace5:contract-sha256" content="7c431ef1947d2b49d5485e8170698feebee420e9c3d1f036865bf0f445640a61">
+<meta name="grace5:contract-sha256" content="8a70a63bd79093a8ae9bf836c2f5468b1336ab23443214345e3ce1759215f0cb">
 <meta name="grace5:date" content="2026-11-17">
 <meta name="grace5:writer" content="independent">
 <meta name="grace5:basis" content="full">
-<meta name="grace5:words" content="576">
+<meta name="grace5:words" content="680">
 <meta name="grace5:target-words" content="600">
-<meta name="grace5:checks" content="3">
+<meta name="grace5:checks" content="4">
 <meta name="grace5:target-checks" content="8">
 <style>
 :root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
@@ -84,6 +84,7 @@ td:first-child .diff-mark{display:inline}
         <li>When required evidence is unavailable, you get one bounded choice before approval: wait for the evidence, or accept alternative evidence with its stated limitation.</li>
         <li>The brief's evidence discussion names a plausible faulty implementation the check would reject; for a trace it also names the setup whose absence would fail, so a bare missing marker cannot pass.</li>
         <li>Feasibility is a preparation obligation, never the final observation, and it authorizes no flashing or hardware-state change.</li>
+        <li>The behavioural evidence for the guidance is a manual rehearsal on a change whose required device, build or environment is unavailable; the automated checks only show that the edited sources compile and that the generated packages carry them.</li>
         <li>The pilot's focused regression test and position rule remain separate governed work.</li>
       </ul>
     </div>
@@ -97,6 +98,7 @@ td:first-child .diff-mark{display:inline}
           <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>TypeScript type check</span><b>CK1</b> automated</td><td class="shows">The kernel sources compile with no type errors, so a guidance edit that introduced a broken type, a missing import or a malformed reference would be rejected here.</td><td class="limits">Only types are checked and nothing runs, so a guidance change that compiles but is never read or followed still passes.</td></tr>
           <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Kernel test suite</span><b>CK2</b> automated</td><td class="shows">Contract validation, the brief fidelity check and the conformance scenarios hold, so an edit that let a brief omit a protected path, or a check pass without its evidence row, would be rejected here.</td><td class="limits">Covers the kernel's own behavior; it does not show that preparation guidance is observed on a real device or that a reported availability is accurate.</td></tr>
           <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Generated package verify</span><b>CK3</b> automated</td><td class="shows">The generated packages and the CLI reference match the current source, so a guidance edit to <code>skills/grace5-prepare/**</code> or <code>models/architecture/brief.md</code> that was not regenerated would be rejected here.</td><td class="limits">Confirms the packages match what the generator produced, not that their content is correct or that the guidance reads as intended.</td></tr>
+          <tr class="manual" data-check="CK4" data-kind="manual" data-required="true"><td><span>Guidance rehearsal session</span><b>CK4</b> manual</td><td class="shows">A prepared change whose required device, build or environment is unavailable shows that preparation reports the unknown as unknown, offers one bounded waiting-or-alternative choice before approval, and that the brief names a faulty implementation the check rejects, so the guidance is exercised rather than merely compiled.</td><td class="limits">One rehearsal on one prepared case by one person; it does not show that the guidance is followed on other changes or that the reported availability is accurate, and it is not automatable.</td></tr>
         </tbody>
       </table>
     </div>
@@ -112,6 +114,7 @@ td:first-child .diff-mark{display:inline}
         <li data-decision="D5"><b>D5</b><span>The pilot's focused regression test and position rule are separate governed work, not an implicit extension of this framework change.</span></li>
         <li data-decision="D6"><b>D6</b><span>The shared-bookkeeping-path scheduling rule stays until a concrete safe exception demonstrates full-diff ownership and evidence invalidation.</span></li>
         <li data-decision="D7"><b>D7</b><span>Feasibility work uses read-only diagnostics and never flashes, resets or changes hardware state.</span></li>
+        <li data-decision="D8"><b>D8</b><span>The rehearsal is the behavioural evidence for the guidance; the automated checks prove only that the edited sources compile and that the generated packages carry them.</span></li>
       </ul>
     </div>
   </section>
@@ -124,6 +127,7 @@ td:first-child .diff-mark{display:inline}
         <li>Nothing in the kernel requires a brief to name a plausible faulty implementation, so the new guidance can be satisfied perfunctorily or skipped.</li>
         <li>A named faulty implementation may be trivial to reject, giving false confidence that the check discriminates.</li>
         <li>Preparation effort grows for every change, including those whose devices are plainly available.</li>
+        <li>The guidance's only behavioural evidence is a manual rehearsal, so it is easy to perform superficially or skip, and its result depends on the one prepared case and the person running it.</li>
       </ul>
     </div>
   </section>
@@ -136,6 +140,7 @@ td:first-child .diff-mark{display:inline}
         <li>Approve this framework change on its own: the pilot's focused regression test and position rule need their own contract and approval.</li>
         <li>Confirm the amended or added rationale-ledger entry carries the smallest alternative and a removal criterion.</li>
         <li>Keep the guidance change free of any check kind, schema, receipt, command or approval-semantics change.</li>
+        <li>Run the rehearsal session on a change whose required device, build or environment is unavailable, and judge whether the guidance behaved as required.</li>
       </ul>
     </div>
   </section>
@@ -178,14 +183,14 @@ td:first-child .diff-mark{display:inline}
     <h2>Returned to the author</h2>
     <div>
       <ul>
-        <li data-finding="resolved"><span>Resolved</span><span>Checked every criterion against its checks, every Affected and Protected path against the repository, the Constraints against the Change and NonGoals, and the term usage; all cited paths exist and no mechanical finding remains.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Checked every criterion against its checks, including the manual rehearsal CK4 and the D8 decision, every Affected and Protected path against the repository, the Constraints against the Change and NonGoals, and the term usage; all cited paths exist and no mechanical finding remains.</span></li>
       </ul>
     </div>
   </section>
 </main>
 <footer>
-  <p id="size">Contract size: 576 words against a target of 600, 3 checks against 8.</p>
-  <p>This brief describes contract text with SHA-256 <code>7c431ef1947d2b49d5485e8170698feebee420e9c3d1f036865bf0f445640a61</code>.</p>
+  <p id="size">Contract size: 680 words against a target of 600, 4 checks against 8; the words exceed the target because the rehearsal check and its decision were added after the first revision.</p>
+  <p>This brief describes contract text with SHA-256 <code>8a70a63bd79093a8ae9bf836c2f5468b1336ab23443214345e3ce1759215f0cb</code>.</p>
   <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
 </footer>
 </body>

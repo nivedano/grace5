@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Contract id="C-0017-verification-cost" revision="1" title="Verification spends work on changed inputs and keeps the required final evidence">
   <Problem>Intervention I-014 records P-006: baseline and final runs took roughly 9–10 and 17.5 minutes in the case, and the duration alone does not prove waste. Targeted iteration and valid build reuse can reduce waiting while final evidence stays on the candidate.</Problem>
-  <Change>`grace5-execute` guidance requires attributing receipt time to build, packaging, tests and live capture before adding reuse; running focused checks while editing and the complete required final set on the clean final candidate; documenting cache keys covering relevant source, toolchain, configuration and firmware variants; and validating invalidation when any relevant input changes. A successful cache never supplies a receipt for different inputs, a required check is never skipped, and a change to required command semantics returns to the owner gate. Hardware capture stays honest even when build artifacts are reusable.</Change>
+  <Change>`grace5-execute` guidance requires attributing receipt time to build, packaging, tests and live capture before adding reuse; running focused checks while editing and the complete required final set on the clean final candidate; and, when reuse is added, documenting cache keys covering relevant source, toolchain, configuration and firmware variants and validating invalidation when any relevant input changes. A successful cache never supplies a receipt for different inputs, a required check is never skipped, and a change to required command semantics returns to the owner gate. Hardware capture stays honest even when build artifacts are reusable. This change writes the profiling and iteration obligation; a concrete cache implementation and a pilot-specific key list follow a separate governed scope after profiling identifies the work.</Change>
   <Constraints>
     <Constraint id="K1" rule="models/architecture/method.md">Execution guidance only: check kinds, receipts, source identity, closure and approval gates are unchanged.</Constraint>
     <Constraint id="K2" rule="models/architecture/source-identity.md">Final evidence remains kernel-counted on the actual clean candidate; a cached artifact does not create a receipt, a candidate or a pass.</Constraint>
@@ -16,11 +16,12 @@
     <NonGoal id="N3">No change to required command semantics without a revised contract and owner approval.</NonGoal>
     <NonGoal id="N4">No duration-saving claim is part of this change; evaluation belongs to the control center's adopted measurement method and is not a condition of this contract.</NonGoal>
     <NonGoal id="N5">No combination with advisor or scheduling changes when attributing duration.</NonGoal>
+    <NonGoal id="N6">No concrete cache implementation or pilot-specific key list before profiling identifies the work; this change states the condition and leaves that scope separate.</NonGoal>
   </NonGoals>
   <Acceptance>
-    <Criterion id="A1" checks="CK1 CK3">Execution guidance requires profiling build, packaging, test and live-capture time before adding reuse, and requires focused iteration plus the complete final set on the clean candidate.</Criterion>
-    <Criterion id="A2" checks="CK1 CK2">A cache key includes relevant source, toolchain, configuration and firmware variants; changing any input invalidates the cache, and a failing selected regression still fails.</Criterion>
-    <Criterion id="A3" checks="CK2 CK3">Both required firmware variants and packaging remain covered; final evidence is kernel-counted on the actual candidate and no required check is skipped.</Criterion>
+    <Criterion id="A1" checks="CK1 CK3 CK4">Execution guidance requires profiling build, packaging, test and live-capture time before adding reuse, and requires focused iteration plus the complete final set on the clean candidate.</Criterion>
+    <Criterion id="A2" checks="CK1 CK2 CK4">A cache key includes relevant source, toolchain, configuration and firmware variants; changing any input invalidates the cache, and a failing selected regression still fails.</Criterion>
+    <Criterion id="A3" checks="CK2 CK3 CK4">Both required firmware variants and packaging remain covered; final evidence is kernel-counted on the actual candidate and no required check is skipped.</Criterion>
     <Criterion id="A4" checks="CK3">Generated packages and the CLI reference remain current after the guidance change, and no release identity moves.</Criterion>
     <Criterion id="A5" checks="CK1">No new cache service, command or receipt format is introduced.</Criterion>
   </Acceptance>
@@ -57,6 +58,9 @@
     <Automated id="CK3" budget="120">
       <Command>bun run package:verify</Command>
     </Automated>
+    <Manual id="CK4">
+      <Procedure>Profile one representative receipt into build, packaging, test and live-capture time. Run focused iteration and the complete required final set on a clean candidate. If reuse is used, run cold and warm on the same candidate, change a relevant source, toolchain, configuration and firmware input, and observe invalidation; confirm a failing selected regression still fails and final evidence remains kernel-counted on the actual candidate.</Procedure>
+    </Manual>
   </Checks>
   <Decisions>
     <Decision id="D1">Profile build, packaging, test and live-capture time before adding any reuse; a duration alone is not a finding of waste.</Decision>
@@ -66,5 +70,6 @@
     <Decision id="D5">A change to required command semantics is a material revision and returns to the owner gate.</Decision>
     <Decision id="D6">Hardware capture stays honest and live even when build artifacts are reused.</Decision>
     <Decision id="D7">Duration is evaluated only by the control center's adopted method; this change makes no savings claim and is not combined with advisor or scheduling changes when a duration effect is attributed.</Decision>
+    <Decision id="D8">Profiling precedes concrete reuse: this change writes the profiling and iteration obligation, and concrete cache keys or pilot scripts follow a separate governed scope after profiling identifies the work.</Decision>
   </Decisions>
 </Contract>

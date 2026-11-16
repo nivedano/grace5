@@ -24,6 +24,7 @@ Control-center intervention I-014 (verification cost). This change owns executio
 
 ## Verification focus
 
+- CK4 is the behavioural rehearsal: profile one receipt, run focused iteration and the complete final set, then (if reuse is used) exercise cold/warm, each input change and a failing selected regression.
 - Cold/warm comparison on the same candidate, then change each relevant input and confirm invalidation.
 - Both required firmware variants and packaging remain covered.
 - An intentionally failing selected regression still fails; final evidence remains kernel-counted on the actual candidate.

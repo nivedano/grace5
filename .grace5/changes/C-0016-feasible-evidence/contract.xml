@@ -18,9 +18,9 @@
     <NonGoal id="N5">No blanket mutation-testing requirement.</NonGoal>
   </NonGoals>
   <Acceptance>
-    <Criterion id="A1" checks="CK1 CK3">Preparation guidance requires device, build and observation feasibility, reports unknown as unknown, and presents waiting or alternative evidence with its limitation before approval.</Criterion>
-    <Criterion id="A2" checks="CK1 CK2">The brief evidence discussion requires a plausible faulty implementation the check rejects; a trace also names the setup whose absence fails, so a missing line alone cannot pass.</Criterion>
-    <Criterion id="A3" checks="CK3">No procedure counts feasibility as the final observation, optionalises a required check without the owner, or authorizes a device-state change.</Criterion>
+    <Criterion id="A1" checks="CK1 CK3 CK4">Preparation guidance requires device, build and observation feasibility, reports unknown as unknown, and presents waiting or alternative evidence with its limitation before approval.</Criterion>
+    <Criterion id="A2" checks="CK1 CK2 CK4">The brief evidence discussion requires a plausible faulty implementation the check rejects; a trace also names the setup whose absence fails, so a missing line alone cannot pass.</Criterion>
+    <Criterion id="A3" checks="CK3 CK4">No procedure counts feasibility as the final observation, optionalises a required check without the owner, or authorizes a device-state change.</Criterion>
     <Criterion id="A4" checks="CK1 CK2">An already approved unchanged check is not reapproved merely because it is run, and an environment failure is recorded separately from a product regression.</Criterion>
     <Criterion id="A5" checks="CK3">Generated packages and the CLI reference remain current after the guidance change.</Criterion>
   </Acceptance>
@@ -56,6 +56,9 @@
     <Automated id="CK3" budget="120">
       <Command>bun run package:verify</Command>
     </Automated>
+    <Manual id="CK4">
+      <Procedure>Prepare a change whose required device, build or environment is unavailable. Observe that preparation reports the unknown as unknown, presents one explicit choice between waiting and alternative evidence with its limitation before approval, and that the brief names a plausible faulty implementation the check rejects and, for a trace, the setup whose absence also fails. Confirm feasibility is not recorded as a final observation, no required check is optionalised without the owner, and no device state is changed.</Procedure>
+    </Manual>
   </Checks>
   <Decisions>
     <Decision id="D1">Feasibility is a preparation obligation, not evidence; an available device or environment is established before the owner commits to the plan.</Decision>
@@ -65,5 +68,6 @@
     <Decision id="D5">The pilot's focused regression test and position rule are separate governed work, not an implicit extension of this framework change.</Decision>
     <Decision id="D6">The shared-bookkeeping-path scheduling rule stays until a concrete safe exception demonstrates ownership and invalidation.</Decision>
     <Decision id="D7">Feasibility work uses read-only diagnostics and never flashes, resets or changes hardware state.</Decision>
+    <Decision id="D8">The rehearsal is the behavioural evidence for the guidance; the automated checks prove only that the edited sources compile and that the generated packages carry them.</Decision>
   </Decisions>
 </Contract>

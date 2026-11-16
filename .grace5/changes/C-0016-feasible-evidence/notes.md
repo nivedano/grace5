@@ -22,6 +22,7 @@ Control-center intervention I-012 (feasible discriminating evidence). This chang
 
 ## Verification focus
 
+- CK4 is the behavioural rehearsal: prepare a change with an unavailable device or environment, observe the unknown report, the single waiting-or-alternative choice, the brief's faulty-implementation and trace-setup statements, and the absence of any observation or hardware change.
 - The guidance must not make an unchanged approved check require reapproval.
 - An unavailable check is not silently optionalised; the owner sees one bounded tradeoff.
 - A trace check that merely lacks a marker must not pass when setup failed.
