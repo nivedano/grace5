@@ -303,14 +303,15 @@ test(
     expect(s.porcelain()).toBe(clean);
 
     // The kernel's own steps: the move declares the closed siblings, the pin, skill and local ignore steps nothing; an open change is never declared.
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[], [], [], [], []]);
+    const historicalSteps = STEPS.filter((step) => ["0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0"].includes(step.from));
+    expect(historicalSteps.map((step) => step.touches(s.repo))).toEqual([[], [], [], [], []]);
     s.pin(VERSION);
     closeFully(s);
     s.commit("close the first change");
     fs.renameSync(s.closedChangeDir, s.openChangeDir);
     s.pin(undefined);
     s.commit("the closed change as a sibling, as a 0.1.0 kernel left it");
-    expect(STEPS.map((step) => step.touches(s.repo))).toEqual([[s.id], [], [], [], []]);
+    expect(historicalSteps.map((step) => step.touches(s.repo))).toEqual([[s.id], [], [], [], []]);
 
     // So the command proceeds: the sibling moves, the open change is untouched.
     const upgrade = s.cli(["upgrade"]);

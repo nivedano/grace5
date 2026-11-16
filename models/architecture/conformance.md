@@ -53,7 +53,7 @@ The kernel's conformance suite has at least one test per case below. A test fail
 
 | Id | Case | Required behaviour |
 |---|---|---|
-| REL-01 | A change is prepared, run, reviewed and closed, with a `package.json` present. | `package.json` and `.grace5/kernel-version` are byte for byte as before: no change command writes either. A version moves only in a release change the owner requests (`upgrade.md`). |
+| REL-01 | A change is prepared, run, reviewed and closed, with a `package.json` present. | `package.json` and `.grace5/kernel-version` are byte for byte as before: no change command writes either. A version moves only in a separate framework tooling release act explicitly requested by the owner (`upgrade.md`). |
 
 ## Closed changes
 

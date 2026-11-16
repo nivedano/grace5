@@ -74,6 +74,7 @@ UP-03 upgrade --plan prints one line per step and pin bump from the pinned versi
 UP-04 upgrade on a repository without a pin runs the chain from 0.1.0: closed siblings move under closed/ with their logs, the local ignore file is written and no project file, the pin is written after each step
 UP-05 upgrade is idempotent: a repository already in shape upgrades without moving or appending anything, and an upgraded one is up to date
 UP-06 a failing step stops the upgrade with failed: <from> -> <to>: <reason>, the pin at the last completed version, and a rerun resumes there
+UP-07 a later pin-only boundary preserves stale installed skills while a refresh step repairs them, both preserving open-change identity
 UP-07 every step refreshes the grace5-* skill directories that exist under .agents/skills/ or .claude/skills/ from the packaged skills, and creates no new location
 UP-08 the post-upgrade check fails the upgrade when a change reads with another hash or a new defect
 UP-09 init writes the pin with the kernel's version and the local ignore file when it creates .grace5/, reports them as existing afterwards, and is refused on a stale pin

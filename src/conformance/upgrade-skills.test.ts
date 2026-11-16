@@ -5,13 +5,50 @@
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { snapshot, snapshotDifference } from "../upgrade/chain";
-import { STEPS, refreshSkills } from "../upgrade/steps";
+import { applyUpgrade, snapshot, snapshotDifference } from "../upgrade/chain";
+import { STEPS, refreshSkills, skillDifferences } from "../upgrade/steps";
 import { HEX64, LOCAL_IGNORE_PATH, LOCAL_IGNORE_STEP, LOCAL_IGNORE_TEXT, PIN_PATH, TEST_TIMEOUT, UPGRADE_VERSION, asVersion010, attr, automated, candidateLine, closedPath, closeFully, disposeAll, hasLine, prepared, readSkill, sha256 } from "./helper";
 
 const VERSION = UPGRADE_VERSION;
 
 afterAll(() => disposeAll());
+
+test(
+  "UP-07 a later pin-only boundary preserves stale installed skills while a refresh step repairs them, both preserving open-change identity",
+  async () => {
+    const parts = VERSION.split(".").map(Number);
+    const target = `${String(parts[0])}.${String(parts[1])}.${String((parts[2] ?? 0) + 1)}`;
+    for (const withStep of [false, true]) {
+      const s = prepared({ id: withStep ? "C-0533-refresh-boundary" : "C-0532-pin-only-boundary", checks: [automated("CK1")] });
+      const locations = [".agents/skills/grace5-prepare", ".claude/skills/grace5-execute"];
+      for (const location of locations) s.write(`${location}/SKILL.md`, "stale installed skill\n");
+      s.commit("installed skills before the next version boundary");
+      const beforeCandidate = candidateLine(s);
+      const before = await snapshot(s.repo);
+      const lines: string[] = [];
+      const step = {
+        from: VERSION, to: target, describe: "refresh installed skills",
+        apply() {}, touches: () => [],
+        verify(root: string, packaged?: string) {
+          const differences = skillDifferences(root, packaged);
+          if (differences.length > 0) throw new Error(`installed skills differ: ${differences.join(", ")}`);
+        },
+      };
+      if (withStep) expect(() => step.verify(s.repo)).toThrow();
+      expect(await applyUpgrade({ root: s.repo, version: target, steps: withStep ? [step] : [], plan: false, print: (line) => lines.push(line) })).toBe(0);
+      expect(lines[0]).toStartWith(withStep ? `step: ${VERSION} -> ${target}:` : `bump: ${VERSION} -> ${target}:`);
+      expect(lines.at(-1)).toBe(`upgraded: ${VERSION} -> ${target}`);
+      expect(s.readPin()).toBe(`${target}\n`);
+      for (const location of locations) {
+        expect(s.read(`${location}/SKILL.md`)).toBe(withStep ? readSkill(`${location.split("/").at(-1) ?? ""}/SKILL.md`) : "stale installed skill\n");
+        expect(lines.includes(`refreshed: ${location}`)).toBe(withStep);
+      }
+      expect(candidateLine(s)).toBe(beforeCandidate);
+      expect(snapshotDifference(before, await snapshot(s.repo))).toBeUndefined();
+    }
+  },
+  TEST_TIMEOUT,
+);
 
 test(
   "UP-07 every step refreshes the grace5-* skill directories that exist under .agents/skills/ or .claude/skills/ from the packaged skills, and creates no new location",
@@ -30,9 +67,12 @@ test(
     expect(hasLine(upgrade, "refreshed: .claude/skills/grace5-execute")).toBe(true);
     expect(hasLine(upgrade, "refreshed: .agents/skills/grace5-prepare")).toBe(true);
     expect(upgrade.out).not.toContain("skills: none installed");
-    // Two existing directories refresh once per step; the final step also installs and refreshes orchestrate in both.
-    expect(upgrade.lines.filter((l) => l.startsWith("step:")).length).toBe(5);
-    expect(upgrade.lines.filter((l) => l.startsWith("refreshed:")).length).toBe(2 * upgrade.lines.filter((l) => l.startsWith("step:")).length + 2);
+    // Every applied step refreshes each directory that was already installed, including later release steps.
+    const stepCount = upgrade.lines.filter((line) => line.startsWith("step:")).length;
+    expect(stepCount).toBeGreaterThanOrEqual(5);
+    for (const rel of [".claude/skills/grace5-execute", ".agents/skills/grace5-prepare"]) {
+      expect(upgrade.lines.filter((line) => line === `refreshed: ${rel}`).length).toBe(stepCount);
+    }
 
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
     expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
@@ -114,7 +154,7 @@ test(
     expect(empty.exists(".agents/skills")).toBe(false);
     expect(empty.exists(".claude/skills")).toBe(false);
 
-    // Restore the valid shape and exercise the real command's 0.5.0→0.6.0 chain on the open change.
+    // Restore the valid shape and exercise the real command through the historical boundary to the current target.
     step.apply(s.repo);
     refreshSkills(s.repo);
     step.verify(s.repo);
@@ -122,7 +162,7 @@ test(
     expect(upgrade.code).toBe(0);
     expect(upgrade.lines).toContain("step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0");
     expect(upgrade.lines).toContain(`checked: ${s.id}`);
-    expect(s.readPin()).toBe("0.6.0\n");
+    expect(s.readPin()).toBe(`${VERSION}\n`);
 
     expect(candidateLine(s)).toBe(beforeCandidate);
     const afterChanges = await snapshot(s.repo);
@@ -241,8 +281,10 @@ test(
     const checkBefore = s.read(`.grace5/changes/${s.id}/contract.xml`);
     const upgrade = s.cli(["upgrade"]);
     expect(upgrade.code).toBe(0);
-    expect(upgrade.lines.filter((line) => /^(step|bump):/.test(line))).toEqual(["step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0"]);
-    expect(s.readPin()).toBe("0.6.0\n");
+    const links = upgrade.lines.filter((line) => /^(step|bump):/.test(line));
+    expect(links[0]).toBe("step: 0.5.0 -> 0.6.0: install grace5-orchestrate beside the installed skills and refresh them to 0.6.0");
+    expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.5.0 -> ${VERSION}`);
+    expect(s.readPin()).toBe(`${VERSION}\n`);
     expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
     expect(s.porcelain().split("\n").filter(Boolean).map((line) => line.slice(3)).sort()).toEqual([".agents/skills/grace5-prepare/SKILL.md", ".agents/skills/grace5-orchestrate/SKILL.md", PIN_PATH].sort());
     expect(fs.readdirSync(s.recordsDir).sort().map((name) => [name, fs.readFileSync(path.join(s.recordsDir, name)).toString("hex")])).toEqual(records);

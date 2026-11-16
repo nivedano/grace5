@@ -19,7 +19,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 ## Working
 
 - Write only inside Affected. Tests and test doubles of affected files are inside it. Never write a Protected path.
-- Never bump the version, the pin or a migration step: a release is a separate change the owner requests (`upgrade.md`).
+- A release is a separate framework tooling act explicitly requested by the owner (`upgrade.md`). Never bump the version or pin or register migration boundaries or rows in an ordinary change; migration implementation and tests may be prepared before release.
 - Keep sequence, technical detail and discovered sub-steps in `notes.md`.
 - Iterate with `grace5 run <id> --check <check>...`. A receipt taken on a dirty tree is for iteration only.
 - Commit with a `Change: <id>` trailer. Commit receipts and notes as you go; committing records never invalidates evidence.
