@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0011-clean-skill-source" revision="1" contract-sha256="560d407f713992dbdd407b5a8058326f24f059c8baee13519573f69dabce61dd" brief-sha256="9043e950b462d8494420f56de970718e2e6b7d93ab8e92fb4676f508249eeaf0" date="2026-11-16" owner="nivedano" decision="approved" recorded-by="Copilot">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669"/>
+  <Bound check="CK2" definition-sha256="f98a757072a9d61435e6a77813dba7afc5c67de3df68b330ee9fba98b8a436fb"/>
+  <Bound check="CK3" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165"/>
+  <Bound check="CK4" definition-sha256="afc2b7c8da137a356afd143d7a224615066d819acab3142502121f8ba6328e62"/>
+  <Bound check="CK5" definition-sha256="310755e58b07c1d440d7a7414be69694b3d1bad19c81f1e25aba34a549ca09a7"/>
+</Approval>

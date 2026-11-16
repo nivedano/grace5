@@ -312,6 +312,11 @@ abandon it). Open changes no step touches are listed as open, untouched: and rea
 post-upgrade check like every other change. The kernel writes no project file: a line an
 earlier version wrote into the project's .gitignore is left alone.
 
+When the chain contains a step, the kernel also refuses to refresh from a checkout whose own
+skills/ or packages/skills/ differs from HEAD: uncommitted skill text is never installed into a
+governed repository. A chain of pin bumps reads no skills and is not refused, and a checkout
+without .git is not checked.
+
 The chain is printed as a plan, one line per link. With --plan nothing is written. Otherwise the
 links are applied in order, the pin is written after each one, and the first failure stops the
 upgrade with the pin at the last completed version; running upgrade again resumes from there.
@@ -319,7 +324,8 @@ After the chain, every change in both locations is read as check reads it, and t
 if any reports a new defect, or a contract or definition hash other than before.
 
 Refuses: outside a git repository; without .grace5/; when the pin cannot be read as a version;
-when the pin is ahead of this kernel; when a step would write an open change. It never
+when the pin is ahead of this kernel; when a step would write an open change; when the chain
+contains a step and the kernel's own skills/ or packages/skills/ differs from HEAD. It never
 downgrades and takes no target version.
 
 Output:
@@ -336,8 +342,9 @@ Output:
   upgraded: <from> -> <to>                  the chain completed and the check passed
   refused: <reason>                         not a git repository, .grace5/ does not exist,
                                             repository pin is unreadable: <reason>,
-                                            kernel too old, or
-                                            open changes touched by step <from> -> <to>: <id>, <id>
+                                            kernel too old,
+                                            open changes touched by step <from> -> <to>: <id>, <id>, or
+                                            kernel skills are modified relative to HEAD: <path>
 
 After a successful upgrade, commit the result.
 

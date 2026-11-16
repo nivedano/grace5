@@ -2,6 +2,7 @@
 // with the pin written after each link, and checked afterwards against a snapshot of every change's hashes and defects.
 
 import { evaluate, isOpen, listChanges, listClosedChanges, readSource } from "../state";
+import { modifiedSkillSources } from "./kernel-source";
 import { compareVersions, readPin, writePin } from "./pin";
 import { refreshSkills } from "./skills";
 import { type Step } from "./steps";
@@ -79,13 +80,16 @@ export interface UpgradeInput {
   readonly refuse?: (reason: string) => void;
   /** The packaged skills directory; the kernel's own by default. */
   readonly packagedSkills?: string;
+  /** The kernel checkout whose skill sources must be clean; the running checkout by default. */
+  readonly kernelRoot?: string;
 }
 
 /**
  * Composes and applies the chain. The caller has already refused what comes before the chain (not a git repository, no
- * .grace5/, kernel too old, up to date); this refuses on the open changes a step would write, prints the plan, applies
- * the links, and returns the exit status. Every path a step or the skill refresh writes is kernel-managed
- * (source-identity.md), so an open change's candidate and diff are unchanged by the chain.
+ * .grace5/, kernel too old, up to date); this refuses on the open changes a step would write, on a kernel checkout whose
+ * skill source differs from HEAD when a step exists, prints the plan, applies the links, and returns the exit status.
+ * Every path a step or the skill refresh writes is kernel-managed (source-identity.md), so an open change's candidate
+ * and diff are unchanged by the chain.
  */
 export async function applyUpgrade(input: UpgradeInput): Promise<number> {
   const { root, version, print } = input;
@@ -100,6 +104,13 @@ export async function applyUpgrade(input: UpgradeInput): Promise<number> {
     const touched = step.touches(root).filter((id) => open.includes(id)).sort();
     if (touched.length > 0) {
       refuse(`open changes touched by step ${step.from} -> ${step.to}: ${touched.join(", ")}`);
+      return 1;
+    }
+  }
+  if (steps.length > 0) {
+    const modified = modifiedSkillSources(input.kernelRoot);
+    if (modified.length > 0) {
+      refuse(`kernel skills are modified relative to HEAD: ${modified.join(", ")} (commit them or run from a released commit)`);
       return 1;
     }
   }

@@ -88,3 +88,4 @@ UP-16 an unreadable pin is refused by every command but status with the fixed ph
 UP-17 status names the kernel a counted result was recorded with when it differs from the running one
 UP-18 a result recorded by 0.3.0 on a pinned tree, or by 0.4.0 on a tree with .grace5/README.md, is on an earlier candidate under this kernel, while a result this kernel records counts after the pin changes
 UP-19 the 0.5.0 to 0.6.0 step installs orchestrate only beside existing packaged skills, is idempotent and self-verifying, and leaves open changes untouched
+UP-20 upgrade refuses before the plan when the kernel's skill source differs from HEAD, and a clean or pin-bump chain is unaffected

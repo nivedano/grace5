@@ -1,13 +1,15 @@
-// Conformance cases UP-07, UP-12, UP-14, UP-15, UP-19 and AUTH-03 of models/architecture/conformance.md: the
+// Conformance cases UP-07, UP-12, UP-14, UP-15, UP-19, UP-20 and AUTH-03 of models/architecture/conformance.md: the
 // installed grace5-* skill directories, their refresh, the kernel-managed paths outside the candidate and the dirty
-// state, and upgrade beside open changes. Split mechanically from upgrade.test.ts by C-0010; the tests are unchanged.
+// state, upgrade beside open changes, and the kernel skill-source guard. Split mechanically from upgrade.test.ts by
+// C-0010; the tests are unchanged except for UP-20.
 
 import { afterAll, expect, test } from "bun:test";
+import { spawnSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { applyUpgrade, snapshot, snapshotDifference } from "../upgrade/chain";
 import { STEPS, refreshSkills, skillDifferences } from "../upgrade/steps";
-import { HEX64, LOCAL_IGNORE_PATH, LOCAL_IGNORE_STEP, LOCAL_IGNORE_TEXT, PIN_PATH, TEST_TIMEOUT, UPGRADE_VERSION, asVersion010, attr, automated, candidateLine, closedPath, closeFully, disposeAll, hasLine, prepared, readSkill, sha256 } from "./helper";
+import { HEX64, LOCAL_IGNORE_PATH, LOCAL_IGNORE_STEP, LOCAL_IGNORE_TEXT, PACKAGED_SKILLS, PIN_PATH, TEST_TIMEOUT, UPGRADE_VERSION, asVersion010, attr, automated, candidateLine, closedPath, closeFully, disposeAll, hasLine, prepared, readSkill, sha256 } from "./helper";
 
 const VERSION = UPGRADE_VERSION;
 
@@ -421,6 +423,103 @@ test(
     s.commit("take the pin");
     expect(candidateLine(s)).toBe(line);
     expect(s.computeCandidate()).toBe(candidate);
+  },
+  TEST_TIMEOUT,
+);
+
+/** A throwaway kernel checkout with both skill trees committed; the caller dirties one of them. */
+function kernelRepo(dir: string): string {
+  const root = path.join(dir, "kernel");
+  for (const rel of ["skills/grace5-prepare", "packages/skills/grace5-prepare"]) {
+    fs.mkdirSync(path.join(root, rel), { recursive: true });
+    fs.writeFileSync(path.join(root, rel, "SKILL.md"), `${rel}\n`);
+  }
+  const git = (...args: string[]): void => {
+    const result = spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
+    if (result.status !== 0) throw new Error(String(result.stderr));
+  };
+  git("init", "-q");
+  git("config", "user.name", "Conformance Fixture");
+  git("config", "user.email", "fixture@example.invalid");
+  git("config", "core.autocrlf", "false");
+  git("config", "commit.gpgsign", "false");
+  git("add", "-A");
+  git("commit", "-q", "-m", "kernel");
+  return root;
+}
+
+test(
+  "UP-20 upgrade refuses before the plan when the kernel's skill source differs from HEAD, and a clean or pin-bump chain is unaffected",
+  async () => {
+    const s = prepared({ id: "C-0534-kernel-source", checks: [automated("CK1")] });
+    s.pin("0.5.0");
+    s.write(".claude/skills/grace5-execute/SKILL.md", "old execute\n");
+    s.commit("installed skill at 0.5.0");
+
+    const kernel = kernelRepo(s.scratch);
+    fs.writeFileSync(path.join(kernel, "packages", "skills", "grace5-prepare", "SKILL.md"), "edited packaged\n");
+
+    const refused: string[] = [];
+    const lines: string[] = [];
+    expect(
+      await applyUpgrade({
+        root: s.repo,
+        version: VERSION,
+        steps: STEPS,
+        plan: false,
+        print: (line) => lines.push(line),
+        refuse: (reason) => refused.push(reason),
+        kernelRoot: kernel,
+        packagedSkills: PACKAGED_SKILLS,
+      }),
+    ).toBe(1);
+    expect(refused).toHaveLength(1);
+    expect(refused[0]).toStartWith("kernel skills are modified relative to HEAD: packages/skills/grace5-prepare/SKILL.md");
+    expect(lines).toHaveLength(0);
+    expect(s.readPin()).toBe("0.5.0\n");
+
+    // A pin bump reads no skills, so the same dirty source is not consulted.
+    const bumpLines: string[] = [];
+    const bumpRefused: string[] = [];
+    expect(
+      await applyUpgrade({
+        root: s.repo,
+        version: "0.5.1",
+        steps: [],
+        plan: false,
+        print: (line) => bumpLines.push(line),
+        refuse: (reason) => bumpRefused.push(reason),
+        kernelRoot: kernel,
+        packagedSkills: PACKAGED_SKILLS,
+      }),
+    ).toBe(0);
+    expect(bumpRefused).toHaveLength(0);
+    expect(bumpLines[0]).toStartWith("bump: 0.5.0 -> 0.5.1:");
+    expect(s.readPin()).toBe("0.5.1\n");
+
+    // A clean kernel source upgrades normally and refreshes the installed skill.
+    s.pin("0.5.0");
+    s.commit("the pin again");
+    const clean = kernelRepo(path.join(s.scratch, "clean"));
+    const cleanLines: string[] = [];
+    const cleanRefused: string[] = [];
+    expect(
+      await applyUpgrade({
+        root: s.repo,
+        version: VERSION,
+        steps: STEPS,
+        plan: false,
+        print: (line) => cleanLines.push(line),
+        refuse: (reason) => cleanRefused.push(reason),
+        kernelRoot: clean,
+        packagedSkills: PACKAGED_SKILLS,
+      }),
+    ).toBe(0);
+    expect(cleanRefused).toHaveLength(0);
+    expect(cleanLines).toContain("refreshed: .claude/skills/grace5-execute");
+    expect(cleanLines).toContain("refreshed: .claude/skills/grace5-orchestrate");
+    expect(cleanLines.at(-1)).toBe(`upgraded: 0.5.0 -> ${VERSION}`);
+    expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
   },
   TEST_TIMEOUT,
 );

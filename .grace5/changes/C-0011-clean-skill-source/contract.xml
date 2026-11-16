@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0011-clean-skill-source" revision="1" title="The kernel refreshes installed skills only from committed skill text and pins LF for every text file">
+  <Problem>Explicit owner decision of 2026-11-16: the kernel must not install uncommitted skill text into a governed repository, and the repository must pin LF. Observed failure: the running checkout can be modified in exactly the files a refresh reads, and `git status` on those files is the only thing between them and every governed repository. Observed failure: without `.gitattributes`, a fresh clone with `core.autocrlf=true` checks out CRLF and `bun run package:verify` reports drift for every generated file, failing a release check on a platform rather than on a defect. Installed-skill drift remains outside the target contract.</Problem>
+  <Change>`grace5 upgrade` refuses before it prints the plan and before it writes anything when the chain contains a migration step and the running kernel checkout's `skills/` or `packages/skills/` differs from its `HEAD`; the refusal names each modified path and exits 1. A pin bump reads no skills and is not refused; a checkout without `.git` is not checked. `.gitattributes` pins `eol=lf` for text; the index is already LF and no blob is renormalised. The refusal is stated in the command help, `upgrade.md`, `commands.md` and a new conformance case; no installed skill byte, state layout, command, flag, schema or record changes.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="AGENTS.md">The surface grows by nothing: no command, flag, schema, record kind, skill or validation mechanism is added; the change is the guard, `.gitattributes`, its tests and the documents that state it.</Constraint>
+    <Constraint id="K2" rule="models/architecture/upgrade.md">An ordinary change does not bump the version, the pin or a tag and registers no migration boundary or row; this change does none of those and adds no release.</Constraint>
+    <Constraint id="K3" rule="models/architecture/source-identity.md">Installed `grace5-*` skills stay kernel-managed and the guard writes nothing, so no candidate, dirty state, diff or evidence changes.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">The guard is a kernel mechanism and adds one ledger entry with its removal criterion; `.gitattributes` is repository configuration, not a kernel mechanism, and adds none.</Constraint>
+    <Constraint id="K5">`skills/`, `packages/`, `package.json` and `.grace5/kernel-version` are Protected: the guard must not change installed bytes, generated packages, the version surfaces or the pin.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">No deletion or consolidation of the skill copies: `packages/` and `skills/` stay as they are; the one-copy or single-channel design waits for the installation process.</NonGoal>
+    <NonGoal id="N2">No drift detection or repair for installed skills, in `status` or `upgrade`; drift stays outside the target contract.</NonGoal>
+    <NonGoal id="N3">No installer, seeding, skill-location change or new skill; installation remains separate from the kernel.</NonGoal>
+    <NonGoal id="N4">No tag or commit-ancestry enforcement: a clean but untagged checkout is still accepted; only a dirty skill source is refused.</NonGoal>
+    <NonGoal id="N5">No change to `run`, `check`, `close`, `status` or the refresh semantics of a step.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK2">With a chain that contains a step, a kernel checkout whose `skills/` or `packages/skills/` differs from `HEAD` is refused before the plan is printed and before anything is written, with and without `--plan`, naming each modified path and exiting 1; the target repository's pin and installed skills are unchanged. A clean kernel source upgrades normally.</Criterion>
+    <Criterion id="A2" checks="CK2">A chain of pin bumps only neither reads nor refuses a modified skill source, and no installed skill byte, generated package, candidate or evidence changes.</Criterion>
+    <Criterion id="A3" checks="CK4">`eol=lf` applies to the canonical and packaged skill trees, and the index has no CRLF blob.</Criterion>
+    <Criterion id="A4" checks="CK3 CK5">The command help and generated CLI reference carry the refusal, and `package:verify` still passes.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>.gitattributes</Path>
+    <Path>src/upgrade/**</Path>
+    <Path>src/cli.ts</Path>
+    <Path>src/conformance/**</Path>
+    <Path>models/architecture/upgrade.md</Path>
+    <Path>models/architecture/commands.md</Path>
+    <Path>models/architecture/conformance.md</Path>
+    <Path>models/architecture/rationale-ledger.md</Path>
+    <Path>models/architecture/cli-reference.md</Path>
+    <Name>kernel skill source guard</Name>
+    <Name>LF pin</Name>
+    <Protected>skills/**</Protected>
+    <Protected>packages/**</Protected>
+    <Protected>package.json</Protected>
+    <Protected>.grace5/kernel-version</Protected>
+    <Protected>.grace5/changes/closed/**</Protected>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/architecture/templates/**</Protected>
+    <Protected>models/architecture/brief.md</Protected>
+    <Protected>models/architecture/method.md</Protected>
+    <Protected>models/architecture/source-identity.md</Protected>
+    <Protected>models/architecture/evidence-records.md</Protected>
+    <Protected>models/architecture/authorization.md</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>README.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="120">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="480">
+      <Command>bun test --parallel</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Trace id="CK4" origin="live" budget="30">
+      <Command>git check-attr eol -- skills/grace5-prepare/SKILL.md packages/skills/grace5-prepare/SKILL.md</Command>
+      <Expect>skills/grace5-prepare/SKILL.md: eol: lf</Expect>
+      <Expect>packages/skills/grace5-prepare/SKILL.md: eol: lf</Expect>
+    </Trace>
+    <Trace id="CK5" origin="live" budget="60">
+      <Command>bun src/cli.ts upgrade --help</Command>
+      <Expect>kernel skills are modified relative to HEAD</Expect>
+    </Trace>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The guard covers both the canonical `skills/` tree, which authors edit, and the `packages/skills/` tree the refresh reads; either being dirty refuses, and the line names the paths.</Decision>
+    <Decision id="D2">The guard runs only when the chain contains a migration step, because only a step refreshes skills and a pin bump reads none.</Decision>
+    <Decision id="D3">The refusal precedes the plan and every write, `--plan` included, so a plan cannot describe a refresh the kernel would not perform.</Decision>
+    <Decision id="D4">A kernel checkout without `.git` is not checked; a clean but untagged checkout is accepted. Closing that residual with a tag check is out of scope.</Decision>
+    <Decision id="D5">Installed-skill drift is not detected or repaired; this change protects the kernel source, not a governed repository's installed copies.</Decision>
+    <Decision id="D6">`.gitattributes` sets `* text=auto eol=lf`; the index is already LF on all 231 tracked files, so the change renormalises no blob and alters no record.</Decision>
+  </Decisions>
+</Contract>

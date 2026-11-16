@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0011-clean-skill-source revision 1</title>
+<meta name="grace5:change" content="C-0011-clean-skill-source">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="560d407f713992dbdd407b5a8058326f24f059c8baee13519573f69dabce61dd">
+<meta name="grace5:date" content="2026-11-16">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<!-- For a difference brief, replace the complete basis element above and add the complete previous-revision element:
+<meta name="grace5:basis" content="difference">
+<meta name="grace5:previous-revision" content="1">
+Do not splice the second element inside the first element's opening tag.
+-->
+<meta name="grace5:words" content="728">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>The kernel refreshes installed skills only from committed skill text and pins LF for every text file</h1>
+  <p class="lead">Brief for approval. Change <code>C-0011-clean-skill-source</code>, revision 1, 2026-11-16. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>A refresh cannot install uncommitted skill text: when the chain contains a migration step and the running kernel checkout&#x27;s <code>skills/</code> or <code>packages/skills/</code> differs from its <code>HEAD</code>, <code>grace5 upgrade</code> refuses before it prints the plan and before it writes anything, names each modified path, and exits 1. The same refusal holds with and without <code>--plan</code>.</li>
+        <li>The guard is deliberately narrow: a chain of pin bumps is not refused, a kernel checkout without <code>.git</code> is not checked, and no flag overrides the refusal. A clean kernel source upgrades exactly as it does today.</li>
+        <li>Installed copies stay out of scope: a governed repository&#x27;s <code>grace5-*</code> skills are neither inspected nor repaired, so drift there remains undetected rather than becoming a new obligation.</li>
+        <li>The repository pins line endings through a new <code>.gitattributes</code> holding <code>* text=auto eol=lf</code>. The index is already LF on all 231 tracked files, so the rule renormalises no blob, rewrites no file and alters no record.</li>
+        <li>The refusal is stated where a person meets it: the command help, <code>upgrade.md</code>, <code>commands.md</code> and a new conformance case. No installed skill byte, state layout, command, flag, schema or record changes, and the version, pin, tag and migration table stay as they are.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The guard, its wiring into the upgrade path and the new conformance case compile with the rest of the kernel: <code>bun run check</code> is <code>tsc --noEmit</code> over the whole tree, so no type error, unused import or broken shape is introduced.</td><td class="limits">Type-checking exercises no behaviour. It cannot show that any refusal fires, that the plan stays unprinted, that the exit status is 1, that the paths are named, or that <code>.gitattributes</code> exists and holds the stated rule, none of which it reads.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Whole suite passes</span><b>CK2</b> automated</td><td class="shows">The behaviour holds through the suite, the new conformance case included: with a step in the chain a dirty kernel skill source is refused with and without <code>--plan</code>, before the plan and before any write, naming each modified path and exiting 1; a clean source upgrades normally; a bump-only chain neither reads nor refuses a modified source and changes no installed skill byte, generated package, candidate or evidence.</td><td class="limits">The suite builds its own fixture checkouts, so it shows the guard on a fixture, not on a real kernel checkout: a file git ignores or one marked assume-unchanged is invisible to <code>git status</code> in the fixture exactly as on a real checkout and would be neither named nor refused, and no test states that. The suite also says nothing about whether the help, <code>upgrade.md</code> and <code>commands.md</code> words match each other; that is reading, not a test.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Generated output matches</span><b>CK3</b> automated</td><td class="shows"><code>bun run package:verify</code> regenerates the packaged skills from the canonical tree and the CLI reference from the help text and finds no drift, so the generated <code>cli-reference.md</code> carries the refusal whenever the help does, and the packaged skills and generated files stay byte for byte as they are.</td><td class="limits">It compares generated output with its sources, not the wording with the owner&#x27;s intent: a misleading help line would be copied faithfully into the reference and pass. It reads neither <code>.gitattributes</code> nor the index, so A3&#x27;s claim about line endings rests on the attribute check and on the contract&#x27;s stated premise, not here.</td></tr>
+          <tr class="trace" data-check="CK4" data-kind="trace" data-required="true"><td><span>LF pin on both trees</span><b>CK4</b> trace</td><td class="shows">The rule reaches both skill trees: <code>git check-attr eol</code> reports <code>eol: lf</code> for <code>skills/grace5-prepare/SKILL.md</code> and for <code>packages/skills/grace5-prepare/SKILL.md</code>, so a canonical and a packaged skill file both resolve to LF.</td><td class="limits">Two sample files stand in for two whole trees, so a later exception rule for one path inside them would not be seen. It does not read the index, so the criterion&#x27;s clause &quot;the index has no CRLF blob&quot; is not measured by this check at all, and it says nothing about what a clone on a machine with <code>core.autocrlf=true</code> checks out.</td></tr>
+          <tr class="trace" data-check="CK5" data-kind="trace" data-required="true"><td><span>Help names the refusal</span><b>CK5</b> trace</td><td class="shows">The help states the refusal where a person reads it: <code>bun src/cli.ts upgrade --help</code> prints the line <code>kernel skills are modified relative to HEAD</code>, so the new obligation is visible before it is met.</td><td class="limits">It reads help text, not the refusal: it cannot show that a real upgrade prints that sentence, names the paths, keeps the plan unprinted or exits 1, and it does not show whether <code>upgrade.md</code> and <code>commands.md</code> repeat the same condition, since no check reads either document.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The guard covers both kernel trees: the canonical <code>skills/</code> that authors edit and the <code>packages/skills/</code> that a refresh reads. Either being dirty refuses, and the refusal names the paths. Both are covered because guarding one leaves the other as the way uncommitted text reaches a governed repository.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The guard runs only when the chain contains a migration step. Only a step refreshes skills; a pin bump reads no skill file, so it is neither refused nor slowed, and the check stays out of the path that changes nothing but the pin.</span></li>
+        <li data-decision="D3"><b>D3</b><span>The refusal precedes the plan and every write, <code>--plan</code> included: a plan that describes a refresh the kernel would not perform misleads more than a refusal does, so the order is refusal, then plan, then writes.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Two residuals are accepted rather than closed: a kernel checkout without <code>.git</code> is not checked, and a clean but untagged checkout is accepted. A tag or commit-ancestry requirement is out of scope, so the guard tests the working tree, not the provenance of <code>HEAD</code>.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Installed-skill drift is neither detected nor repaired. The change protects the kernel&#x27;s own source, not the installed copies in a governed repository, whose staleness therefore stays as it is today.</span></li>
+        <li data-decision="D6"><b>D6</b><span>The repository rule is <code>* text=auto eol=lf</code>. The index is already LF on all 231 tracked files, so the rule renormalises no blob and alters no record; it is configuration, not a kernel mechanism, and carries no ledger entry.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The guard is only as wide as git&#x27;s report. A file under <code>skills/</code> or <code>packages/skills/</code> that is gitignored or marked assume-unchanged does not appear in the status the guard reads, so it would be installed by a refresh with no refusal. The contract states three residuals and not this one.</li>
+        <li>A legitimate edit in the kernel&#x27;s own skill trees now blocks every upgrade whose chain contains a step, until it is committed. There is no override flag, so the only ways forward are to commit or stash the work before upgrading.</li>
+        <li>A kernel distributed without <code>.git</code> is unchecked by design: its skill source is whatever the installed package holds, so an operator who edits the installed package gets no refusal, and nothing records that the check was skipped.</li>
+        <li>The line-ending rule is repository-wide, not skill-only. Every text file is pinned to LF, so a file that must keep CRLF later needs an exception rule, and the pin is evidenced by two sampled files rather than by the trees or the index.</li>
+        <li>Installed-skill drift remains undetected, so a governed repository can run stale <code>grace5-*</code> skills while every check of this change passes.</li>
+        <li>The documented refusal rests on review. No check reads <code>upgrade.md</code> or <code>commands.md</code>, so a document that drifts from the implemented condition fails no check.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Approve or reject: approval accepts a refusal with no override and the three stated residuals — a checkout without <code>.git</code>, a clean but untagged checkout, and installed-skill drift left undetected.</li>
+        <li>Run the refusal once by hand, in a bench session. Dirty one file under <code>packages/skills/</code> in a kernel checkout, then run <code>grace5 upgrade --plan</code> and <code>grace5 upgrade</code> against a repository whose chain contains a step, and read the named paths and the exit status. No automated check shows this on a real checkout.</li>
+        <li>Record the two live traces at close: CK4 and CK5 are trace checks with live origin, so each needs a recorded run of its command, not a test result.</li>
+        <li>Read the wording: the help line, <code>upgrade.md</code> and <code>commands.md</code> are compared by no check, so whether they state the same condition is the owner&#x27;s or review&#x27;s reading.</li>
+        <li>Accept the size: 728 contract words against a target of 600, with the reason in the footer.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>A new <code>.gitattributes</code> at the repository root, holding <code>* text=auto eol=lf</code>; the index is already LF, so it rewrites no file.</li>
+        <li><code>src/upgrade/**</code>: the guard that compares the kernel checkout&#x27;s <code>skills/</code> and <code>packages/skills/</code> with its <code>HEAD</code> and refuses before the plan.</li>
+        <li><code>src/cli.ts</code>: the help text that states the refusal.</li>
+        <li><code>src/conformance/**</code>: the new conformance case and its test title, proving the refusal with and without <code>--plan</code> and the acceptance of a bump-only chain.</li>
+        <li>The documents that state it: <code>models/architecture/upgrade.md</code>, <code>models/architecture/commands.md</code> and <code>models/architecture/conformance.md</code>; the generated <code>models/architecture/cli-reference.md</code> follows the help text.</li>
+        <li>One entry in <code>models/architecture/rationale-ledger.md</code> for the guard, with its removal criterion.</li>
+        <li>The constraint on all of it: the surface grows by nothing. No command, flag, schema, record kind, skill or validation mechanism is added, and no version, pin, tag or migration row moves.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no deletion or consolidation of the skill copies. <code>packages/</code> and <code>skills/</code> stay as they are; the one-copy or single-channel design waits for the installation process.</li>
+        <li>N2: no drift detection or repair for installed skills, in <code>status</code> or in <code>upgrade</code>; drift stays outside the target contract.</li>
+        <li>N3: no installer, no seeding, no skill-location change and no new skill; installation remains separate from the kernel.</li>
+        <li>N4: no tag or commit-ancestry enforcement. A clean but untagged checkout is still accepted; only a dirty skill source is refused.</li>
+        <li>N5: no change to <code>run</code>, <code>check</code>, <code>close</code>, <code>status</code>, or to the refresh semantics of a step.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected="skills/**">skills/**</li>
+        <li data-protected="packages/**">packages/**</li>
+        <li data-protected="package.json">package.json</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/architecture/templates/**">models/architecture/templates/**</li>
+        <li data-protected="models/architecture/brief.md">models/architecture/brief.md</li>
+        <li data-protected="models/architecture/method.md">models/architecture/method.md</li>
+        <li data-protected="models/architecture/source-identity.md">models/architecture/source-identity.md</li>
+        <li data-protected="models/architecture/evidence-records.md">models/architecture/evidence-records.md</li>
+        <li data-protected="models/architecture/authorization.md">models/architecture/authorization.md</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>A3: a clause its check cannot plausibly serve. A3 requires that &quot;the index has no CRLF blob&quot; but names only CK4, which reads the <code>eol</code> attribute of two files and never the index. Resolved: the Change and D6 state the index is already LF on all 231 tracked files and that no blob is renormalised, so A3&#x27;s second clause records a premise the change keeps rather than work a check can measure; the repository confirms 231 tracked files with no CRLF or mixed index entry, and CK4&#x27;s limitation states the gap.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Change: a cited path that does not exist yet. <code>.gitattributes</code> is absent at the repository root, so the citation names no file to edit. Resolved: <code>Affected</code> lists it as the path the change creates and D6 states what it holds; every other cited path — the four upgrade sources, <code>src/cli.ts</code>, <code>src/conformance/</code>, the five model documents, both skill copies and all protected paths — exists as written.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Change and D1: an undefined term. The Change says the trees must not &quot;differ from `HEAD`&quot;, which does not say whether an untracked file counts, while D1 states the same condition as the trees being dirty. Resolved: D1&#x27;s &quot;dirty&quot; reads through <code>source-identity.md</code>, where Dirty is <code>git status --porcelain</code> listing a source path, untracked files included and ignored files excluded; the guard is therefore the status report, and the residual that an ignored or assume-unchanged file escapes it is stated in the risks.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>CK5: an undefined term in the expected line. &quot;kernel skills&quot; in <code>kernel skills are modified relative to HEAD</code> could be read as the installed <code>grace5-*</code> skills of a governed repository, which the method calls installed skills and which D5 excludes. Resolved: D1 names the guard&#x27;s subject as the kernel&#x27;s own canonical and packaged trees, so the help line refers to those and not to any installed copy.</span></li>
+        <li data-finding="resolved"><span>Resolved</span><span>Affected: a boundary that does not at first cover the Change. The refusal must precede the plan, and the plan is printed by <code>applyUpgrade</code> in <code>src/upgrade/chain.ts</code>; the command file that calls it, <code>src/commands/upgrade.ts</code>, is not an Affected path. Resolved: <code>applyUpgrade</code> already refuses the open-change case at exactly that point, before printing the plan, so the guard fits inside <code>src/upgrade/**</code> and no file outside <code>Path</code> need be written.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 728 words against a target of 600, 5 checks against 8. The 128-word excess is the two independent failures the change closes — a dirty kernel skill source installed into every governed repository, and a CRLF checkout failing a release check on a platform rather than on a defect — plus its four explicit residual and boundary statements: a checkout without <code>.git</code>, an untagged checkout, installed-skill drift, and the pin-bump exclusion. The check count sits below the target because the change adds no new verification mechanism: its behaviour is exercised through the existing suite, with two live traces for the attribute and the help.</p>
+  <p>This brief describes contract text with SHA-256 <code>560d407f713992dbdd407b5a8058326f24f059c8baee13519573f69dabce61dd</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>
