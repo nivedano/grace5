@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0017-verification-cost" revision="1" title="Verification spends work on changed inputs and keeps the required final evidence">
+  <Problem>Intervention I-014 records P-006: baseline and final runs took roughly 9–10 and 17.5 minutes in the case, and the duration alone does not prove waste. Targeted iteration and valid build reuse can reduce waiting while final evidence stays on the candidate.</Problem>
+  <Change>`grace5-execute` guidance requires attributing receipt time to build, packaging, tests and live capture before adding reuse; running focused checks while editing and the complete required final set on the clean final candidate; documenting cache keys covering relevant source, toolchain, configuration and firmware variants; and validating invalidation when any relevant input changes. A successful cache never supplies a receipt for different inputs, a required check is never skipped, and a change to required command semantics returns to the owner gate. Hardware capture stays honest even when build artifacts are reusable.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/method.md">Execution guidance only: check kinds, receipts, source identity, closure and approval gates are unchanged.</Constraint>
+    <Constraint id="K2" rule="models/architecture/source-identity.md">Final evidence remains kernel-counted on the actual clean candidate; a cached artifact does not create a receipt, a candidate or a pass.</Constraint>
+    <Constraint id="K3" rule="models/architecture/upgrade.md">No selective-baseline policy, skipped required check or cross-candidate receipt reuse; a required command change is a material revision.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">One existing verification-cost entry is amended, or one entry is added, with the smallest alternative, expected benefit, cost and removal criterion.</Constraint>
+    <Constraint id="K5" rule="AGENTS.md">An ordinary change: no version, pin, tag, migration row or release moves.</Constraint>
+    <Constraint id="K6">Pilot scripts and tests are in scope only after profiling identifies concrete work; new cache services and kernel commands are not.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">No new cache service, daemon or kernel command.</NonGoal>
+    <NonGoal id="N2">No selective start baseline, skipped required check or reuse of a receipt across candidates.</NonGoal>
+    <NonGoal id="N3">No change to required command semantics without a revised contract and owner approval.</NonGoal>
+    <NonGoal id="N4">No duration-saving claim is part of this change; evaluation belongs to the control center's adopted measurement method and is not a condition of this contract.</NonGoal>
+    <NonGoal id="N5">No combination with advisor or scheduling changes when attributing duration.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK3">Execution guidance requires profiling build, packaging, test and live-capture time before adding reuse, and requires focused iteration plus the complete final set on the clean candidate.</Criterion>
+    <Criterion id="A2" checks="CK1 CK2">A cache key includes relevant source, toolchain, configuration and firmware variants; changing any input invalidates the cache, and a failing selected regression still fails.</Criterion>
+    <Criterion id="A3" checks="CK2 CK3">Both required firmware variants and packaging remain covered; final evidence is kernel-counted on the actual candidate and no required check is skipped.</Criterion>
+    <Criterion id="A4" checks="CK3">Generated packages and the CLI reference remain current after the guidance change, and no release identity moves.</Criterion>
+    <Criterion id="A5" checks="CK1">No new cache service, command or receipt format is introduced.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>skills/grace5-execute/**</Path>
+    <Path>models/architecture/method.md</Path>
+    <Path>models/architecture/rationale-ledger.md</Path>
+    <Path>packages/**</Path>
+    <Name>verification cost</Name>
+    <Name>cache invalidation</Name>
+    <Name>final evidence</Name>
+    <Protected>.grace5/changes/closed/**</Protected>
+    <Protected>package.json</Protected>
+    <Protected>.grace5/kernel-version</Protected>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/architecture/templates/**</Protected>
+    <Protected>models/architecture/authorization.md</Protected>
+    <Protected>models/architecture/source-identity.md</Protected>
+    <Protected>models/architecture/evidence-records.md</Protected>
+    <Protected>models/architecture/brief.md</Protected>
+    <Protected>skills/grace5-prepare/**</Protected>
+    <Protected>skills/grace5-orchestrate/**</Protected>
+    <Protected>skills/grace5-review/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>README.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="120">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test --parallel</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">Profile build, packaging, test and live-capture time before adding any reuse; a duration alone is not a finding of waste.</Decision>
+    <Decision id="D2">Run focused checks while editing and the complete required final set on the clean final candidate.</Decision>
+    <Decision id="D3">A cache key includes relevant source, toolchain, configuration and firmware variants, and invalidation is exercised by changing each kind of input.</Decision>
+    <Decision id="D4">A cache never supplies a receipt for different inputs; no required check is skipped and no receipt is reused across candidates.</Decision>
+    <Decision id="D5">A change to required command semantics is a material revision and returns to the owner gate.</Decision>
+    <Decision id="D6">Hardware capture stays honest and live even when build artifacts are reused.</Decision>
+    <Decision id="D7">Duration is evaluated only by the control center's adopted method; this change makes no savings claim and is not combined with advisor or scheduling changes when a duration effect is attributed.</Decision>
+  </Decisions>
+</Contract>

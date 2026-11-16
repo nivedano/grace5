@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0015-advisor-guidance revision 1</title>
+<meta name="grace5:change" content="C-0015-advisor-guidance">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="ef560274c3e59ba76cc855a49fd5f0ae3e19815e428d34bce67a1c08f688734b">
+<meta name="grace5:date" content="2026-11-17">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="677">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Advisor guidance is packaged, imported once, and checked against current state</h1>
+  <p class="lead">Brief for approval. Change <code>C-0015-advisor-guidance</code>, revision 1, 2026-11-17. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>One packaged advisor-guidance resource is the framework&#x27;s maintained source; a project watchdog imports it instead of carrying a copied second body.</li>
+        <li>An explicit setup action installs or refreshes exactly one OMP-discovered project watchdog import, keeps every byte of existing project guidance, writes no other project file, and changes nothing on a repeated run.</li>
+        <li><code>grace5-orchestrate</code> and <code>grace5-execute</code> tell the main agent to verify advice against current kernel and git state, resolve contradictions from evidence, drop a superseded observation without a repair narrative, and keep advisor context away from the independent reviewer.</li>
+        <li>A client without OMP gains no runtime dependency, and removing or relocating the resource leaves no silently broken import.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The new setup tool, its test and the skill-referenced code compile with the rest of the kernel: <code>bun run check</code> is <code>tsc --noEmit</code> over the whole tree, so no type error, unused import or broken shape enters it.</td><td class="limits">A type-check runs no behaviour. It cannot show that setup writes exactly one import, preserves existing guidance, is idempotent, resolves a reference in an installed layout, or that a non-OMP client gains no dependency.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Whole test suite</span><b>CK2</b> automated</td><td class="shows">The suite passes, the new advisor-setup tests included: a fresh install writes one intended import; an existing <code>WATCHDOG.md</code> keeps its bytes plus at most one import; a second run changes nothing; custom priorities survive; a removed or relocated resource is reported rather than left silently broken; a non-OMP client needs no new runtime dependency.</td><td class="limits">The suite runs on fixtures, not a real client install: it cannot show that a real project&#x27;s guidance is preserved, or that OMP in fact discovers the watchdog on a given machine. Distribution presence is asserted only if a test happens to build the package.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Generated packages match</span><b>CK3</b> automated</td><td class="shows"><code>bun run package:verify</code> regenerates the packaged skills and the CLI reference from the canonical tree and finds no drift, so the packaged advisor guidance reaches each generated distribution with the skill text.</td><td class="limits">It compares generated output with its sources, not the guidance&#x27;s meaning: a wrong or missing import instruction copied faithfully into the package would still verify, and it reads no client project file.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Setup surface help</span><b>CK4</b> automated</td><td class="shows"><code>bun src/tools/advisor-setup.ts --help</code> prints the setup action&#x27;s documented surface, so the action is named and visible without adding a kernel command.</td><td class="limits">Help text only: it shows the action exists as written, not that it works, that it writes exactly one import and nothing else, or that the generated packages and CLI reference stay current.</td></tr>
+          <tr class="manual" data-check="CK5" data-kind="manual" data-required="true"><td><span>Advisor replay</span><b>CK5</b> manual</td><td class="shows">The recorded procedure replays three advisor findings — a missing-trailer concern, an obsolete ledger warning, contradictory skill-boundary advice — and confirms the main agent checks current kernel and git state, acts on a current material error, ignores a superseded observation without a repair narrative and forwards none of the advisor&#x27;s context to the independent reviewer; on a client without OMP the repository stays usable and no runtime advisor dependency appears.</td><td class="limits">One replay by one operator on prepared cases, verified by no tool: a missed stale-repair line or an unnoticed context leak can pass by eye, and advice shapes outside the three cases are not judged.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The packaged guidance resource is the maintained source; a project watchdog imports it instead of copying a second body.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The project watchdog import is explicit and project-owned; an ordinary upgrade never creates or rewrites it.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Existing project guidance is preserved and at most one intended import is added; repeated setup is idempotent.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The main agent rechecks delayed advice against current state, resolves contradictions from evidence and omits stale repair narration.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Advisor context is not forwarded to the independent final reviewer, and advice never substitutes for that review.</span></li>
+        <li data-decision="D6"><b>D6</b><span><code>advisor.syncBacklog</code> and model or roster changes remain separate measured variables, not hidden in the resource.</span></li>
+        <li data-decision="D7"><b>D7</b><span>A client without OMP receives no new runtime dependency and no fabricated advisor behaviour.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The setup action writes the project-owned root <code>WATCHDOG.md</code>. Its safety rests on preserving existing bytes, which the contract states but no check reads against a real client repository, so a project that edited the file between runs is protected by the tool&#x27;s care rather than by an independent observation.</li>
+        <li>Criterion A3 claims the packaged resource is present in the generated distribution, yet its checks are the test suite and the setup help, not <code>package:verify</code>, which is attached to the guidance criterion. The one check that regenerates and compares generated output is not the check named for the distribution claim.</li>
+        <li>The behavioural half of the change — how the main agent treats delayed advice and what it forwards to the reviewer — is judged only by one manual replay. No automated check reads the skill prose, so a wording regression passes CK1 through CK4.</li>
+        <li>CK4, a help listing, is attached to criteria A3 and A5, whose other clauses are about distribution presence and the currency of the generated packages and CLI reference; a help listing establishes little about either, so those clauses rest on CK2 and CK3. CK1&#x27;s type-check now has its own criterion, A6, which it fits.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Approve or reject the change: it adds one packaged resource, one repository setup tool with its test, skill guidance and one ledger entry; no kernel command, schema, receipt, approval or version moves.</li>
+        <li>Before close, run the manual replay (CK5): three advisor findings and one non-OMP client check.</li>
+        <li>Rule on the five boundaries it refuses to cross: no event-triggered scheduling, no global OMP rewrite, no second advisor, no token-saving claim, no client-specific paths.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write <code>models/architecture/advisor-guidance.md</code>, the packaged advisor guidance resource.</li>
+        <li>May write the project-owned root <code>WATCHDOG.md</code>, and only through the explicit setup action; an ordinary upgrade never touches it.</li>
+        <li>May write <code>src/tools/advisor-setup.ts</code> and <code>src/tools/advisor-setup.test.ts</code>, and other <code>src/tools/**</code> including <code>src/tools/package.ts</code>.</li>
+        <li>May write <code>models/architecture/upgrade.md</code> and one entry in <code>models/architecture/rationale-ledger.md</code>.</li>
+        <li>May write <code>skills/grace5-orchestrate/**</code> and <code>skills/grace5-execute/**</code>.</li>
+        <li>May write <code>packages/**</code>, the generated distribution.</li>
+        <li>Constraints it works under: no new kernel command, schema, receipt or approval, and the setup action is a repository tool, not a kernel command (K1); an ordinary upgrade writes only kernel-managed paths and never installs the project watchdog (K2); watchdog files are project artifacts and source, the setup writes are explicit and reviewable, and no check result is fabricated (K3); one ledger entry records the resource, with no second scheduler or advisor policy (K4); advice grants no approval, observation or scope authority and never replaces the independent final review (K5); the pilot&#x27;s <code>advisor.syncBacklog</code> setting stays a measured configuration change, not part of the resource (K6).</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no event-triggered advisor scheduling, model substitution or advisor disabling; those remain separate experiments.</li>
+        <li>N2: no global OMP configuration rewrite and no automatic upgrade installation of a project-owned watchdog.</li>
+        <li>N3: no new advisor roster, second advisor or kernel mechanism.</li>
+        <li>N4: no claim of token savings or a precision improvement from the guidance alone.</li>
+        <li>N5: no client-specific paths in the packaged resource.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected="package.json">package.json</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/architecture/templates/**">models/architecture/templates/**</li>
+        <li data-protected="models/architecture/method.md">models/architecture/method.md</li>
+        <li data-protected="models/architecture/authorization.md">models/architecture/authorization.md</li>
+        <li data-protected="models/architecture/source-identity.md">models/architecture/source-identity.md</li>
+        <li data-protected="models/architecture/evidence-records.md">models/architecture/evidence-records.md</li>
+        <li data-protected="skills/grace5-prepare/**">skills/grace5-prepare/**</li>
+        <li data-protected="skills/grace5-review/**">skills/grace5-review/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>No mechanical finding remains. Checked each criterion against the checks it names (A1 CK2, A2 CK2, A3 CK2 CK4, A4 CK3 CK5, A5 CK3 CK4, A6 CK1), the Change against the write boundary and the five NonGoals, every rule path and cited path (<code>AGENTS.md</code>, and the <code>upgrade</code>, <code>source-identity</code>, <code>rationale-ledger</code> and <code>authorization</code> documents, all present), the terms OMP, <code>WATCHDOG.md</code> and the packaged resource, and the contract hash and counts against <code>grace5 check</code>; none is missing, undefined, contradictory or false, so the brief is written to this contract.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 677 words against a target of 600, 5 checks against 8. The 77-word excess is the two failure modes the change closes — advisor messages that dominated reported cost, contradicted themselves and arrived against superseded ledger state — plus the six constraints, five non-goals and a dedicated type-check criterion that bound and evidence the intervention. The check count sits below the target because the change adds no new verification mechanism: its behaviour is exercised through the existing suite, one packaging check and one manual replay.</p>
+  <p>This brief describes contract text with SHA-256 <code>ef560274c3e59ba76cc855a49fd5f0ae3e19815e428d34bce67a1c08f688734b</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>

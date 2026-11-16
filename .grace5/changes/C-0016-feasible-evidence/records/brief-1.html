@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0016-feasible-evidence revision 1</title>
+<meta name="grace5:change" content="C-0016-feasible-evidence">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="7c431ef1947d2b49d5485e8170698feebee420e9c3d1f036865bf0f445640a61">
+<meta name="grace5:date" content="2026-11-17">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="576">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="3">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Preparation proves evidence is feasible and discriminating before approval</h1>
+  <p class="lead">Brief for approval. Change <code>C-0016-feasible-evidence</code>, revision 1, 2026-11-17. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>Preparation identifies, for every required check, the device, build and environment state and the observation, before you commit to the plan.</li>
+        <li>Preparation uses the read-only diagnostics that are available to establish whether each required device and environment is available, and reports what it cannot establish as unknown.</li>
+        <li>When required evidence is unavailable, you get one bounded choice before approval: wait for the evidence, or accept alternative evidence with its stated limitation.</li>
+        <li>The brief's evidence discussion names a plausible faulty implementation the check would reject; for a trace it also names the setup whose absence would fail, so a bare missing marker cannot pass.</li>
+        <li>Feasibility is a preparation obligation, never the final observation, and it authorizes no flashing or hardware-state change.</li>
+        <li>The pilot's focused regression test and position rule remain separate governed work.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>TypeScript type check</span><b>CK1</b> automated</td><td class="shows">The kernel sources compile with no type errors, so a guidance edit that introduced a broken type, a missing import or a malformed reference would be rejected here.</td><td class="limits">Only types are checked and nothing runs, so a guidance change that compiles but is never read or followed still passes.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Kernel test suite</span><b>CK2</b> automated</td><td class="shows">Contract validation, the brief fidelity check and the conformance scenarios hold, so an edit that let a brief omit a protected path, or a check pass without its evidence row, would be rejected here.</td><td class="limits">Covers the kernel's own behavior; it does not show that preparation guidance is observed on a real device or that a reported availability is accurate.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Generated package verify</span><b>CK3</b> automated</td><td class="shows">The generated packages and the CLI reference match the current source, so a guidance edit to <code>skills/grace5-prepare/**</code> or <code>models/architecture/brief.md</code> that was not regenerated would be rejected here.</td><td class="limits">Confirms the packages match what the generator produced, not that their content is correct or that the guidance reads as intended.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Feasibility is a preparation obligation, not evidence: an available device or environment is established before the owner commits to the plan.</span></li>
+        <li data-decision="D2"><b>D2</b><span>An availability that cannot be established is reported as unknown, never as available and never as a product failure.</span></li>
+        <li data-decision="D3"><b>D3</b><span>When required evidence is unavailable, the owner receives one bounded choice before approval: wait for the evidence, or accept alternative evidence with its stated limitation.</span></li>
+        <li data-decision="D4"><b>D4</b><span>The brief names a plausible faulty implementation the check would reject; a trace also names the setup whose absence would fail, so a bare missing marker cannot pass.</span></li>
+        <li data-decision="D5"><b>D5</b><span>The pilot's focused regression test and position rule are separate governed work, not an implicit extension of this framework change.</span></li>
+        <li data-decision="D6"><b>D6</b><span>The shared-bookkeeping-path scheduling rule stays until a concrete safe exception demonstrates full-diff ownership and evidence invalidation.</span></li>
+        <li data-decision="D7"><b>D7</b><span>Feasibility work uses read-only diagnostics and never flashes, resets or changes hardware state.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>Read-only diagnostics may report a device or environment as available while the observation later fails, so feasibility can be established from evidence that does not predict the bench result.</li>
+        <li>The alternative-evidence branch lets approval rest on weaker evidence than the original check, with the limitation stated but not enforced.</li>
+        <li>Nothing in the kernel requires a brief to name a plausible faulty implementation, so the new guidance can be satisfied perfunctorily or skipped.</li>
+        <li>A named faulty implementation may be trivial to reject, giving false confidence that the check discriminates.</li>
+        <li>Preparation effort grows for every change, including those whose devices are plainly available.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Rule, when required evidence is unavailable, between waiting for it and accepting alternative evidence with its limitation, before approval.</li>
+        <li>Confirm that a required manual or trace check's device, build and environment state can be established; a bench session is needed where it cannot.</li>
+        <li>Approve this framework change on its own: the pilot's focused regression test and position rule need their own contract and approval.</li>
+        <li>Confirm the amended or added rationale-ledger entry carries the smallest alternative and a removal criterion.</li>
+        <li>Keep the guidance change free of any check kind, schema, receipt, command or approval-semantics change.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li><code>skills/grace5-prepare/**</code> and <code>models/architecture/brief.md</code> receive the preparation and brief guidance.</li>
+        <li><code>models/architecture/method.md</code> and <code>models/architecture/rationale-ledger.md</code> may be amended to carry the obligation and its ledger entry.</li>
+        <li><code>packages/**</code> are regenerated so generated packages and the CLI reference stay current.</li>
+        <li>Constraints: no check kind, schema, receipt, command or approval semantics change; every check keeps its evidence row and limitation cell; feasibility never counts as the final observation and authorizes no flashing or hardware-state change; no version, pin, tag, migration row or release moves.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>No relaxation of the shared-bookkeeping-path dependency rule and no scheduling exception; the current rule stays until a concrete safe exception demonstrates full-diff ownership and evidence invalidation.</li>
+        <li>No firmware, hardware, flashing or device-state change in this repository.</li>
+        <li>No new check kind, dependency fingerprint or evidence database.</li>
+        <li>No rewrite of a closed contract and no retroactive re-approval of an unchanged check.</li>
+        <li>No blanket mutation-testing requirement.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected="package.json">package.json</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/architecture/templates/**">models/architecture/templates/**</li>
+        <li data-protected="models/architecture/authorization.md">models/architecture/authorization.md</li>
+        <li data-protected="models/architecture/source-identity.md">models/architecture/source-identity.md</li>
+        <li data-protected="models/architecture/evidence-records.md">models/architecture/evidence-records.md</li>
+        <li data-protected="skills/grace5-execute/**">skills/grace5-execute/**</li>
+        <li data-protected="skills/grace5-orchestrate/**">skills/grace5-orchestrate/**</li>
+        <li data-protected="skills/grace5-review/**">skills/grace5-review/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>Checked every criterion against its checks, every Affected and Protected path against the repository, the Constraints against the Change and NonGoals, and the term usage; all cited paths exist and no mechanical finding remains.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 576 words against a target of 600, 3 checks against 8.</p>
+  <p>This brief describes contract text with SHA-256 <code>7c431ef1947d2b49d5485e8170698feebee420e9c3d1f036865bf0f445640a61</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>

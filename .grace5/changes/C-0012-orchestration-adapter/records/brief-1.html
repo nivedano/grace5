@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0012-orchestration-adapter revision 1</title>
+<meta name="grace5:change" content="C-0012-orchestration-adapter">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="2c120523e7054d1f6b9ee69506a13f9dc6f8a99b7efbef0e85e6f456fbcf5bab">
+<meta name="grace5:date" content="2026-11-17">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="1050">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>One lifecycle adapter over harness task facilities, with bounded role handoffs</h1>
+  <p class="lead">Brief for approval. Change <code>C-0012-orchestration-adapter</code>, revision 1, 2026-11-17. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li><code>grace5-orchestrate</code> becomes one thin lifecycle adapter: the harness&#x27;s native task facilities own spawning, messaging, waiting, cancelling, inspection and transient progress, while GRACE keeps authority, isolation decisions, phase selection and closure.</li>
+        <li>One implementer is active at a time in a shared worktree. Implementers run baseline, targeted and final evidence, and the orchestrating agent validates status and the complete diff at handoff instead of repeating fresh evidence on an unchanged candidate.</li>
+        <li>Preparation is a lifecycle phase of the triggering conversation, not a separate session: a requested material revision is contracted and independently briefed there, only the unresolved owner decision is asked, execution waits for approval of that revision, and an approval of the exact unchanged bytes is reused without a new question or record.</li>
+        <li>Live progress stays in native task state. One compact prose checkpoint under <code>.grace5/orchestration/runs/</code> records the workspace, selected and excluded changes, original starts, worker identity and deadline where not otherwise recoverable, fix-round count, parked obligations and unsettled decisions, holding only what is not durably recoverable.</li>
+        <li>Dispatch packets are role-bounded and carry verified repository and documentation roots, shell convention, change id, original start and current candidate, permitted role and return stage. Reviewer packets carry the approved contract, complete diff, receipts and cited rules, never the author&#x27;s reasoning or hinted findings.</li>
+        <li><code>grace5 --help</code> and the generated CLI reference print the installed documentation root, so a fresh session can find the lifecycle documents without a filesystem-wide search. A non-OMP harness receives the same invariants through its own task tools, and a conflicting higher-priority harness policy is a critical stop before dispatch.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>The help change compiles</span><b>CK1</b> automated</td><td class="shows">The TypeScript sources, including the help change in <code>src/cli.ts</code>, type-check without errors.</td><td class="limits">Compilation only: it does not run help, build packages or observe orchestration, and it says nothing about the printed path.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>The kernel still conforms</span><b>CK2</b> automated</td><td class="shows">The kernel&#x27;s existing record, authorization, receipt, close and upgrade cases still pass after the documentation and help edits, so the kernel&#x27;s own behavior is unchanged.</td><td class="limits">The cases exercise kernel state, not an orchestrating agent or skill prose. They do not establish A1, A3, A4, A5 or A6; those are left to CK5.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Packages and reference agree</span><b>CK3</b> automated</td><td class="shows">Canonical skills and <code>packages/**</code> agree without drift, and the generated CLI reference matches the help text, so the reference cannot disagree with whatever help prints.</td><td class="limits">Generated identity proves no orchestration behavior, and it does not show that the printed path is the correct installed root on a given layout.</td></tr>
+          <tr class="trace" data-check="CK4" data-kind="trace" data-required="true"><td><span>Help prints the root marker</span><b>CK4</b> trace</td><td class="shows">Running <code>bun src/cli.ts --help</code> in this checkout prints the literal marker <code>documentation root:</code>.</td><td class="limits">A marker match only: it does not verify that the printed path exists, that an installed package prints its own installed root, or that a fresh session can orient from it.</td></tr>
+          <tr class="manual" data-check="CK5" data-kind="manual" data-required="true"><td><span>Two-harness rehearsal</span><b>CK5</b> manual</td><td class="shows">An OMP session and one non-OMP task path rehearse an approved serial batch and an interrupted worker. The record shows at most one active implementer; same-conversation preparation with only the unresolved decision asked; reuse of an unchanged approval; an honest red baseline and a later green final; a reviewer packet with contract, complete diff, receipts and cited rules and no authoring conversation; recovery that reconciles worker, git and status without a duplicate start, dispatch or close; and a pre-dispatch stop for a conflicting harness policy. Each path locates the lifecycle documents from the printed root and an installed layout.</td><td class="limits">One approved batch and one interruption on two paths: it cannot establish behavior on other harnesses, larger or dependent batches, concurrent work, or unobserved situations. A4&#x27;s partial-commit and no-repeated-final-run policy is judged from how the rehearsal is conducted, not from a separate run.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Harness task facilities own spawn, message, wait, cancel, inspection and transient progress; the GRACE adapter owns authority, isolation, phase selection and closure.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Preparation is a lifecycle phase, not a separate conversation: a requested material revision is prepared and briefed in the triggering conversation, and only the genuine unresolved owner decision is asked.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Live execution uses native progress state; the prose checkpoint holds only what is not durably recoverable and is updated on handoff, changed obligation, pause or finish, not on every status read.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Implementers run baseline, targeted and final evidence; the orchestrating agent validates status and the complete diff at handoff and does not repeat fresh evidence on an unchanged candidate.</span></li>
+        <li data-decision="D5"><b>D5</b><span>Dispatch packets are role-bounded and carry verified repository and documentation roots, shell convention, change id, original start and current candidate, permitted role and return stage; reviewer packets carry no author reasoning.</span></li>
+        <li data-decision="D6"><b>D6</b><span>A conflicting higher-priority harness policy is a critical stop before dispatch; a capability fallback uses equivalent native task tools and discloses unavailable independence rather than weakening a gate.</span></li>
+        <li data-decision="D7"><b>D7</b><span>No OMP path, session file or configuration is a kernel prerequisite; another harness receives the same invariants through its own task tools.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>The behavioral evidence is one rehearsal. Only CK5 observes the agent&#x27;s orchestration, and one batch plus one interruption cannot show behavior on other harnesses, larger or dependent batches, concurrent work, or situations the rehearsal never reaches.</li>
+        <li>The adapter depends on each harness providing native spawning, messaging, waiting and cancellation. A capability fallback must disclose reduced independence, so the fallback path may verify less than the rehearsal demonstrates.</li>
+        <li>Preparing a revision in the triggering conversation shortens the path to an owner decision but can blur preparation with execution. Only an approval of the exact revision authorizes work; approval is never inferred from the conversation.</li>
+        <li>One compact checkpoint replaces broader ledger prose. Anything not durably recoverable and not recorded at handoff, changed obligation, pause or finish can be lost when a session is interrupted.</li>
+        <li>The help output becomes orientation for installed layouts. CK4 sees only the marker, so a wrong path or a package whose installed root differs from this checkout can still satisfy the trace.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Rule on D1 through D7: accept the harness/adapter split, same-conversation preparation, the checkpoint&#x27;s limited scope, implementer-run evidence, bounded dispatch and reviewer packets, the critical stop and capability fallback, and non-OMP parity.</li>
+        <li>The manual CK5 rehearsal is a bench session that must be run and recorded before closure: an OMP session and one non-OMP task path, an approved serial batch and an interrupted worker. You have no manual procedure of your own, but the behavioral evidence you rely on is this rehearsal.</li>
+        <li>Accept the residual uncertainty over other harnesses, larger batches and concurrent work, or require an extension before approval.</li>
+        <li>This change authorizes no release, version, pin, tag, README status line or migration row. Any such distribution remains a separate owner decision.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>The canonical skills <code>skills/grace5-orchestrate/**</code> and <code>skills/grace5-prepare/**</code> change to carry the adapter and preparation-phase guidance. <code>models/architecture/method.md</code>, <code>rationale-ledger.md</code> (L-24) and <code>commands.md</code> carry the method, ledger and help changes; <code>src/cli.ts</code> prints the documentation root; <code>models/architecture/cli-reference.md</code> and <code>packages/**</code> are regenerated from those sources.</li>
+        <li>Guidance only: no command, flag, schema, record kind, receipt field, second task runtime, registry, database or OMP prerequisite is added. Exact-revision authorization, serial shared-worktree isolation, truthful fresh evidence, complete-diff review and kernel closure stay.</li>
+        <li>Each change keeps its original start and complete start-to-final diff; later batch commits remain visible and Protected paths still apply.</li>
+        <li>No approval is inferred. Preparation and every material revision return to the owner gate, and an existing approval of unchanged bytes is reused rather than re-requested.</li>
+        <li>L-24 is amended with the reduced adapter and checkpoint cost, the P-014 failure, the smallest alternative and a removal criterion; no other mechanism is added. No version, pin, tag, README status line or migration row changes; only generated packages and the help text move.</li>
+        <li>A higher-priority harness policy that conflicts with the adapter is reported before dispatch, and skill prose never claims to override it. At run time the adapter keeps one prose checkpoint under <code>.grace5/orchestration/runs/</code>, outside the candidate; native task state is authoritative while work is live.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no OMP configuration, session-file or path prerequisite; a non-OMP harness keeps the same invariants with its native task tools.</li>
+        <li>N2: no second GRACE task runtime, tool registry, persistent task database or duplicate progress ledger.</li>
+        <li>N3: no change to execute or review mechanics beyond cited pointers; their check, receipt, approval and closure semantics stay.</li>
+        <li>N4: no dependency-policy redesign, advisor scheduling, commit-trailer automation, installation-mirror repair or M3 measurement.</li>
+        <li>N5: no kernel command, schema, receipt format, source-identity rule, migration boundary or release.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected="package.json">package.json</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/architecture/templates/**">models/architecture/templates/**</li>
+        <li data-protected="models/architecture/authorization.md">models/architecture/authorization.md</li>
+        <li data-protected="models/architecture/source-identity.md">models/architecture/source-identity.md</li>
+        <li data-protected="models/architecture/evidence-records.md">models/architecture/evidence-records.md</li>
+        <li data-protected="models/architecture/brief.md">models/architecture/brief.md</li>
+        <li data-protected="skills/grace5-execute/**">skills/grace5-execute/**</li>
+        <li data-protected="skills/grace5-review/**">skills/grace5-review/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>Checked every criterion against its named checks, every term used in the Change and Decisions, every cited rule and Affected and Protected path, every boundary against the Change, and the words and check counts against <code>grace5 check</code>. The corrected contract names CK5 on A1, A3, A4, A5 and A6 and CK1 on A8, and names the orchestrating agent in the Change and D4; every cited path exists, and no contradiction, uncovered boundary or other mechanical finding remains.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 1050 words against a target of 600, 5 checks against 8. Reason for excess: eight acceptance criteria and six constraints cover preparation, dispatch, recovery, the checkpoint and installed-root orientation, so the contract&#x27;s prose exceeds the target.</p>
+  <p>This brief describes contract text with SHA-256 <code>2c120523e7054d1f6b9ee69506a13f9dc6f8a99b7efbef0e85e6f456fbcf5bab</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>

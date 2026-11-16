@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0014-installation-ownership" revision="1" title="Installed GRACE skills have one owner and a verifiable installation-health state">
+  <Problem>Intervention I-010 records P-017: package refresh and a project mirror generator wrote competing banners into the same installed `grace5-*` directories, so a required check failed and passed on the same candidate after excluded files changed. Installation health and candidate evidence need separate ownership and freshness.</Problem>
+  <Change>Installed `grace5-*` skill directories under `.agents/skills/` and `.claude/skills/` become package-owned: a project mirror generator must not rewrite them in a competing format and must continue validating project-owned skills. A dedicated installation-health tool compares every installed `grace5-*` directory with the packaged skill bytes and the state pin, reports drift with the differing paths, writes nothing, and exits nonzero. `upgrade.md`, `source-identity.md`, `grace5-prepare` and `grace5-execute` state that installation health is evaluated afresh at handoff, while a required check that depends on excluded inputs is not candidate evidence unless a bounded dependency fingerprint is separately approved. No fingerprint mechanism is added by this change.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/source-identity.md">Installed `grace5-*` directories remain kernel-managed and excluded from the candidate; the health check reads them but writes no source path.</Constraint>
+    <Constraint id="K2" rule="models/architecture/upgrade.md">The existing refresh remains the only writer of installed packaged skills; the change adds no automatic project-file write and no new migration boundary.</Constraint>
+    <Constraint id="K3" rule="models/architecture/authorization.md">An installation-health pass never substitutes for a candidate check, an owner approval or a receipt.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">One ledger entry is added for the installation-health mechanism with its removal criterion; a dependency fingerprint is not added.</Constraint>
+    <Constraint id="K5" rule="AGENTS.md">An ordinary change: no version, pin, tag, migration row or release moves.</Constraint>
+    <Constraint id="K6">Project-owned skills and the project's own mirror validation remain outside the installed package-owned directories; the change does not take ownership of them.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">No automatic repair or rewrite of installed skills; drift is reported and the existing refresh remains the repair path.</NonGoal>
+    <NonGoal id="N2">No arbitrary dependency fingerprint, cache hash or hash of all GRACE records. A fingerprint needs its own approved contract if a real required check cannot be separated.</NonGoal>
+    <NonGoal id="N3">No weakening of a required check and no deletion of an assertion to turn an installation failure green.</NonGoal>
+    <NonGoal id="N4">No new kernel command, receipt field or migration boundary.</NonGoal>
+    <NonGoal id="N5">No client-specific mirror-generator implementation inside this framework repository.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK2 CK4">A clean upgrade followed by project mirror validation reproduces without alternating rewrites, and the project mirror path does not change installed packaged skill bytes.</Criterion>
+    <Criterion id="A2" checks="CK2 CK5">Corrupting an installed `grace5-*` file makes installation health fail; restoring the exact packaged bytes makes it pass; corrupting a project-owned mirrored skill still fails the existing mirror check.</Criterion>
+    <Criterion id="A3" checks="CK2">The health check reports the pin and the differing paths, writes nothing, and treats a missing packaged skill source as an actionable error rather than a pass.</Criterion>
+    <Criterion id="A4" checks="CK3">The ownership rule and the handoff-time freshness rule are stated in upgrade, source-identity and lifecycle guidance for every retained required check that depends on excluded inputs.</Criterion>
+    <Criterion id="A5" checks="CK3">Generated packages and the CLI reference remain current after the documentation and guidance changes.</Criterion>
+    <Criterion id="A6" checks="CK1">The installation-health tool and upgrade code type-check with the rest of the kernel.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/tools/installation-health.ts</Path>
+    <Path>src/tools/installation-health.test.ts</Path>
+    <Path>src/tools/**</Path>
+    <Path>src/upgrade/skills.ts</Path>
+    <Path>src/conformance/**</Path>
+    <Path>models/architecture/upgrade.md</Path>
+    <Path>models/architecture/source-identity.md</Path>
+    <Path>models/architecture/rationale-ledger.md</Path>
+    <Path>skills/grace5-prepare/**</Path>
+    <Path>skills/grace5-execute/**</Path>
+    <Path>packages/**</Path>
+    <Name>package-owned installed skills</Name>
+    <Name>installation health</Name>
+    <Name>excluded-input freshness</Name>
+    <Protected>.grace5/changes/closed/**</Protected>
+    <Protected>package.json</Protected>
+    <Protected>.grace5/kernel-version</Protected>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/architecture/templates/**</Protected>
+    <Protected>models/architecture/method.md</Protected>
+    <Protected>models/architecture/authorization.md</Protected>
+    <Protected>models/architecture/evidence-records.md</Protected>
+    <Protected>models/architecture/brief.md</Protected>
+    <Protected>skills/grace5-orchestrate/**</Protected>
+    <Protected>skills/grace5-review/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>README.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="120">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test --parallel</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun src/tools/installation-health.ts --help</Command>
+    </Automated>
+    <Automated id="CK5" budget="120">
+      <Command>bun src/tools/installation-health.ts</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">Installed packaged skill directories are owned by the package; a project mirror generator validates only project-owned skills and never rewrites those directories.</Decision>
+    <Decision id="D2">Installation health is evaluated afresh at handoff and is not candidate evidence; a check result on an earlier candidate never makes an installation pass current.</Decision>
+    <Decision id="D3">No dependency fingerprint is introduced by default; it is admitted only by a separate approved contract for a real required check that cannot be separated from installation health.</Decision>
+    <Decision id="D4">Drift is reported, not repaired automatically; the existing refresh remains the only writer.</Decision>
+    <Decision id="D5">The health tool reads the pin and installed bytes and writes nothing, so it changes no candidate and needs no owner gate of its own.</Decision>
+    <Decision id="D6">A failing assertion is never deleted to make the installation green; the ownership conflict is resolved instead.</Decision>
+  </Decisions>
+</Contract>

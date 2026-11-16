@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0016-feasible-evidence" revision="1" title="Preparation proves evidence is feasible and discriminating before approval">
+  <Problem>Intervention I-012 records P-019: an unavailable bench log blocked a required manual check and a batch, and a closed change retained findings about absent focused coverage and a weakly discriminating trace. Feasibility and discriminating power were discovered after approval.</Problem>
+  <Change>`grace5-prepare` and `models/architecture/brief.md` require preparation to identify each required device, build and environment state and observation, use available read-only diagnostics to establish availability, report unknowns as unknown, and present one explicit waiting-or-alternative-evidence choice before approval when evidence is unavailable. The brief's evidence discussion must name a plausible faulty implementation the check would reject and, for a trace, the setup whose absence would also fail. Feasibility never counts as the final observation and authorizes no flashing or hardware-state change. The pilot's focused regression test and position rule remain separate governed work.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/method.md">Preparation and brief guidance only: no check kind, schema, receipt, command or approval semantics change.</Constraint>
+    <Constraint id="K2" rule="models/architecture/brief.md">Every check retains its evidence row and limitation cell; the added discussion does not replace a check or invent an observation.</Constraint>
+    <Constraint id="K3" rule="models/architecture/authorization.md">An unavailable evidence path requires an owner-approved tradeoff; an agent never optionalises a required check or records an observation nobody made.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">One existing preparation or brief entry is amended, or one entry is added, with the smallest alternative and a removal criterion.</Constraint>
+    <Constraint id="K5" rule="AGENTS.md">An ordinary change: no version, pin, tag, migration row or release moves.</Constraint>
+    <Constraint id="K6">Pilot test and code changes receive their own contract and approval; no mutation testing is imposed on unrelated checks and no closed contract is rewritten.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">No shared bookkeeping-path dependency relaxation or scheduling exception; the current rule stays until a concrete safe exception demonstrates full-diff ownership and evidence invalidation.</NonGoal>
+    <NonGoal id="N2">No firmware, hardware, flashing or device-state change in this repository.</NonGoal>
+    <NonGoal id="N3">No new check kind, dependency fingerprint or evidence database.</NonGoal>
+    <NonGoal id="N4">No rewrite of a closed contract and no retroactive re-approval of an unchanged check.</NonGoal>
+    <NonGoal id="N5">No blanket mutation-testing requirement.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1 CK3">Preparation guidance requires device, build and observation feasibility, reports unknown as unknown, and presents waiting or alternative evidence with its limitation before approval.</Criterion>
+    <Criterion id="A2" checks="CK1 CK2">The brief evidence discussion requires a plausible faulty implementation the check rejects; a trace also names the setup whose absence fails, so a missing line alone cannot pass.</Criterion>
+    <Criterion id="A3" checks="CK3">No procedure counts feasibility as the final observation, optionalises a required check without the owner, or authorizes a device-state change.</Criterion>
+    <Criterion id="A4" checks="CK1 CK2">An already approved unchanged check is not reapproved merely because it is run, and an environment failure is recorded separately from a product regression.</Criterion>
+    <Criterion id="A5" checks="CK3">Generated packages and the CLI reference remain current after the guidance change.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>skills/grace5-prepare/**</Path>
+    <Path>models/architecture/brief.md</Path>
+    <Path>models/architecture/method.md</Path>
+    <Path>models/architecture/rationale-ledger.md</Path>
+    <Path>packages/**</Path>
+    <Name>evidence feasibility</Name>
+    <Name>discriminating check</Name>
+    <Protected>.grace5/changes/closed/**</Protected>
+    <Protected>package.json</Protected>
+    <Protected>.grace5/kernel-version</Protected>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/architecture/templates/**</Protected>
+    <Protected>models/architecture/authorization.md</Protected>
+    <Protected>models/architecture/source-identity.md</Protected>
+    <Protected>models/architecture/evidence-records.md</Protected>
+    <Protected>skills/grace5-execute/**</Protected>
+    <Protected>skills/grace5-orchestrate/**</Protected>
+    <Protected>skills/grace5-review/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>README.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="120">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test --parallel</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">Feasibility is a preparation obligation, not evidence; an available device or environment is established before the owner commits to the plan.</Decision>
+    <Decision id="D2">An unknown availability is reported as unknown, never as available or as a failure of the product.</Decision>
+    <Decision id="D3">When required evidence is unavailable, the owner receives one bounded choice between waiting and alternative evidence with its limitation, before approval.</Decision>
+    <Decision id="D4">The brief must name a plausible faulty implementation the check rejects, and a trace must name the setup whose absence also fails; a bare missing marker cannot pass.</Decision>
+    <Decision id="D5">The pilot's focused regression test and position rule are separate governed work, not an implicit extension of this framework change.</Decision>
+    <Decision id="D6">The shared-bookkeeping-path scheduling rule stays until a concrete safe exception demonstrates ownership and invalidation.</Decision>
+    <Decision id="D7">Feasibility work uses read-only diagnostics and never flashes, resets or changes hardware state.</Decision>
+  </Decisions>
+</Contract>

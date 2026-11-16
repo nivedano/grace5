@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0014-installation-ownership revision 1</title>
+<meta name="grace5:change" content="C-0014-installation-ownership">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="5f2b7755fe256c88e2481dcafaaa9be4fd98d6e151a1a13e67f402638dc02142">
+<meta name="grace5:date" content="2026-11-17">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="644">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="5">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Installed GRACE skills have one owner and a verifiable installation-health state</h1>
+  <p class="lead">Brief for approval. Change <code>C-0014-installation-ownership</code>, revision 1, 2026-11-17. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>Installed <code>grace5-*</code> skill directories under <code>.agents/skills/</code> and <code>.claude/skills/</code> have one owner: the package. A project mirror generator keeps validating project-owned skills and never rewrites those installed directories, so the same candidate can no longer fail and pass because excluded files changed.</li>
+        <li>A dedicated installation-health tool compares every installed <code>grace5-*</code> directory with the packaged skill bytes and the state pin, prints the differing paths, writes nothing and exits nonzero on drift. A missing packaged skill source is an actionable error, not a pass.</li>
+        <li>Installation health is evaluated afresh at handoff and is not candidate evidence: a required check that depends on excluded inputs is not candidate evidence unless a bounded dependency fingerprint is separately approved, and this change adds no fingerprint mechanism.</li>
+        <li><code>upgrade.md</code>, <code>source-identity.md</code>, <code>grace5-prepare</code> and <code>grace5-execute</code> state the ownership and handoff-time freshness rules, and the existing refresh stays the only writer of installed packaged skills.</li>
+        <li>Release identity does not move: no version, pin, tag, migration row, new kernel command or new automatic project-file write, and project-owned skills stay outside the installed directories.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type-check</span><b>CK1</b> automated</td><td class="shows">The installation-health tool, its tests and the changed upgrade and conformance code compile with the rest of the kernel.</td><td class="limits">Nothing about behaviour: a clean compile says nothing about ownership, drift detection or handoff-time freshness.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Full test suite</span><b>CK2</b> automated</td><td class="shows">The conformance and unit tests pass, including the new installation-health tests: corrupting an installed <code>grace5-*</code> file fails health, restoring the exact packaged bytes passes, corrupting a project-owned mirrored skill still fails the mirror check, and a clean upgrade followed by project mirror validation reproduces without alternating rewrites.</td><td class="limits">Only the test doubles this change writes: not that a real project's mirror generator behaves as documented, not that a real installed tree is healthy, and not that the assertions discriminate beyond the cases they name.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Generated packages current</span><b>CK3</b> automated</td><td class="shows">After the documentation and guidance edits, the generated skill packages and the CLI reference match their sources byte for byte.</td><td class="limits">What the guidance text says: it proves the packaged copies are in sync with their sources, not that upgrade, source-identity or the prepare and execute skills state the rule truthfully.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Tool usage text</span><b>CK4</b> automated</td><td class="shows">The new installation-health tool exists and prints its usage text.</td><td class="limits">Nothing about the health comparison itself: the help output is only a smoke gate on the tool's interface.</td></tr>
+          <tr class="automated" data-check="CK5" data-kind="automated" data-required="true"><td><span>Installation health run</span><b>CK5</b> automated</td><td class="shows">On the tree it runs on, every installed <code>grace5-*</code> directory matches the packaged skill bytes and the state pin, and the tool exits 0 without writing.</td><td class="limits">Any candidate evidence: it reads excluded inputs, so a pass is a handoff-time state that must be retaken and never makes a candidate check current, and drift after the run is not seen.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>Installed packaged skill directories are owned by the package; a project mirror generator validates only project-owned skills and never rewrites those directories.</span></li>
+        <li data-decision="D2"><b>D2</b><span>Installation health is evaluated afresh at handoff and is not candidate evidence; a check result on an earlier candidate never makes an installation pass current.</span></li>
+        <li data-decision="D3"><b>D3</b><span>No dependency fingerprint is introduced by default; it is admitted only by a separate approved contract for a real required check that cannot be separated from installation health.</span></li>
+        <li data-decision="D4"><b>D4</b><span>Drift is reported, not repaired automatically; the existing refresh remains the only writer.</span></li>
+        <li data-decision="D5"><b>D5</b><span>The health tool reads the pin and the installed bytes and writes nothing, so it changes no candidate and needs no owner gate of its own.</span></li>
+        <li data-decision="D6"><b>D6</b><span>A failing assertion is never deleted to make the installation green; the ownership conflict is resolved instead.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>Drift is reported and never repaired: a broken installation stays broken until someone runs the existing refresh, so a failing health run is a state to fix at handoff, not a result about the candidate.</li>
+        <li>No fingerprint mechanism is added, so a retained required check that genuinely cannot be separated from excluded inputs stays without candidate evidence and must be re-established at every handoff.</li>
+        <li>The ownership rule binds a project mirror generator by documentation and review: this repository implements no client generator, so nothing in the kernel enforces the client side.</li>
+        <li>Health is compared against the packaged bytes and the pin of the checkout that runs the tool, so a stale or locally modified kernel checkout reports drift that is local state rather than a product defect.</li>
+        <li>A green health run can be mistaken for evidence: it never substitutes for a candidate check, an owner approval or a receipt.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Rule on the ownership decision: installed packaged skill directories belong to the package, and a project's mirror generator keeps validating only project-owned skills.</li>
+        <li>Rule on the deferred fingerprint: admitting one needs a separate approved contract, and none is added by this change.</li>
+        <li>Accept that installation health is a handoff-time state and not a closing condition, so its pass is retaken rather than carried as evidence.</li>
+        <li>See that the client-side change happens where the mirror generator lives; this framework repository supplies the rule and the tool, not the client implementation.</li>
+        <li>Read the guidance text itself: the automated checks show the packaged copies are in sync, so judging what upgrade, source-identity and the lifecycle guidance actually say is a reading task.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>May write the new installation-health tool and its tests under <code>src/tools/</code>, and upgrade and conformance code under <code>src/upgrade/</code> and <code>src/conformance/</code>.</li>
+        <li>May write guidance in <code>models/architecture/upgrade.md</code>, <code>source-identity.md</code> and <code>rationale-ledger.md</code>, the last as one entry for the installation-health mechanism with its removal criterion.</li>
+        <li>May write the <code>grace5-prepare</code> and <code>grace5-execute</code> skills and the generated packages under <code>packages/</code>.</li>
+        <li>Installed <code>grace5-*</code> directories stay kernel-managed and excluded from the candidate: the health check reads them and writes no source path, and the existing refresh stays the only writer of installed packaged skills.</li>
+        <li>No automatic project-file write and no new migration boundary; a health pass never substitutes for a candidate check, an owner approval or a receipt.</li>
+        <li>An ordinary change: no version, pin, tag, migration row or release moves, and project-owned skills and the project's own mirror validation stay outside the installed package-owned directories.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no automatic repair or rewrite of installed skills; drift is reported and the existing refresh remains the repair path.</li>
+        <li>N2: no arbitrary dependency fingerprint, cache hash or hash of all GRACE records; a fingerprint needs its own approved contract if a real required check cannot be separated.</li>
+        <li>N3: no weakening of a required check and no deletion of an assertion to turn an installation failure green.</li>
+        <li>N4: no new kernel command, receipt field or migration boundary.</li>
+        <li>N5: no client-specific mirror-generator implementation inside this framework repository.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected="package.json">package.json</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/architecture/templates/**">models/architecture/templates/**</li>
+        <li data-protected="models/architecture/method.md">models/architecture/method.md</li>
+        <li data-protected="models/architecture/authorization.md">models/architecture/authorization.md</li>
+        <li data-protected="models/architecture/evidence-records.md">models/architecture/evidence-records.md</li>
+        <li data-protected="models/architecture/brief.md">models/architecture/brief.md</li>
+        <li data-protected="skills/grace5-orchestrate/**">skills/grace5-orchestrate/**</li>
+        <li data-protected="skills/grace5-review/**">skills/grace5-review/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>The writer checked every cited path and command, the terms, the boundaries and the checks each criterion names. One finding was returned: the criterion on generated packages and the CLI reference named only the new tool's <code>--help</code> check, which cannot establish that currency. The author resolved it by naming the package check for that criterion, adding a type-check criterion, and re-forming the reproduction criterion; no mechanical finding remains.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 644 words against a target of 600, 5 checks against 8.</p>
+  <p>Reason for the excess: the contract states its problem, change, six constraints, five non-goals, six acceptance criteria, five checks and six decisions in full prose instead of referring to prior text, which puts it 44 words over the 600-word target. It names five checks against a target of eight: the change adds one tool with two command checks and reuses the project's other gates.</p>
+  <p>This brief describes contract text with SHA-256 <code>5f2b7755fe256c88e2481dcafaaa9be4fd98d6e151a1a13e67f402638dc02142</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>

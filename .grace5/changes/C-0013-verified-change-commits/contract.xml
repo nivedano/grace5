@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0013-verified-change-commits" revision="1" title="Change commits construct and verify the Change trailer mechanically">
+  <Problem>Intervention I-009 records P-016: missing `Change:` trailers repeatedly caused review and history repair, then recurred on a closing commit while prose reminders failed to change behaviour. Attribution must be constructed and verified in the commit path, not remembered per free-form commit.</Problem>
+  <Change>A reusable repository commit routine constructs a commit for one explicit change id and explicit owned paths, appends the literal `Change: &lt;id&gt;` trailer, and reads back the created commit's parsed trailers and changed-path list. It refuses an empty selection, a path outside the supplied list, a missing or mismatched trailer, and any read-back failure; it never stages all dirty files, rewrites history or hides a failed verification. `grace5-execute` and `grace5-orchestrate` cite the routine for product, test, evidence, review and close-move commits; batch-only ledger commits follow their actual ownership rather than being assigned to a change. A failed verification stops the next handoff.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="AGENTS.md">The routine is a repository tool, not a kernel command: no command, schema, record kind, receipt field, approval rule or closure rule changes.</Constraint>
+    <Constraint id="K2" rule="models/architecture/method.md">Lifecycle semantics stay: final evidence remains kernel-counted on the actual candidate, and a red test-first commit remains allowed where the lifecycle allows it.</Constraint>
+    <Constraint id="K3" rule="models/architecture/source-identity.md">Path ownership is explicit; receipt revisions stay reachable, and no already referenced history is rewritten automatically.</Constraint>
+    <Constraint id="K4" rule="models/architecture/rationale-ledger.md">L-01 is amended with the mechanical-attribution alternative, expected benefit, cost and removal criterion; no new kernel mechanism is recorded.</Constraint>
+    <Constraint id="K5">The routine uses git plumbing and porcelain only. A failed verification is reported and never suppressed, and a mismatched read-back is not repaired by amending a consumed commit.</Constraint>
+    <Constraint id="K6" rule="AGENTS.md">An ordinary change: no version, pin, tag, migration boundary, migration row or release moves.</Constraint>
+  </Constraints>
+  <NonGoals>
+    <NonGoal id="N1">No kernel commit command and no new receipt or record field.</NonGoal>
+    <NonGoal id="N2">No automatic rewrite of already referenced history and no amendment of revisions consumed by receipts or later changes.</NonGoal>
+    <NonGoal id="N3">No staging of foreign dirty work, no adoption of unknown work, and no manufactured empty commit.</NonGoal>
+    <NonGoal id="N4">No replacement of a harness-native verified commit facility where it supports the required behaviour; the repository helper is the fallback.</NonGoal>
+    <NonGoal id="N5">No change to close, review or evidence semantics.</NonGoal>
+  </NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK2">Product, record and close-move commits created through the routine carry a parsed `Change: &lt;id&gt;` trailer and exactly the supplied paths.</Criterion>
+    <Criterion id="A2" checks="CK2">An empty selection, a path outside the supplied list, a missing trailer or a mismatched read-back stops before the next change starts; foreign dirty work remains unstaged.</Criterion>
+    <Criterion id="A3" checks="CK2">A red test-first commit remains allowed; a failed verification is reported and a hole in the read-back is not hidden.</Criterion>
+    <Criterion id="A4" checks="CK2">Amending tip metadata does not silently rewrite revisions already consumed by receipts or later changes.</Criterion>
+    <Criterion id="A5" checks="CK3 CK4">The execute and orchestrate skills cite the routine for every change-owned commit, and batch ledger commits are attributed by actual ownership.</Criterion>
+    <Criterion id="A6" checks="CK3">The generated packages and CLI reference remain consistent with the changed skill text.</Criterion>
+    <Criterion id="A7" checks="CK1">The new routine and its tests type-check with the rest of the kernel.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/tools/change-commit.ts</Path>
+    <Path>src/tools/change-commit.test.ts</Path>
+    <Path>src/tools/**</Path>
+    <Path>skills/grace5-execute/**</Path>
+    <Path>skills/grace5-orchestrate/**</Path>
+    <Path>models/architecture/rationale-ledger.md</Path>
+    <Path>models/architecture/commands.md</Path>
+    <Path>packages/**</Path>
+    <Name>verified change commit</Name>
+    <Name>Change trailer read-back</Name>
+    <Protected>.grace5/changes/closed/**</Protected>
+    <Protected>package.json</Protected>
+    <Protected>.grace5/kernel-version</Protected>
+    <Protected>models/architecture/schemas/**</Protected>
+    <Protected>models/architecture/templates/**</Protected>
+    <Protected>models/architecture/method.md</Protected>
+    <Protected>models/architecture/authorization.md</Protected>
+    <Protected>models/architecture/source-identity.md</Protected>
+    <Protected>models/architecture/evidence-records.md</Protected>
+    <Protected>skills/grace5-prepare/**</Protected>
+    <Protected>skills/grace5-review/**</Protected>
+    <Protected>AGENTS.md</Protected>
+    <Protected>README.md</Protected>
+  </Affected>
+  <Checks>
+    <Automated id="CK1" budget="120">
+      <Command>bun run check</Command>
+    </Automated>
+    <Automated id="CK2" budget="600">
+      <Command>bun test --parallel</Command>
+    </Automated>
+    <Automated id="CK3" budget="120">
+      <Command>bun run package:verify</Command>
+    </Automated>
+    <Automated id="CK4" budget="120">
+      <Command>bun src/tools/change-commit.ts --help</Command>
+    </Automated>
+  </Checks>
+  <Decisions>
+    <Decision id="D1">The change id and owned paths are explicit arguments; implicit staging and inference from dirty state are refused.</Decision>
+    <Decision id="D2">The literal `Change: &lt;id&gt;` trailer is constructed once and read back from the created commit; a trailer mentioned only in prose does not count.</Decision>
+    <Decision id="D3">Batch-only ledger commits follow their actual ownership; they are not assigned to a change whose records they do not carry.</Decision>
+    <Decision id="D4">A failed read-back stops the next handoff; repair is a separate, owner-visible operation, never an automatic history rewrite.</Decision>
+    <Decision id="D5">A harness-native verified commit facility is used where it exists; the repository routine is the portable fallback.</Decision>
+    <Decision id="D6">A red test-first commit remains valid because the lifecycle, not the commit routine, decides when evidence is final.</Decision>
+  </Decisions>
+</Contract>

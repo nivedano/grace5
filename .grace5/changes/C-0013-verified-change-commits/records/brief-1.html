@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief: C-0013-verified-change-commits revision 1</title>
+<meta name="grace5:change" content="C-0013-verified-change-commits">
+<meta name="grace5:revision" content="1">
+<meta name="grace5:contract-sha256" content="7bdc6debde5bf594cae5db8f579a53c512af2c04f0b36c59d4355b808bb7e690">
+<meta name="grace5:date" content="2026-11-17">
+<meta name="grace5:writer" content="independent">
+<meta name="grace5:basis" content="full">
+<meta name="grace5:words" content="622">
+<meta name="grace5:target-words" content="600">
+<meta name="grace5:checks" content="4">
+<meta name="grace5:target-checks" content="8">
+<style>
+:root{--bg:#15181d;--surface:#1b1f26;--ink:#dfe3ea;--muted:#98a1ae;--line:#343b46;--go:#6aaee6;--stop:#d9904f;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PT Sans",system-ui,sans-serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 24px}
+header{padding-top:28px}
+h1{font-size:22px;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+section{background:var(--surface);border:1px solid var(--line);padding:12px 14px;margin:0 0 12px}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:13px;font-weight:400;color:var(--muted);margin:12px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin:2px 0}
+code,.protected li,td:first-child b,#decisions b{font-family:"PT Mono",ui-monospace,Consolas,monospace;font-size:13px}
+.protected{padding-left:0;list-style:none}
+.protected li{color:var(--stop)}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:400;color:var(--muted);text-align:left;padding:0 12px 6px 0}
+td{padding:6px 12px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);font-size:13px;width:22%}
+td:first-child span{display:block;color:var(--ink);font-size:15px}
+td:first-child b{color:var(--ink)}
+td.shows{width:40%}
+td.limits:empty::after{content:"No limitation stated";color:var(--muted)}
+.manual td:first-child{color:var(--stop)}
+.trace td:first-child::after{content:" (device)";color:var(--stop)}
+.optional td{color:var(--muted)}
+#decisions ul,#findings ul{padding-left:0;list-style:none}
+#decisions li,#findings li{display:grid;grid-template-columns:44px minmax(0,1fr)}
+#decisions b{font-weight:400;color:var(--go)}
+#burdens li{color:var(--ink)}
+#burdens{border-color:var(--stop)}
+#findings li{grid-template-columns:76px minmax(0,1fr);color:var(--muted);font-size:13px}
+#findings li[data-finding=open]>span:first-child{color:var(--stop)}
+footer{color:var(--muted);font-size:13px;padding-top:2px;padding-bottom:40px}
+footer p{margin:0 0 4px}
+footer .say{color:var(--ink);font-size:15px;margin-top:12px}
+:root{--diff-add:#a3e3b7;--diff-add-bg:#163226;--diff-mod:#f1ce8e;--diff-mod-bg:#332b1b;--diff-del:#f1b0b3;--diff-del-bg:#3b2227}
+.diff-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin:0 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--muted)}
+.diff-legend .key{display:inline-flex;gap:6px;align-items:center}
+.diff-legend .key-add{color:var(--diff-add)}
+.diff-legend .key-mod{color:var(--diff-mod)}
+.diff-legend .key-del{color:var(--diff-del)}
+.diff-mark{display:inline;font-family:ui-monospace,Consolas,monospace;font-weight:700;margin-right:5px}
+.diff-added,.diff-modified,.diff-removed{padding:5px 8px;border-left:3px solid;border-radius:2px}
+.diff-added{color:var(--diff-add);background:var(--diff-add-bg);border-color:var(--diff-add)}
+.diff-modified{color:var(--diff-mod);background:var(--diff-mod-bg);border-color:var(--diff-mod)}
+.diff-removed{color:var(--diff-del);background:var(--diff-del-bg);border-color:var(--diff-del);text-decoration:line-through}
+span.diff-added,span.diff-modified,span.diff-removed{padding:0 3px;border-left-width:2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+tr.diff-added,tr.diff-modified,tr.diff-removed{padding:0}
+td:first-child .diff-mark{display:inline}
+#decisions li.diff-added b,#decisions li.diff-modified b,#decisions li.diff-removed b{color:inherit}
+@media print{:root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#444;--line:#bbb;--go:#1f6fb2;--stop:#b8641c;color-scheme:light}section{break-inside:avoid}}
+@media print{:root{--diff-add:#19552f;--diff-add-bg:#eef8f0;--diff-mod:#704800;--diff-mod-bg:#fff7e4;--diff-del:#8f2731;--diff-del-bg:#fff0f1}.diff-legend,.diff-added,.diff-modified,.diff-removed{print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Change commits construct and verify the Change trailer mechanically</h1>
+  <p class="lead">Brief for approval. Change <code>C-0013-verified-change-commits</code>, revision 1, 2026-11-17. Full brief, written by: independent reader.</p>
+</header>
+<main>
+  <section id="result">
+    <h2>What you get</h2>
+    <div>
+      <ul>
+        <li>A change's commits are built by one repository routine from an explicit change id and an explicit list of owned paths, so attribution is constructed in the commit path instead of remembered per free-form commit.</li>
+        <li>The routine appends the literal <code>Change: &lt;id&gt;</code> trailer and reads the created commit back &mdash; its parsed trailers and its changed-path list &mdash; and refuses a missing or mismatched trailer or any read-back failure.</li>
+        <li>It refuses an empty selection and any path outside the supplied list; it never stages all dirty files, never rewrites history and never hides a failed verification, and a failed verification stops the next handoff.</li>
+        <li><code>grace5-execute</code> and <code>grace5-orchestrate</code> point at the routine for product, test, evidence, review and close-move commits; batch-only ledger commits are attributed by their actual ownership, not to a change whose records they do not carry.</li>
+        <li>No kernel command, schema, record kind, receipt field, approval or closure rule changes, and no version, pin, tag or migration boundary moves; a red test-first commit stays valid.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="evidence">
+    <h2>What will count as done</h2>
+    <div>
+      <table>
+        <thead><tr><th>Check</th><th>If it passes, we know</th><th>Even then, we do not know</th></tr></thead>
+        <tbody>
+          <tr class="automated" data-check="CK1" data-kind="automated" data-required="true"><td><span>Kernel type check</span><b>CK1</b> automated</td><td class="shows">The repository still type-checks after the new tool is added and the two skills are edited.</td><td class="limits">A clean type check says nothing about runtime behaviour: whether a commit carries the trailer, whether exactly the supplied paths were staged, or how a refusal is reported.</td></tr>
+          <tr class="automated" data-check="CK2" data-kind="automated" data-required="true"><td><span>Commit routine test suite</span><b>CK2</b> automated</td><td class="shows">The routine constructs the trailer and reads it back, refuses an empty selection, a path outside the list, a missing or mismatched trailer and a read-back failure, leaves foreign dirty work unstaged, keeps a red test-first commit valid, and does not rewrite consumed revisions when tip metadata is amended.</td><td class="limits">Tests use temporary repositories and local fixtures. They do not show that a real handoff stops on a failed verification, that the skill prose actually cites the routine, or that no other commit path still commits without the trailer.</td></tr>
+          <tr class="automated" data-check="CK3" data-kind="automated" data-required="true"><td><span>Generated artifact verify</span><b>CK3</b> automated</td><td class="shows">The three generated packages and the generated CLI reference still match their sources, so the edited skill text is what the distribution was regenerated from and nothing drifted.</td><td class="limits">It proves packaging consistency, not that the skill text instructs the routine for every change-owned commit, and it says nothing about batch ledger commit attribution.</td></tr>
+          <tr class="automated" data-check="CK4" data-kind="automated" data-required="true"><td><span>Routine help runs</span><b>CK4</b> automated</td><td class="shows">The repository tool exists and prints its help, so the routine is present and its documented surface is invocable.</td><td class="limits">It shows only that the tool runs; it exercises no commit and does not read the skill text that is meant to cite the routine.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section id="decisions">
+    <h2>Decisions for review</h2>
+    <div>
+      <ul>
+        <li data-decision="D1"><b>D1</b><span>The change id and the owned paths are explicit arguments to the routine; implicit staging and any inference from dirty state are refused.</span></li>
+        <li data-decision="D2"><b>D2</b><span>The literal <code>Change: &lt;id&gt;</code> trailer is written once and read back from the created commit; a trailer mentioned only in prose does not count as attribution.</span></li>
+        <li data-decision="D3"><b>D3</b><span>Batch-only ledger commits are attributed by their actual ownership; they are not assigned to a change whose records they do not carry.</span></li>
+        <li data-decision="D4"><b>D4</b><span>A failed read-back stops the next handoff; repair is a separate, owner-visible operation, never an automatic history rewrite.</span></li>
+        <li data-decision="D5"><b>D5</b><span>A harness-native verified commit facility is used where one exists; the repository routine is the portable fallback.</span></li>
+        <li data-decision="D6"><b>D6</b><span>A red test-first commit stays valid because the lifecycle, not the commit routine, decides when evidence is final.</span></li>
+      </ul>
+    </div>
+  </section>
+  <section id="risks">
+    <h2>Risks</h2>
+    <div>
+      <ul>
+        <li>Attribution only improves for commits that go through the routine. A commit made by another path, or by hand, still lacks the trailer, so the failure that motivated the change can recur whenever the routine is bypassed.</li>
+        <li>A stricter routine can block a handoff: a refusal on a mismatched read-back or an out-of-list path stops work until it is resolved. The change keeps a red test-first commit valid and prefers a harness-native verified commit facility where one exists, which limits but does not remove that friction.</li>
+        <li>A read-back failure is reported and never repaired automatically. A genuinely wrong trailer therefore needs a separate, owner-visible repair, which costs time on the very path that already failed.</li>
+        <li>The routine may act only on the supplied paths; if the caller's list is wrong or incomplete, the routine refuses rather than correcting it, so the list itself remains a place where a mistake shows up late.</li>
+        <li>The edited skill text must be repackaged, or the generated-artifact verify check fails and the change cannot hand off.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="burdens">
+    <h2>Approval decisions and effort</h2>
+    <div>
+      <ul>
+        <li>Rule on the fallback: where a harness already provides a verified commit facility, the change prefers it and keeps the repository routine only as the portable fallback. It is a repository tool, never a kernel command.</li>
+        <li>Accept that attribution covers the commit path the routine owns. Commits made outside it are not forced to carry the trailer; review and the recorded start revision still cover that gap, not the routine.</li>
+        <li>Provide a git worktree whose foreign dirty work is identified rather than committed. The routine stages only the supplied paths and never adopts unknown work, so pre-existing changes must be left alone or handled first.</li>
+        <li>No bench session or manual procedure is required. The work is code and skill text, verified by the type check, the routine's test suite, the generated-artifact verify and the routine's help.</li>
+      </ul>
+    </div>
+  </section>
+  <section id="boundaries">
+    <h2>Where it may reach</h2>
+    <div>
+      <ul class="writes">
+        <li>Adds the repository tool <code>src/tools/change-commit.ts</code> and its test, and may touch other files under <code>src/tools/</code>.</li>
+        <li>Edits the skills <code>skills/grace5-execute/</code> and <code>skills/grace5-orchestrate/</code> so they cite the routine for change-owned commits.</li>
+        <li>Amends the rationale ledger entry L-01 and edits <code>models/architecture/commands.md</code>, and regenerates <code>packages/</code> from the edited skill text.</li>
+        <li>It works under these constraints: explicit change id and owned paths only; git plumbing and porcelain only; no implicit staging; a failed verification is reported and never suppressed; and a mismatched read-back is never repaired by amending a consumed commit.</li>
+      </ul>
+      <h3>Left alone on purpose</h3>
+      <ul class="exclusions">
+        <li>N1: no kernel commit command and no new receipt or record field.</li>
+        <li>N2: no automatic rewrite of already referenced history, and no amendment of revisions consumed by receipts or later changes.</li>
+        <li>N3: no staging of foreign dirty work, no adoption of unknown work, and no manufactured empty commit.</li>
+        <li>N4: no replacement of a harness-native verified commit facility where it supports the required behaviour; the repository helper is the fallback.</li>
+        <li>N5: no change to close, review or evidence semantics.</li>
+      </ul>
+      <h3>Must not be written</h3>
+      <ul class="protected">
+        <li data-protected=".grace5/changes/closed/**">.grace5/changes/closed/**</li>
+        <li data-protected="package.json">package.json</li>
+        <li data-protected=".grace5/kernel-version">.grace5/kernel-version</li>
+        <li data-protected="models/architecture/schemas/**">models/architecture/schemas/**</li>
+        <li data-protected="models/architecture/templates/**">models/architecture/templates/**</li>
+        <li data-protected="models/architecture/method.md">models/architecture/method.md</li>
+        <li data-protected="models/architecture/authorization.md">models/architecture/authorization.md</li>
+        <li data-protected="models/architecture/source-identity.md">models/architecture/source-identity.md</li>
+        <li data-protected="models/architecture/evidence-records.md">models/architecture/evidence-records.md</li>
+        <li data-protected="skills/grace5-prepare/**">skills/grace5-prepare/**</li>
+        <li data-protected="skills/grace5-review/**">skills/grace5-review/**</li>
+        <li data-protected="AGENTS.md">AGENTS.md</li>
+        <li data-protected="README.md">README.md</li>
+      </ul>
+    </div>
+  </section>
+  <section id="findings">
+    <h2>Returned to the author</h2>
+    <div>
+      <ul>
+        <li data-finding="resolved"><span>Resolved</span><span>Checked the contract against the repository: every check has one evidence row of matching kind and required flag; every Affected and Protected path exists (the new <code>src/tools/change-commit.ts</code> is the file the change adds) and every cited rule document exists; the terms <code>Change: &lt;id&gt;</code> trailer, ledger commit and harness-native verified commit facility are defined in the repository or self-contained; the Affected boundary covers every artifact the Change names; and no criterion contradicts another. No mechanical finding remains.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>
+  <p id="size">Contract size: 622 words against a target of 600, 4 checks against 8.</p>
+  <p>The words run 22 over the 600 target because the contract states six constraints, five non-goals, six decisions and seven acceptance criteria around a routine with several distinct refusal paths. The checks number 4, below the target of 8, because the routine's behaviour is carried by one test suite plus the existing type, generated-artifact and help checks.</p>
+  <p>This brief describes contract text with SHA-256 <code>7bdc6debde5bf594cae5db8f579a53c512af2c04f0b36c59d4355b808bb7e690</code>.</p>
+  <p class="say">Decision: approve, or reject with a reason. Approval is recorded separately and authorizes execution. A hold defers execution until the change or batch is explicitly started; it adds no kernel state.</p>
+</footer>
+</body>
+</html>
