@@ -4,12 +4,9 @@ Prepared 2026-11-17. No brief is written, per the requested retirement. No appro
 
 ## Bootstrap limitation
 
-The current kernel requires a brief for a new approval: `approval.xsd` requires `brief-sha256`, and `state.obligation` and `close` require a brief for the current revision. This change removes that requirement, but it cannot itself be approved under the old rule without a brief. Two owner paths are possible and neither is inferred here:
+The current kernel requires a brief for a new approval: `approval.xsd` requires `brief-sha256`, and `state.obligation` and `close` require a brief for the current revision. This change removes that requirement, but it cannot itself be approved under the old rule without a brief.
 
-1. Authorize one last brief for this change only, approving the retirement; or
-2. Record an explicit one-time bootstrap decision outside the normal brief flow, with the exact contract and check hashes, and treat the implementation as the first application of the new rule.
-
-Until one is chosen, `grace5 status C-0019-retire-briefs` reports `unapproved` and no execution may start. A brief was deliberately not created.
+2026-11-17: the owner approved the complete prepared set, including this change, on its contract. That statement is the explicit bootstrap decision for this change: no brief is written, and the approval is bound to the contract and check hashes above. The kernel cannot represent this decision until the briefless path is implemented, so the `approval-1.xml` record is written under the new schema after the implementation, before final evidence and review. If the owner instead requires the old-rule path, a one-time brief for this change only is the alternative; none is inferred.
 
 ## Scope
 
@@ -56,6 +53,14 @@ Preparation retains the independent finding channel without the artifact. An ind
 12. Amend rationale-ledger L-04 (retired) and L-05 (contract-only binding).
 13. Add `src/conformance/briefless.test.ts` for the new path and the legacy path; update existing brief-dependent tests so historical cases still pass.
 14. Regenerate `models/architecture/cli-reference.md` and `packages/`; run CK1-CK8.
+
+## Independent contract read: resolved findings
+
+A findings-only independent read of the 2026-11-17 contract returned two mechanical issues before the owner gate, both resolved in the contract:
+
+- A2 named CK3 and CK7, which validate records but do not exercise legacy `run`/`close`; A2 now names CK2 and CK6.
+- CK5 did not inspect `models/architecture/commands.md`, so a stale brief refusal phrase there would pass; CK5 now includes that file.
+- The read's K7/D10 observation was checked against the seven contracts: all seven protect `models/architecture/templates/**`, and C-0012, C-0014, C-0017 and C-0018 protect `models/architecture/brief.md`; K7 and D10 now state that set exactly.
 
 ## Measurement consequence
 
