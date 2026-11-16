@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0013-verified-change-commits" revision="1" contract-sha256="7bdc6debde5bf594cae5db8f579a53c512af2c04f0b36c59d4355b808bb7e690" n="2" run-id="ced1a7ee9962455ea3f1dc6a6963dcb0" started="2026-11-16T22:02:32.606Z" ended="2026-11-16T22:05:01.567Z" status="completed" source-revision="67878007f282c0666568246bcc690d3dab45e968" dirty="false" candidate="e9bc0812f1519e1e3b4fc6f73fe8514f0a3fda9ea965849294feb186e5f5f323" kernel="grace5 0.8.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="5006" log="records/logs/run-2/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=120
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="143328" log="records/logs/run-2/CK2.log" log-sha256="b41a5259262a0983632b797010f223c31d13d6d6be1851e48394421b835f9ccf">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="549" log="records/logs/run-2/CK3.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="03e3fb3a6f4811bd51a8a35e6f468037fa812bf36216c479c56467ce523206ab" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="70" log="records/logs/run-2/CK4.log" log-sha256="a96f1d9c955e976c26cf262face4e0537c615c29962c07a548f78328732a4026">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun src/tools/change-commit.ts --help
+</Definition>
+  </Result>
+</Run>
