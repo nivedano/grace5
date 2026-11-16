@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0017-verification-cost" revision="1" contract-sha256="fa6f554e5f10de4c31b3284924526ebd46ccacf680db588dd5e3a74b6a66441d" brief-sha256="d5894d22550bf160863cd13f0ae48c62b594e814a3da745148ba623c5496bf36" date="2026-11-17" decision="approved">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669"/>
+  <Bound check="CK2" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011"/>
+  <Bound check="CK3" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165"/>
+  <Bound check="CK4" definition-sha256="186949afd3bbd3640efabebef5f67ee800948ea80963822d9b2874b3da6af3d8"/>
+</Approval>

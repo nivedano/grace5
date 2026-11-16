@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0015-advisor-guidance" revision="1" contract-sha256="ef560274c3e59ba76cc855a49fd5f0ae3e19815e428d34bce67a1c08f688734b" brief-sha256="0f343ace8fb92328932514233945cab23717ba2ae99201479db9e377530148eb" date="2026-11-17" decision="approved">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669"/>
+  <Bound check="CK2" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011"/>
+  <Bound check="CK3" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165"/>
+  <Bound check="CK4" definition-sha256="780e94bb1d2cbb65d8f51a414be2b3b730c28f29b022c2b2746563344eba515e"/>
+  <Bound check="CK5" definition-sha256="b794c5493bf4754301c1b495b5126bd4fe89196a1ffe617add2f7aee649658b8"/>
+</Approval>

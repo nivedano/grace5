@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0013-verified-change-commits" revision="1" contract-sha256="7bdc6debde5bf594cae5db8f579a53c512af2c04f0b36c59d4355b808bb7e690" brief-sha256="991f63fd8d4d22bef728eef797b37c1c26b226b1a53890d9f732fc1de8d04310" date="2026-11-17" decision="approved">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669"/>
+  <Bound check="CK2" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011"/>
+  <Bound check="CK3" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165"/>
+  <Bound check="CK4" definition-sha256="03e3fb3a6f4811bd51a8a35e6f468037fa812bf36216c479c56467ce523206ab"/>
+</Approval>
