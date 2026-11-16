@@ -5,13 +5,13 @@ description: Use when a GRACE 5 change has an owner approval and the work has to
 
 # Execute a GRACE 5 change
 
-Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
+Before working, read the repository's optional `.grace5/extensions/` files and follow those addressed to your role (`method.md`, Local extensions).
 
-File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. At any point `grace5 status <id>` tells you where you are; its last line, `next:`, is the obligation to work on.
+File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere those shipped with the package. At any point `grace5 status <id>` tells you where you are; its last line, `next:`, is the obligation to work on.
 
 ## Before starting
 
-- `grace5 status` must report `authorization: approved`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first, which proceeds past an open change no step writes, and when it refuses because a step touches this change, close it with the previous kernel (run from a checkout at the previous tag) or abandon it (`upgrade.md`).
+- `grace5 status` must report `authorization: approved`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here. A pin refusal means the state is behind the kernel: run `grace5 upgrade` first; `upgrade.md` names the ways out when a step touches this change.
 - Follow the isolation rule in `method.md`: one change per worktree for standalone execution; a serial `grace5-orchestrate` batch of approved changes may retain parked changes with one active implementer and the complete diff preserved (`source-identity.md`). Never create a branch or a worktree without the owner's consent; ask where the work should happen and use what they name.
 - Run `grace5 run <id> --start` once. It records the start revision, the dirty paths already present and the starting state of the checks (`commands.md`).
 - Pre-existing dirty work is identified, never adopted: do not stage, stash, commit or tidy it. Tell the owner what the receipt lists; the final tree must be clean (`source-identity.md`).
@@ -19,7 +19,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 ## Working
 
 - Write only inside Affected. Tests and test doubles of affected files are inside it. Never write a Protected path.
-- A release is a separate framework tooling act explicitly requested by the owner (`upgrade.md`). Never bump the version or pin or register migration boundaries or rows in an ordinary change; migration implementation and tests may be prepared before release.
+- Never bump the version or pin or register migration boundaries or rows; a release is a separate owner-requested act (`upgrade.md`).
 - Keep sequence, technical detail and discovered sub-steps in `notes.md`.
 - Iterate with `grace5 run <id> --check <check>...`. A receipt taken on a dirty tree is for iteration only.
 - Commit with a `Change: <id>` trailer. Commit receipts and notes as you go; committing records never invalidates evidence.

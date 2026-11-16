@@ -5,9 +5,9 @@ description: Use when a GRACE 5 change has final evidence on a clean committed r
 
 # Review a GRACE 5 change
 
-Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
+Before working, read the repository's optional `.grace5/extensions/` files and follow those addressed to your role (`method.md`, Local extensions).
 
-File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. `evidence-records.md` defines the review record and what `grace5 close` reads from it.
+File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere those shipped with the package. `evidence-records.md` defines the review record and what `grace5 close` reads from it.
 
 ## Handing over
 
@@ -29,7 +29,7 @@ The author adds no summary, no explanation of intent and no list of what to look
 - For a Trace check, read the capture command itself. Would the same marker sequence appear if the behaviour were broken? Is the origin honest, meaning the command really captures during the run what it reports as live, and takes device and build from the device and not from constants?
 - Rules. Give a verdict for each rule the contract cites: `upheld`, `violated` or `not-applicable`, read against the rule file, not against the constraint's paraphrase.
 - Boundary. `grace5 status` lists changed files as `outside: <path>` and `protected: <path>`. The kernel blocks only the protected ones; judge each outside write and record a finding for any that is not a test of an affected file or is otherwise unjustified.
-- Release discipline. An ordinary change that bumps the version in `package.json`, the README status line or `.grace5/kernel-version`, or registers migration boundaries or versioned table rows, is a blocking finding (`upgrade.md`). A release is a separate owner-requested tooling act. Preparing migration implementation and tests before release is allowed.
+- Release discipline. An ordinary change that bumps the version in `package.json`, the README status line or `.grace5/kernel-version`, or registers migration boundaries or versioned table rows, is a blocking finding (`upgrade.md`); preparing migration implementation and tests is allowed.
 
 ## Findings
 

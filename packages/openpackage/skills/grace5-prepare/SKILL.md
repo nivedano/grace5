@@ -5,9 +5,9 @@ description: Use when a GRACE 5 change has to be opened or its contract revised,
 
 # Prepare a GRACE 5 change
 
-Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
+Before working, read the repository's optional `.grace5/extensions/` files and follow those addressed to your role (`method.md`, Local extensions).
 
-File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. `method.md` is the whole method; read it once.
+File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere those shipped with the package. `method.md` is the whole method; read it once.
 
 ## Before opening a change
 
@@ -24,10 +24,10 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 ## Contract
 
-- Create the change with `grace5 init <id>`; the id must be new, since `init` refuses one that exists open or under `.grace5/changes/closed/`. A refusal `repository state is at <pin>, kernel is <version>: run grace5 upgrade` means the state is behind the kernel: run `grace5 upgrade` first, which proceeds past an open change no step writes, and when it refuses because a step touches an open change, that change is closed with the previous kernel (run from a checkout at the previous tag) or abandoned (`upgrade.md`). Write `contract.xml` to `schemas/contract.xsd`: eight sections in fixed order, described in `method.md`.
+- Create the change with `grace5 init <id>`; the id must be new, open or closed. A pin refusal means the state is behind the kernel: run `grace5 upgrade` first; `upgrade.md` names the ways out when a step touches an open change. Write `contract.xml` to `schemas/contract.xsd`: eight sections in fixed order, described in `method.md`.
 - State the behavioural delta once, in Change. Cite a standing rule by path in `rule`; never recopy its text. No tasks, no sequence, no pre-written code.
 - Affected names what may be written, and Protected what must not be (`authorization.md`).
-- A release is a separate framework tooling act explicitly requested by the owner (`upgrade.md`). Ordinary changes never bump the version or pin and never register migration boundaries or rows; they may prepare migration implementation and tests before release.
+- Never bump the version or pin or register migration boundaries or rows; a release is a separate owner-requested act (`upgrade.md`).
 - Make each check decisive: it must fail if the behaviour is broken. `grace5-review` states the question every required check is judged by; write checks that survive it.
 - Choose Automated when a project command's exit status separates working from broken. Choose Trace over Manual whenever the behaviour leaves ordered lines in a log a command can capture, because the kernel then checks sequence and provenance itself (`trace-provenance.md`). Keep Manual for what only a person can judge, and declare its Environment.
 - A check that is red before the work starts is fine, and is often the reason for the change.
@@ -46,7 +46,7 @@ Hand the contract, without the conversation, to an independent subagent that nev
 ## Owner gate
 
 - Give the owner the brief page. They answer in one statement: approve, or reject with the reason.
-- Record it in `records/approval-<rev>.xml` (`schemas/approval.xsd`): the decision, date, contract and definition hashes exactly as `grace5 check` prints them, and the SHA-256 of the brief file's bytes as the owner read it, taken with a system hash tool. An approval carries `<Statement>approved</Statement>`; a rejection carries its reason there and no approval without one. Omit `owner`, `recorded-by`, `Source` and any excerpt of the conversation; legacy attribution fields are accepted and ignored. Compute nothing else by hand.
+- Record it in `records/approval-<rev>.xml` (`schemas/approval.xsd`): the decision, date, contract and definition hashes exactly as `grace5 check` prints them, and the SHA-256 of the brief's bytes as the owner read it, taken with a system hash tool. A rejection carries its reason in `Statement`. Omit personal attribution and conversation excerpts; compute nothing else by hand.
 - Never set or infer an approval. `authorization.md` says which words count and how a rejection is recorded. An approval authorizes execution; new records carry neither `executes` nor `Execution`. An approval worded to defer the start, such as "approved, hold", remains an approval: wait until the owner starts the change or a batch, and record no hold state.
 
 ## Material revision

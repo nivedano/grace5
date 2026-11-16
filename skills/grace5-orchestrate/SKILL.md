@@ -5,11 +5,11 @@ description: Use when several approved GRACE 5 changes should run in one mostly 
 
 # Orchestrate approved GRACE 5 changes
 
-File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. Read `method.md`; use `grace5-prepare`, `grace5-execute` and `grace5-review` for their lifecycle mechanics rather than reconstructing them here.
+File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere those shipped with the package. Read `method.md`; use `grace5-prepare`, `grace5-execute` and `grace5-review` for their lifecycle mechanics rather than reconstructing them here.
 
-Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
+Before working, read the repository's optional `.grace5/extensions/` files and follow those addressed to your role (`method.md`, Local extensions).
 
-You coordinate; you write no product files. Implementers follow `grace5-execute`; reviewers follow `grace5-review` independently of the authoring conversation. Read the state of every change from `grace5 status`, never from a subagent's report. You run `grace5 close` when status names no other obligation. Never manufacture or edit kernel receipts, approvals or close records; the reviewer authors its review record as its skill requires. Preparation and owner decisions are outside the run. A release is a separate framework tooling act explicitly requested by the owner (`upgrade.md`); ordinary changes do not bump versions or pins or register migration boundaries or rows, though they may prepare migration implementation and tests before release.
+You coordinate; you write no product files. Implementers follow `grace5-execute`; reviewers follow `grace5-review` independently of the authoring conversation. Read the state of every change from `grace5 status`, never from a subagent's report. You run `grace5 close` when status names no other obligation. Never manufacture or edit kernel receipts, approvals or close records; the reviewer authors its review record as its skill requires. Preparation and owner decisions are outside the run. Ordinary changes never bump versions or pins or register migration boundaries or rows; a release is a separate owner-requested act (`upgrade.md`).
 
 ## Orient and record the run
 
