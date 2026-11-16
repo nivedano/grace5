@@ -1,6 +1,6 @@
 ---
 name: grace5-prepare
-description: Use when a GRACE 5 change has to be opened or its contract revised, before any execution. Covers the interview, contract.xml, the independent brief, and recording the owner's decision.
+description: Use when a GRACE 5 change has to be opened or its contract revised, before any execution. Covers the risk triage, the interview, contract.xml, the independent brief, and recording the owner's decision.
 ---
 
 # Prepare a GRACE 5 change
@@ -8,6 +8,13 @@ description: Use when a GRACE 5 change has to be opened or its contract revised,
 Before working, read the files in the repository's optional `.grace5/extensions/` folder and follow those addressed to your role (`method.md`, Local extensions).
 
 File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere the GRACE 5 method documents shipped with the package. `method.md` is the whole method; read it once.
+
+## Before opening a change
+
+- Triage the request by risk, not by habit. A chore — a minor skill-text correction, a small CLI bug fix, a similarly contained edit — is carried out directly, without a specification and without asking; keep bureaucracy low.
+- The test is consequence: if this edit goes wrong, can the damage be seen and undone with the project's own commands? If yes, edit directly. If the risk outruns what a direct edit can tackle — behaviour, boundaries, evidence or state others depend on — open a full GRACE 5 change.
+- An explicit request for a specification always gets one.
+- A direct edit is an ordinary source edit outside the lifecycle: no contract, brief, approval or receipts. Verify it with the project's own commands and commit it; if the work grows past the triage, stop and open a change.
 
 ## Interview
 
