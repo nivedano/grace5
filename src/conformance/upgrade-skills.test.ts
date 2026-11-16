@@ -1,4 +1,4 @@
-// Conformance cases UP-07, UP-12, UP-14, UP-15, UP-19, UP-20, UP-21 and AUTH-03 of models/architecture/conformance.md: the
+// Conformance cases UP-07, UP-12, UP-14, UP-15, UP-19, UP-20, UP-21, UP-22 and AUTH-03 of models/architecture/conformance.md: the
 // installed grace5-* skill directories, their refresh, the kernel-managed paths outside the candidate and the dirty
 // state, upgrade beside open changes, and the kernel skill-source guard. Split mechanically from upgrade.test.ts by
 // C-0010; the tests are unchanged except for UP-20.
@@ -539,7 +539,7 @@ test(
     expect(s.start().code).toBe(0);
     s.pin("0.6.0");
 
-    const step = STEPS.find((candidate) => candidate.from === "0.6.0" && candidate.to === VERSION);
+    const step = STEPS.find((candidate) => candidate.from === "0.6.0" && candidate.to === "0.7.0");
     expect(step).toBeDefined();
     if (step === undefined) throw new Error("missing the 0.6.0 to 0.7.0 migration step");
     expect(step.touches(s.repo)).toEqual([]);
@@ -575,8 +575,83 @@ test(
 
     const upgrade = s.cli(["upgrade"]);
     expect(upgrade.code).toBe(0);
-    expect(upgrade.lines).toContain(`step: 0.6.0 -> ${VERSION}: install grace5-orchestrate beside the installed skills and refresh them to ${VERSION}`);
-    expect(upgrade.lines).toContain(`upgraded: 0.6.0 -> ${VERSION}`);
+    expect(upgrade.lines).toContain("step: 0.6.0 -> 0.7.0: install grace5-orchestrate beside the installed skills and refresh them to 0.7.0");
+    expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.6.0 -> ${VERSION}`);
+    expect(s.readPin()).toBe(`${VERSION}\n`);
+    expect(candidateLine(s)).toBe(beforeCandidate);
+    expect(snapshotDifference(beforeChanges, await snapshot(s.repo))).toBeUndefined();
+    expect(s.receipt()).toBe(receiptBefore);
+    expect(s.runNumbers()).toHaveLength(runCountBefore);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "UP-22 the 0.7.0 to 0.8.0 step refreshes the installed skills, is idempotent and self-verifying, and leaves open changes untouched",
+  async () => {
+    const s = prepared({ id: "C-0538-refresh-08", checks: [automated("CK1")] });
+    s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare\n");
+    s.write(".claude/skills/grace5-execute/SKILL.md", "stale execute\n");
+    s.write(".claude/skills/grace5-local/SKILL.md", "repository-owned skill\n");
+    s.commit("fixture at 0.7.0 with installed packaged skills");
+    expect(s.start().code).toBe(0);
+    s.pin("0.7.0");
+
+    const step = STEPS.find((candidate) => candidate.from === "0.7.0" && candidate.to === "0.8.0");
+    expect(step).toBeDefined();
+    if (step === undefined) throw new Error("missing the 0.7.0 to 0.8.0 migration step");
+    expect(step.touches(s.repo)).toEqual([]);
+
+    const beforeCandidate = candidateLine(s);
+    const beforeChanges = await snapshot(s.repo);
+    const receiptBefore = s.receipt();
+    const runCountBefore = s.runNumbers().length;
+
+    // apply writes nothing itself: the runner's refresh carries the step, so the tree is untouched by it.
+    const afterApply = s.porcelain();
+    step.apply(s.repo);
+    expect(s.porcelain()).toBe(afterApply);
+    expect(refreshSkills(s.repo)).toContain(".agents/skills/grace5-prepare");
+    expect(refreshSkills(s.repo)).toContain(".claude/skills/grace5-execute");
+    step.verify(s.repo);
+    expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
+    expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
+    expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
+
+    // Applying it twice changes nothing, and verification rejects a missing or drifted installed file.
+    const oncePorcelain = s.porcelain();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    expect(s.porcelain()).toBe(oncePorcelain);
+    fs.rmSync(path.join(s.repo, ".agents/skills/grace5-prepare/SKILL.md"), { force: true });
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-prepare/SKILL.md"), "drifted\n");
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+
+    // No location is made when the repository has no installed packaged skills.
+    const empty = prepared({ id: "C-0539-no-installed-skills-08", checks: [automated("CK1")] });
+    step.apply(empty.repo);
+    refreshSkills(empty.repo);
+    step.verify(empty.repo);
+    expect(empty.exists(".agents/skills")).toBe(false);
+    expect(empty.exists(".claude/skills")).toBe(false);
+
+    // Restore the valid shape and exercise the real command through the historical boundary to the current target.
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    const upgrade = s.cli(["upgrade"]);
+    expect(upgrade.code).toBe(0);
+    expect(upgrade.lines).toContain("step: 0.7.0 -> 0.8.0: refresh the installed skills to 0.8.0");
+    expect(upgrade.lines).toContain(`checked: ${s.id}`);
+    expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.7.0 -> ${VERSION}`);
     expect(s.readPin()).toBe(`${VERSION}\n`);
     expect(candidateLine(s)).toBe(beforeCandidate);
     expect(snapshotDifference(beforeChanges, await snapshot(s.repo))).toBeUndefined();
