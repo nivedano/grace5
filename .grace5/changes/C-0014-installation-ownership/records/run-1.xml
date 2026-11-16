@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0014-installation-ownership" revision="1" contract-sha256="5f2b7755fe256c88e2481dcafaaa9be4fd98d6e151a1a13e67f402638dc02142" n="1" run-id="0ced4ac24f2743b9b5d096a8b9a8ee8e" started="2026-11-16T21:35:51.553Z" ended="2026-11-16T21:38:32.877Z" status="completed" start="true" source-revision="bbea8489f18b28288effa36c2c8ca687f1132385" dirty="false" candidate="801ba2b24445b8e0814f8f7bb3a89c91b4336db18c32e972b8c604ad53f754de" kernel="grace5 0.8.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="5634" log="records/logs/run-1/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=120
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="154937" log="records/logs/run-1/CK2.log" log-sha256="d959721edf53374de1314e6d8d01869e3e44cc0c4e8166b786ec66f9ca4633f7">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="616" log="records/logs/run-1/CK3.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="b35412ac89e37ac34c2fcd5ca02ec05cc80e0b40d7735a805e3033d802e6e8bf" verdict="failed" cwd="." exit="1" elapsed-ms="61" log="records/logs/run-1/CK4.log" log-sha256="fb9eb57c504e92874e7649117d47bd3a1192a8314d048d2fb3065b9e2229721a">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun src/tools/installation-health.ts --help
+</Definition>
+    <Reason>exit 1</Reason>
+  </Result>
+  <Result check="CK5" kind="automated" required="true" definition-sha256="124325d74c85274d75bcd2cb6a4a4ef74bb442db19c2d7846174f1bacf779eec" verdict="failed" cwd="." exit="1" elapsed-ms="65" log="records/logs/run-1/CK5.log" log-sha256="fb9eb57c504e92874e7649117d47bd3a1192a8314d048d2fb3065b9e2229721a">
+    <Definition>kind=automated
+id=CK5
+required=true
+cwd=.
+budget=120
+command=bun src/tools/installation-health.ts
+</Definition>
+    <Reason>exit 1</Reason>
+  </Result>
+</Run>

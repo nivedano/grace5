@@ -22,6 +22,8 @@ Excluding the change directory keeps receipts, reviews, briefs, approvals, logs 
 
 The exclusion is by path and nothing else: whatever is placed under `.grace5/` or under an installed `grace5-*` skill directory, a script, a fixture, a copy of product code, is outside the candidate and outside the dirty state, and a check's `definition-sha256` binds the command text, not a file that command executes. A check must therefore execute nothing kept in the change directory or another kernel-managed path, and a `Path` or `Protected` glob that points into one is never reported; the kernel does not detect either, and whether a command reaches into the change tree is for review to read in the contract (accepted design, review finding F6 of C-0001-kernel).
 
+A required check whose result depends on the bytes of an installed `grace5-*` skill directory, or on any other excluded input, is installation health, not candidate evidence: the candidate is the same whatever those bytes hold, so a pass on one candidate never makes such a check current on another. It is evaluated afresh at handoff (`upgrade.md`), never carried over from an earlier result. Binding an excluded input into candidate evidence needs a bounded fingerprint of exactly those inputs under its own approved contract; hashing arbitrary caches or the whole of `.grace5/` is not such a fingerprint, and the kernel adds none.
+
 ## Examples
 
 | Event after a clean passing run | Candidate | Effect on evidence |

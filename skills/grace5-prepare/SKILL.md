@@ -29,6 +29,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - Affected names what may be written, and Protected what must not be (`authorization.md`).
 - Never bump the version or pin or register migration boundaries or rows; a release is a separate owner-requested act (`upgrade.md`).
 - Make each check decisive: it must fail if the behaviour is broken. `grace5-review` states the question every required check is judged by; write checks that survive it.
+- A check decides between candidates only on the candidate's own bytes. Where its result depends on an excluded input — the installed `grace5-*` skills or anything else under a kernel-managed path — it cannot: state it as installation health, re-evaluated afresh at handoff (`source-identity.md`, `upgrade.md`), not as candidate evidence. Binding such an input into evidence needs a bounded fingerprint under its own approved contract; do not hash caches or the state directory.
 - Choose Automated when a project command's exit status separates working from broken. Choose Trace over Manual whenever the behaviour leaves ordered lines in a log a command can capture, because the kernel then checks sequence and provenance itself (`trace-provenance.md`). Keep Manual for what only a person can judge, and declare its Environment.
 - A check that is red before the work starts is fine, and is often the reason for the change.
 - Run `grace5 check <id>` and clear every `defect:` line. Size is reported, not enforced; explain an excess to the brief writer.

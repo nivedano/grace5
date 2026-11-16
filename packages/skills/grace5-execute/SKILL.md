@@ -29,6 +29,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 - Commit everything, so that the source revision is clean, then run `grace5 run <id>` with no selection.
 - For each manual check, the operator carries out the Procedure on that build, and the record states what was actually observed, failures and blocks included: `grace5 run <id> --check <check> --observe <passed|failed|blocked|not-attempted> --build <build> --note <what was seen>`. The other fields are in `evidence-records.md`. Never record an observation nobody made or observe on another person's behalf.
+- Where a required check's result depends on an excluded input such as the installed `grace5-*` skills, re-evaluate installation health (`bun src/tools/installation-health.ts`) at handoff; an earlier pass says nothing about the current installed bytes, and a refresh or a changed pin moves them without changing the candidate (`source-identity.md`). Never reuse an old pass.
 - Any later commit that changes the source candidate makes all of this history, manual observations included. A different commit with the same candidate does not. Finish the code first.
 
 ## Recovery
