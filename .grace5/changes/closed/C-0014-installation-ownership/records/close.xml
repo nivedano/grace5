@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0014-installation-ownership" revision="1" contract-sha256="5f2b7755fe256c88e2481dcafaaa9be4fd98d6e151a1a13e67f402638dc02142" date="2026-11-16T21:53:02.438Z" source-revision="ffde347b9def8e323db3304c302758ce4ca3fc87" candidate="4cd2d21b9eb0254e6c6eddc18854dc4a10155548a5ec38b2a7d77c11f54c9b36" start-revision="bbea8489f18b28288effa36c2c8ca687f1132385" brief="brief-1.html" approval="approval-1.xml" review="1" kernel="grace5 0.8.0">
+  <Satisfied check="CK1" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK4" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK5" kind="automated" run="2" claim="command-completion"/>
+</Close>
