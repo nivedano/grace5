@@ -14,9 +14,31 @@ Until one is chosen, `grace5 status C-0019-retire-briefs` reports `unapproved` a
 ## Scope
 
 - Remove the brief from the approval surface: new approval records bind the contract and check definitions only.
+- Keep one findings-only independent contract read before the owner gate; no page, no fidelity parser, no owner-facing brief.
 - Keep legacy briefs, approvals and close records readable; validate a brief only when the approval carries `brief-sha256`.
 - Remove the active brief documents/template and the brief writer/handoff guidance.
 - Keep checks, receipts, independent complete-diff review, protected paths and closure unchanged.
+
+## Open-set sequencing
+
+C-0012, C-0016, C-0017 and C-0018 are prepared with briefs and protect `brief.md` or `templates/**`. This change must execute after they close, or after each change's own approved material revision removes the protection; otherwise its writes to those paths appear in their complete diffs as protected-path violations. Their briefs become history and are not deleted or rewritten.
+
+C-0016 writes feasibility and discrimination guidance into `brief.md`. Before this change deletes that file, the same requirements must be relocated into `skills/grace5-prepare/SKILL.md` and the contract's own sections. If C-0016 closed first, its `brief.md` text is history and C-0019 re-expresses the requirements; if it is still open at C-0019's start, this change waits.
+
+## Independent contract read
+
+Preparation retains the independent finding channel without the artifact. An independent subagent that did not write the contract receives the contract, the cited rule files and read access, and returns findings only: a criterion its check cannot serve, an undefined term, a contradiction, a boundary that does not cover Change, or a cited path that does not exist. The author resolves each finding by editing the contract before the owner gate. No HTML page, `grace5:writer` metadata or fidelity parser is produced. The final independent review remains separate and unchanged.
+
+## Consumer surface
+
+- `src/brief.ts` remains the legacy parser only.
+- `src/state.ts` and `src/commands/close.ts` distinguish a legacy approval with `brief-sha256` from a new approval without it.
+- `approval.xsd` and `close.xsd` make the brief fields optional; `src/records.ts` writes new records without them.
+- `commands.md`, the CLI help and the generated `cli-reference.md` drop the brief refusal phrases and the brief check rule.
+- `examples/defective-brief` remains a legacy fixture; `examples-verify.ts` may keep it on the legacy path.
+- Conformance FS-12, FS-14, RV-04 and RV-10 are revised or retained as legacy cases; a new `briefless.test.ts` covers the new path.
+- `models/architecture/m2-proposal.md` records the brief-metric gap; sysops `grace/optimize/METHOD.md` and `graceopt` are cross-repo consequences and are not changed here.
+- Rationale ledger L-04 is retired and L-05 is amended to the contract-only binding.
 
 ## Implementation outline
 
@@ -26,13 +48,14 @@ Until one is chosen, `grace5 status C-0019-retire-briefs` reports `unapproved` a
 4. `src/commands/close.ts`: do not require a brief for a new approval; include `brief` in the close record only when legacy.
 5. `src/commands/run.ts`: ensure a new briefless revision is not held by a brief defect; a legacy brief still holds once its revision is approved.
 6. `src/brief.ts`: keep as the legacy parser; no new brief is authored.
-7. `skills/grace5-prepare/SKILL.md`: remove the independent brief writer and the brief owner-gate step; the owner reads the contract and answers approve/reject. Keep the interview, contract, checks and owner gate.
-8. `skills/grace5-orchestrate/SKILL.md`, `grace5-execute/SKILL.md`, `grace5-review/SKILL.md`: remove brief handoff references; the reviewer still receives the contract, complete diff, receipts and cited rules.
-9. `models/architecture/method.md`, `authorization.md`, `evidence-records.md`, `commands.md`, `conformance.md`, `m2-proposal.md`, `README.md`, `AGENTS.md`: state the contract-only approval, legacy brief handling and the measurement consequence.
-10. Delete `models/architecture/brief.md` and `models/architecture/templates/brief.html` from the active surface; keep `models/architecture/examples/**` untouched as historical fixtures.
-11. Amend rationale-ledger L-04 (retired) and L-05 (contract-only binding).
-12. Add `src/conformance/briefless.test.ts` for the new path and the legacy path; update existing brief-dependent tests so historical cases still pass.
-13. Regenerate `models/architecture/cli-reference.md` and `packages/`; run CK1-CK8.
+7. `skills/grace5-prepare/SKILL.md`: remove the independent brief writer and the brief owner-gate step; the owner reads the contract and answers approve/reject. Add the findings-only independent contract read: a subagent that did not write the contract receives the contract, cited rules and read access, returns findings, and the author resolves them before the owner gate. Keep the interview, contract, checks and owner gate.
+8. Relocate C-0016's feasibility and discrimination requirements from `brief.md` into `skills/grace5-prepare/SKILL.md` and the contract sections before deleting `brief.md`.
+9. `skills/grace5-orchestrate/SKILL.md`, `grace5-execute/SKILL.md`, `grace5-review/SKILL.md`: remove brief handoff references; the reviewer still receives the contract, complete diff, receipts and cited rules.
+10. `models/architecture/method.md`, `authorization.md`, `evidence-records.md`, `commands.md`, `conformance.md`, `m2-proposal.md`, `README.md`, `AGENTS.md`: state the contract-only approval, the independent contract read, legacy brief handling and the measurement consequence.
+11. Delete `models/architecture/brief.md` and `models/architecture/templates/brief.html` from the active surface; keep `models/architecture/examples/**` untouched as historical fixtures.
+12. Amend rationale-ledger L-04 (retired) and L-05 (contract-only binding).
+13. Add `src/conformance/briefless.test.ts` for the new path and the legacy path; update existing brief-dependent tests so historical cases still pass.
+14. Regenerate `models/architecture/cli-reference.md` and `packages/`; run CK1-CK8.
 
 ## Measurement consequence
 
@@ -41,7 +64,8 @@ The control center's M2 metrics read brief metadata (`grace5.brief.*`, `grace5.b
 ## Verification focus
 
 - CK2/CK6: a new change with no brief approves, starts, runs, reviews and closes; a legacy brief still validates and a mismatched legacy brief still refuses.
-- CK5/CK8: the active guidance and surface no longer instructs or carries a brief.
+- CK5/CK8: the active guidance and surface no longer instructs or carries a brief, and the prepare skill names the independent findings-only contract read.
+- CK6: the new test covers the briefless approval/run/close path, the legacy brief path, the altered-after-approval path and the unbound-check path.
 - CK3/CK7: examples and every closed change remain clean.
 - CK1/CK4: typecheck, generated packages and CLI reference remain current.
 - The change registers no version, pin, tag or migration row.
