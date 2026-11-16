@@ -39,11 +39,11 @@ A run stopped by a signal writes its receipt with `status="interrupted"`, the ru
 
 ## The manual observation
 
-A manual check is satisfied only by a recorded observation, never by its procedure. The operator, or an agent recording what a named person reported, runs:
+A manual check is satisfied only by a recorded observation, never by its procedure. The operator runs:
 
-`grace5 run <change> --check <id> --observe <passed|failed|blocked|not-attempted> --by <who> --build <build identity> [--environment <text>] [--reference <photo, log or note>] --note <what was seen>`
+`grace5 run <change> --check <id> --observe <passed|failed|blocked|not-attempted> --build <build identity> [--environment <text>] [--reference <photo, log or note>] --note <what was seen>`
 
-or gives the same fields in a file with `--from`. The receipt records the observation with who, when, build and environment, inside a run that carries the candidate and a result that carries the check definition hash. So the observation is bound to candidate, build, environment and check definition. If the check's Environment declares a build, the stated build must satisfy it by the rule of `trace-provenance.md`; otherwise the result is `refused`. A declared device is recorded with the environment and is not compared: the operator's statement is the evidence, and the kernel does not pretend to verify it.
+or gives the same fields in a file with `--from`. The receipt records the observation date, build and environment, inside a run that carries the candidate and a result that carries the check definition hash. Legacy XML `Observation/@by` values are accepted and ignored; `--by` and a `by` field in `--from` are unsupported. So the observation is bound to candidate, build, environment and check definition. If the check's Environment declares a build, the stated build must satisfy it by the rule of `trace-provenance.md`; otherwise the result is `refused`. A declared device is recorded with the environment and is not compared: the observation is the evidence, and the kernel does not pretend to verify it.
 
 ## Supersession
 
@@ -61,7 +61,7 @@ No record is deleted or rewritten to supersede it. Git and the numbering hold th
 
 ## The review record
 
-`records/review-<n>.xml` states who reviewed and how independent they were, the diff covered (`start-revision` to `end-revision`) and its candidate, findings with severity and status, an `Adequacy` statement per check, and a verdict per cited rule. A blocking finding is `open`, `resolved`, or `owner-disposed` with the owner's quoted `OwnerDecision`. A violated rule or a check that does not discriminate is also written as a blocking finding. Whether a change is small enough for its author to review is the author's judgement, visible in the record as `independence="self"` and counted by measurement.
+`records/review-<n>.xml` states how independent the review was, the diff covered (`start-revision` to `end-revision`) and its candidate, findings with severity and status, an `Adequacy` statement per check, and a verdict per cited rule. A blocking finding is `open`, `resolved`, or `owner-disposed` with a neutral `OwnerDecision` stating the owner's disposition; no personal quotation is required. The legacy `reviewer` attribute is accepted and ignored. A violated rule or a check that does not discriminate is also written as a blocking finding. Whether a change is small enough for its author to review is the author's judgement, visible in the record as `independence="self"` and counted by measurement.
 
 ## What close verifies
 
@@ -74,7 +74,7 @@ No record is deleted or rewritten to supersede it. Git and the numbering hold th
 5. The complete diff from the start revision touches no protected path.
 6. For every required automated and trace check: the current result is `passed`, clean, on the final candidate, with the current definition hash.
 7. For every required manual check: the current result is a `passed` observation, recorded clean on the final candidate with the current definition hash, a build and an environment.
-8. The current review is `completed`; carries the current contract hash; covers the complete diff, its `start-revision` being the start run's revision and its `end-revision` a commit that carries the final candidate; has no blocking finding that is `open` or that is `owner-disposed` without the owner's quoted decision, has an `Adequacy` with `discriminates="true"` for every required check, and has no `Rule` with verdict `violated`.
+8. The current review is `completed`; carries the current contract hash; covers the complete diff, its `start-revision` being the start run's revision and its `end-revision` a commit that carries the final candidate; has no blocking finding that is `open` or that is `owner-disposed` without a neutral `OwnerDecision` stating the disposition, has an `Adequacy` with `discriminates="true"` for every required check, and has no `Rule` with verdict `violated`.
 
 Then it writes `close.xml` naming the run that satisfied each check. Checks marked `required="false"` are listed with their latest verdict and never counted.
 

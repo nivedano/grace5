@@ -20,6 +20,47 @@ import {
 afterAll(() => disposeAll());
 
 test(
+  "RECEIPT personal attribution is absent from new records, legacy attributes remain readable, and obsolete observation inputs are rejected",
+  () => {
+    for (const legacy of [false, true]) {
+      const s = new Scenario({ id: legacy ? "C-0211-legacy-attribution" : "C-0210-no-attribution", checks: [manual("MK1")] });
+      s.write("observation.txt", "observe=passed\nbuild=bench-build-7\nenvironment=bench\nnote=The procedure passed.\n");
+      s.write("obsolete-observation.txt", "observe=passed\nby=Private Identity\n");
+      s.prepare();
+      const records = `.grace5/changes/${s.id}/records/`;
+      if (legacy) s.write(`${records}approval-1.xml`, s.record("approval-1.xml").replace("<Approval ", '<Approval owner="Legacy Owner" recorded-by="Legacy Recorder" '));
+      expect(s.check().defects).toEqual([]);
+      expect(s.start().code).toBe(0);
+      const before = s.runNumbers();
+      const obsoleteFlag = s.run("--check", "MK1", "--observe", "passed", "--by", "Private Identity");
+      expect(obsoleteFlag.code).toBe(2);
+      expect(obsoleteFlag.out).not.toContain("Private Identity");
+      const obsoleteFile = s.run("--check", "MK1", "--from", `${s.repo}/obsolete-observation.txt`);
+      expect(obsoleteFile.code).toBe(2);
+      expect(obsoleteFile.out).toContain("unknown field 'by'");
+      expect(obsoleteFile.out).not.toContain("Private Identity");
+      expect(s.runNumbers()).toEqual(before);
+      expect(s.run("--check", "MK1", "--from", `${s.repo}/observation.txt`).code).toBe(0);
+      expect(attr(s.receipt(), "Observation", "by")).toBeUndefined();
+      s.writeReview();
+      if (legacy) {
+        s.write(`${records}run-2.xml`, s.receipt(2).replace("<Observation ", '<Observation by="Legacy Observer" '));
+        s.write(`${records}review-1.xml`, s.record("review-1.xml").replace("<Review ", '<Review reviewer="Legacy Reviewer" '));
+      } else {
+        expect(attr(s.record("approval-1.xml"), "Approval", "owner")).toBeUndefined();
+        expect(attr(s.record("approval-1.xml"), "Approval", "recorded-by")).toBeUndefined();
+        expect(attr(s.record("review-1.xml"), "Review", "reviewer")).toBeUndefined();
+      }
+      const originals = ["approval-1.xml", "review-1.xml", "run-2.xml"].map((name) => s.record(name));
+      expect(s.check().defects).toEqual([]);
+      expect(s.close().code).toBe(0);
+      expect(["approval-1.xml", "review-1.xml", "run-2.xml"].map((name) => s.record(name))).toEqual(originals);
+    }
+  },
+  TEST_TIMEOUT,
+);
+
+test(
   "CHECK reads CRLF as LF for the contract hash and reports an open brief finding",
   () => {
     const s = new Scenario({ id: "C-0202-crlf", checks: [automated("CK1")] });
@@ -47,7 +88,7 @@ test(
       [],
       ["--check", "CK1"],
       ["--skip", "CK1", "--note", "not today"],
-      ["--check", "MK1", "--observe", "passed", "--by", "Ada Bench", "--build", "b1", "--environment", "bench", "--note", "seen"],
+      ["--check", "MK1", "--observe", "passed", "--build", "b1", "--environment", "bench", "--note", "seen"],
     ];
     for (const flags of forms) {
       const r = s.run(...flags);

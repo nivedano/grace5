@@ -22,7 +22,7 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | FS-14 | A brief omits a protected path. | `check` reports the omission, and `close` refuses while it stands. |
 | FS-15 | The start revision cannot be resolved, so the complete diff cannot be computed. | `close` refuses; the protected-path step is never skipped. |
 | FS-16 | The review names another start revision, another contract hash, or an end revision of another candidate. | `close` refuses. |
-| FS-17 | A blocking finding is marked owner-disposed without the owner's words. | `close` refuses. |
+| FS-17 | A blocking finding is marked owner-disposed without a neutral `OwnerDecision` stating the owner's actual disposition. | `close` refuses. |
 | FS-18 | The review records a violated rule or a check that does not discriminate. | `close` refuses. |
 
 ## Failure

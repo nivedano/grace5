@@ -123,7 +123,7 @@ test(
 );
 
 test(
-  "FS-17 owner-disposed needs the owner's words (RV-03)",
+  "FS-17 owner-disposed needs the owner's recorded decision (RV-03)",
   () => {
     const { s } = evidenced({ id: "C-0303-disposed", checks: [automated("CK1")] });
     s.writeReview({ findings: [{ id: "F1", severity: "blocking", status: "owner-disposed", ownerDecision: false }] });

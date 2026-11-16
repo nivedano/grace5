@@ -418,7 +418,6 @@ export interface ReviewOptions {
 }
 
 export interface ObserveOptions {
-  by?: string;
   build?: string;
   environment?: string;
   reference?: string;
@@ -689,7 +688,7 @@ export class Scenario {
   }
 
   observe(check: string, verdict: "passed" | "failed" | "blocked" | "not-attempted", o: ObserveOptions = {}): CliResult {
-    const flags = ["--check", check, "--observe", verdict, "--by", o.by ?? "Fixture Operator", "--build", o.build ?? "bench-build-7"];
+    const flags = ["--check", check, "--observe", verdict, "--build", o.build ?? "bench-build-7"];
     if (o.environment !== undefined) flags.push("--environment", o.environment);
     if (o.reference !== undefined) flags.push("--reference", o.reference);
     flags.push("--note", o.note ?? "Seen as the procedure describes.");
@@ -861,7 +860,7 @@ export class Scenario {
     const statement = o.omitStatement === true ? "" : decision === "approved" ? "approved" : "Rejected: not this way.";
     const lines = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
-      `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="${today()}" owner="Fixture Owner" decision="${decision}"${legacyExecutes} recorded-by="conformance suite">`,
+      `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="${today()}" decision="${decision}"${legacyExecutes}>`,
       ...(statement === "" ? [] : [`  <Statement>${statement}</Statement>`]),
       ...(o.source === undefined ? [] : [`  <Source>${o.source}</Source>`]),
     ];
@@ -942,14 +941,14 @@ export class Scenario {
     const contractSha = o.contractSha ?? sha256(fs.readFileSync(path.join(this.changeDir, "contract.xml"), "utf8").replace(/\r\n/g, "\n"));
     const lines = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
-      `<Review change="${this.id}" revision="${this.revision}" contract-sha256="${contractSha}" n="${n}" date="${today()}" reviewer="Fixture Reviewer" independence="independent" start-revision="${startRevision}" end-revision="${o.endRevision ?? this.head()}" candidate="${candidate}" status="${o.status ?? "completed"}">`,
+      `<Review change="${this.id}" revision="${this.revision}" contract-sha256="${contractSha}" n="${n}" date="${today()}" independence="independent" start-revision="${startRevision}" end-revision="${o.endRevision ?? this.head()}" candidate="${candidate}" status="${o.status ?? "completed"}">`,
       `  <Independence>A reviewer that saw the contract and the complete diff, and nothing of the authoring conversation.</Independence>`,
     ];
     for (const f of o.findings ?? []) {
       lines.push(`  <Finding id="${f.id}" severity="${f.severity}" status="${f.status}">`);
       lines.push(`    <Text>${xmlEscape(f.text ?? "The product line is not what the Change states.")}</Text>`);
       if (f.status === "resolved") lines.push(`    <Resolution>Shown to be as the Change states.</Resolution>`);
-      if (f.status === "owner-disposed" && f.ownerDecision !== false) lines.push(`    <OwnerDecision>Leave it; I accept that.</OwnerDecision>`);
+      if (f.status === "owner-disposed" && f.ownerDecision !== false) lines.push(`    <OwnerDecision>Accepted as an unresolved limitation.</OwnerDecision>`);
       lines.push(`  </Finding>`);
     }
     const omit = new Set(o.omitAdequacy ?? []);

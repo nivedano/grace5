@@ -17,7 +17,6 @@ export interface RunOptions {
   readonly checks: readonly string[];
   readonly skip: readonly string[];
   readonly observe: string | undefined;
-  readonly by: string | undefined;
   readonly build: string | undefined;
   readonly environment: string | undefined;
   readonly reference: string | undefined;
@@ -201,7 +200,7 @@ function readObservationFile(path: string): Map<string, string> {
     if (line.trim() === "" || line.trimStart().startsWith("#")) continue;
     const equals = line.indexOf("=");
     const name = equals < 0 ? "" : line.slice(0, equals).trim();
-    if (!["observe", "by", "build", "environment", "reference", "note"].includes(name)) throw new Usage(`--from: '${line.trim()}' is not one of observe, by, build, environment, reference, note as name=value`);
+    if (!["observe", "build", "environment", "reference", "note"].includes(name)) throw new Usage(`--from: unknown field '${name}'; expected observe, build, environment, reference, note as name=value`);
     fields.set(name, line.slice(equals + 1).trim());
   }
   return fields;
@@ -248,17 +247,16 @@ async function runInner(options: RunOptions): Promise<number> {
   if (observing && options.start) throw new Usage("--observe cannot be combined with --start");
   if (observing && options.checks.length !== 1) throw new Usage("--observe needs exactly one --check <id>");
   if (observing && !OBSERVED.includes(observe as Verdict)) throw new Usage(`--observe takes one of ${OBSERVED.join(", ")}`);
-  const by = options.by ?? file.get("by");
   const build = options.build ?? file.get("build");
   const note = options.note ?? file.get("note");
   const reference = options.reference ?? file.get("reference");
   const statedEnvironment = options.environment ?? file.get("environment");
   if (observing) {
-    for (const [name, value] of [["--by", by], ["--build", build], ["--note", note]] as const) {
+    for (const [name, value] of [["--build", build], ["--note", note]] as const) {
       if ((value ?? "").trim() === "") throw new Usage(`--observe needs ${name}`);
     }
-  } else if (!skipping && [options.by, options.build, options.environment, options.reference, options.note].some((value) => value !== undefined)) {
-    throw new Usage("--by, --build, --environment, --reference and --note belong to --observe (and --note to --skip)");
+  } else if (!skipping && [options.build, options.environment, options.reference, options.note].some((value) => value !== undefined)) {
+    throw new Usage("--build, --environment, --reference and --note belong to --observe (and --note to --skip)");
   }
 
   const selection = selectChange(options.root, options.change);
@@ -350,7 +348,7 @@ async function runInner(options: RunOptions): Promise<number> {
       results.push({
         ...blank(check, verdict, satisfied ? undefined : "build mismatch"),
         claim: verdict === "passed" ? "observation" : undefined,
-        observation: { by: by ?? "", at: new Date().toISOString(), build: build ?? "", environment: environment ?? "", reference: reference === undefined || reference.trim() === "" ? undefined : reference, note: note ?? "" },
+        observation: { at: new Date().toISOString(), build: build ?? "", environment: environment ?? "", reference: reference === undefined || reference.trim() === "" ? undefined : reference, note: note ?? "" },
       });
     } else results.push(await runCheck(check, context));
   }

@@ -43,7 +43,6 @@ export interface TraceRecord {
 }
 
 export interface ObservationRecord {
-  readonly by: string;
   readonly at: string;
   readonly build: string;
   readonly environment: string;
@@ -202,7 +201,6 @@ function readResult(element: XmlElement): RunResult {
       forbidden: childrenNamed(trace, "Forbidden").map((m) => collapse(m.text)),
     },
     observation: observation === undefined ? undefined : {
-      by: attr(observation, "by"),
       at: attr(observation, "at"),
       build: attr(observation, "build"),
       environment: attr(observation, "environment"),
@@ -367,7 +365,7 @@ function resultNode(result: RunResult): XmlNode {
   if (observation !== undefined) {
     children.push({
       name: "Observation",
-      attributes: { by: observation.by, at: observation.at, build: observation.build, environment: observation.environment, reference: observation.reference },
+      attributes: { at: observation.at, build: observation.build, environment: observation.environment, reference: observation.reference },
       text: observation.note,
     });
   }

@@ -11,11 +11,11 @@ The owner approves one revision of one contract. The approval record binds four 
 | The readable contract | `contract-sha256`: SHA-256 of the bytes of `contract.xml` at that revision, with CRLF read as LF. It covers all eight sections, Checks included. |
 | Each check definition | One `Bound` element per check with the SHA-256 of its canonical definition text (`evidence-records.md`). `grace5 check` prints both hashes; the agent copies them and invents none. |
 | The brief the owner read | `brief-sha256`: SHA-256 of the bytes of `brief-<rev>.html` as the owner read it, so a brief edited after approval no longer matches. |
-| The decision | `decision` is `approved` or `rejected`; `owner` and `date` name who decided and when. An approval's `Statement` is the single word `approved` or is absent; a rejection's `Statement` is its reason and is required. A new record carries no `Source` and no excerpt of the conversation. |
+| The decision | `decision` is `approved` or `rejected`; `date` records when the owner decided. An approval's `Statement` is the single word `approved` or is absent; a rejection's `Statement` is its reason and is required. New records omit `owner`, `recorded-by`, `Source` and any excerpt of the conversation; legacy `owner` and `recorded-by` values are accepted and ignored. |
 
 The owner approves on the brief, not on the contract. The brief carries the same contract hash, so a brief written for different contract text cannot support the approval; `close` checks that the brief, the approval and the current contract agree.
 
-An approval exists only when the owner said so about this brief. "Proceed", "keep going" or "make a plan", said without the brief of this revision in front of the owner, is not an approval, and no agent writes the record from it. The record is agent-written and the kernel authenticates no one: its authority is the decision bound to the exact contract, check and brief hashes, and no agent infers it. The record holds no quote and no account of the conversation. `Source` is accepted in records already written and ignored; a new record omits it.
+An approval exists only when the owner approves this brief. "Proceed", "keep going" or "make a plan", said without the brief of this revision in front of the owner, is not an approval, and no agent writes the record from it. The record is agent-written and the kernel authenticates no one: its authority is the owner's decision bound to the exact contract, check and brief hashes, and no agent infers it. The record holds no personal attribution, quote or account of the conversation. Legacy `owner`, `recorded-by` and `Source` values are accepted and ignored; new records omit them.
 
 ## Execution authorization
 

@@ -181,7 +181,7 @@ function reviewObligation(review: Review | undefined, basis: ReviewBasis): strin
   if (review.candidate !== candidate || basis.candidateOfRevision(review.endRevision) !== candidate) return "review covers an earlier candidate";
   const open = review.findings.find((f) => f.severity === "blocking" && f.status === "open");
   if (open !== undefined) return `blocking finding ${open.id} is open`;
-  // A blocking finding is disposed of only by the owner's quoted decision.
+  // A blocking finding is disposed of only by the owner's recorded decision.
   const undecided = review.findings.find((f) => f.severity === "blocking" && f.status === "owner-disposed" && (f.ownerDecision ?? "") === "");
   if (undecided !== undefined) return `blocking finding ${undecided.id} is disposed without an owner decision`;
   for (const check of contract.checks.filter((c) => c.required)) {

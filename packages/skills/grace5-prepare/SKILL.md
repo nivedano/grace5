@@ -39,7 +39,7 @@ Hand the contract, without the conversation, to an independent subagent that nev
 ## Owner gate
 
 - Give the owner the brief page. They answer in one statement: approve, or reject with the reason.
-- Record it in `records/approval-<rev>.xml` (`schemas/approval.xsd`): the decision, the contract and definition hashes exactly as `grace5 check` prints them, and the SHA-256 of the brief file's bytes as the owner read it, taken with a system hash tool. An approval carries `<Statement>approved</Statement>`; a rejection carries its reason there and no approval without one. Write no `Source` and no excerpt of the conversation. Compute nothing else by hand.
+- Record it in `records/approval-<rev>.xml` (`schemas/approval.xsd`): the decision, date, contract and definition hashes exactly as `grace5 check` prints them, and the SHA-256 of the brief file's bytes as the owner read it, taken with a system hash tool. An approval carries `<Statement>approved</Statement>`; a rejection carries its reason there and no approval without one. Omit `owner`, `recorded-by`, `Source` and any excerpt of the conversation; legacy attribution fields are accepted and ignored. Compute nothing else by hand.
 - Never set or infer an approval. `authorization.md` says which words count and how a rejection is recorded. An approval authorizes execution; new records carry neither `executes` nor `Execution`. An approval worded to defer the start, such as "approved, hold", remains an approval: wait until the owner starts the change or a batch, and record no hold state.
 
 ## Material revision

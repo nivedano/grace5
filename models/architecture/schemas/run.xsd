@@ -97,10 +97,11 @@
     <xs:attribute name="expected" type="xs:nonNegativeInteger" use="required"/>
   </xs:complexType>
 
-  <!-- A manual observation (K-7): who saw what, on which build and environment. The candidate and check definition come from the enclosing Run and Result. -->
+  <!-- A manual observation (K-7): what was seen, on which build and environment. The candidate and check definition come from the enclosing Run and Result. -->
   <xs:complexType name="Observation">
     <xs:simpleContent><xs:extension base="Text">
-      <xs:attribute name="by" type="Text" use="required"/>
+      <!-- Legacy personal attribution: accepted in existing records and ignored; new records omit it. -->
+      <xs:attribute name="by" type="Text" use="optional"/>
       <xs:attribute name="at" type="xs:dateTime" use="required"/>
       <xs:attribute name="build" type="Text" use="required"/>
       <xs:attribute name="environment" type="Text" use="required"/>

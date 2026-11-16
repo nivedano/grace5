@@ -28,7 +28,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 ## Final evidence
 
 - Commit everything, so that the source revision is clean, then run `grace5 run <id>` with no selection.
-- For each manual check, the named person carries out the Procedure on that build, and you record what they actually saw, failures and blocks included: `grace5 run <id> --check <check> --observe <passed|failed|blocked|not-attempted> --by <who> --build <build> --note <what was seen>`. The other fields are in `evidence-records.md`. Never record an observation nobody made, and never observe on a person's behalf.
+- For each manual check, the operator carries out the Procedure on that build, and the record states what was actually observed, failures and blocks included: `grace5 run <id> --check <check> --observe <passed|failed|blocked|not-attempted> --build <build> --note <what was seen>`. The other fields are in `evidence-records.md`. Never record an observation nobody made or observe on another person's behalf.
 - Any later commit that changes the source candidate makes all of this history, manual observations included. A different commit with the same candidate does not. Finish the code first.
 
 ## Recovery

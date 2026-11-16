@@ -6,13 +6,13 @@
   <xs:element name="Review">
     <xs:complexType>
       <xs:sequence>
-        <!-- Independence: who reviewed and what they had seen; a self-review states its limitation here. -->
+        <!-- Independence: access to authoring context; a self-review states its limitation here. -->
         <xs:element name="Independence" type="Text"/>
         <xs:element name="Finding" minOccurs="0" maxOccurs="unbounded"><xs:complexType>
           <xs:sequence>
             <xs:element name="Text" type="Text"/>
             <xs:element name="Resolution" type="Text" minOccurs="0"/>
-            <!-- OwnerDecision: the quoted words of the owner disposing of a finding that stays unresolved. -->
+            <!-- OwnerDecision: the actual owner disposition of a finding that stays unresolved, recorded neutrally. -->
             <xs:element name="OwnerDecision" type="Text" minOccurs="0"/>
           </xs:sequence>
           <xs:attribute name="id" type="xs:ID" use="required"/>
@@ -44,7 +44,8 @@
       <xs:attributeGroup ref="Binding"/>
       <xs:attribute name="n" type="xs:positiveInteger" use="required"/>
       <xs:attribute name="date" type="xs:date" use="required"/>
-      <xs:attribute name="reviewer" type="Text" use="required"/>
+      <!-- Legacy personal attribution: accepted in existing records and ignored; new records omit it. -->
+      <xs:attribute name="reviewer" type="Text" use="optional"/>
       <xs:attribute name="independence" use="required"><xs:simpleType><xs:restriction base="xs:string">
         <xs:enumeration value="independent"/><xs:enumeration value="self"/>
       </xs:restriction></xs:simpleType></xs:attribute>

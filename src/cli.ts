@@ -119,7 +119,7 @@ Usage:
   grace5 [--root <dir>] run [change]
   grace5 [--root <dir>] run [change] --check <id>...
   grace5 [--root <dir>] run [change] --start [--check <trace id>...]
-  grace5 [--root <dir>] run [change] --check <id> --observe <verdict> --by <who> --build <build>
+  grace5 [--root <dir>] run [change] --check <id> --observe <verdict> --build <build>
                                      [--environment <text>] [--reference <ref>] --note <text>
   grace5 [--root <dir>] run [change] --check <id> --from <file>
   grace5 [--root <dir>] run [change] --skip <id>... --note <reason>
@@ -139,14 +139,13 @@ Forms:
   --observe <verdict>
                     Record a manual observation for the one manual check named with --check.
                     The verdict is passed, failed, blocked or not-attempted.
-      --by <who>             Who observed. Required.
       --build <build>        The build identity observed. Required. If the check's Environment
                              declares a build, this must satisfy it or the result is refused.
       --environment <text>   Where it was observed. Defaults to the text of the check's
                              Environment; required when the check declares none.
       --reference <ref>      A photo, log or note that supports the observation. Optional.
       --note <text>          What was seen. Required.
-  --from <file>     Read the observation fields from a file of name=value lines (observe, by,
+  --from <file>     Read the observation fields from a file of name=value lines (observe,
                     build, environment, reference, note); a flag given as well wins.
   --skip <id>... --note <reason>
                     Record the named checks as skipped with the reason.
@@ -254,7 +253,7 @@ Checks these in order and refuses at the first unmet one, naming it:
   8. The current review is completed; carries the current contract hash; covers the complete
      diff, its start-revision being the start run's revision and its end-revision a commit
      that carries the final candidate; has no blocking finding that is open or that is
-     owner-disposed without the owner's quoted decision; has an Adequacy with
+     owner-disposed without the owner's recorded decision; has an Adequacy with
      discriminates="true" for every required check; and has no Rule with verdict violated.
 
 Then it writes records/close.xml naming the run that satisfied each check, and as a ninth
@@ -337,7 +336,7 @@ Exit status:
   2  a usage error`,
 };
 
-const VALUE_FLAGS = ["--observe", "--by", "--build", "--environment", "--reference", "--note", "--from"] as const;
+const VALUE_FLAGS = ["--observe", "--build", "--environment", "--reference", "--note", "--from"] as const;
 const LIST_FLAGS = ["--check", "--skip"] as const;
 
 function usage(message: string): number {
@@ -440,7 +439,6 @@ async function main(argv: readonly string[]): Promise<number> {
         checks: lists.get("--check") ?? [],
         skip: lists.get("--skip") ?? [],
         observe: values.get("--observe"),
-        by: values.get("--by"),
         build: values.get("--build"),
         environment: values.get("--environment"),
         reference: values.get("--reference"),

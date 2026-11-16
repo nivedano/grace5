@@ -71,7 +71,6 @@ function happy(): Happy {
   const candidate = s.computeCandidate();
   const finalRun = s.run();
   const observation = s.observe("MK1", "passed", {
-    by: "Ada Bench",
     build: `app-${finalHead.slice(0, 8)}`,
     reference: "photo-17.jpg",
     note: "The wanted line was read aloud from the product file.",
@@ -314,7 +313,7 @@ test(
 );
 
 test(
-  "RECEIPT Observation fields: by, at, build, environment, reference and what was seen",
+  "RECEIPT Observation fields: at, build, environment, reference and what was seen, without personal attribution",
   () => {
     const h = happy();
     const r3 = h.s.receipt(3);
@@ -327,7 +326,7 @@ test(
     expect(attr(block, "Result", "verdict")).toBe("passed");
     expect(attr(block, "Result", "claim")).toBe("observation");
     expect(attr(block, "Result", "definition-sha256")).toBe(h.info.definitions["MK1"] ?? "none");
-    expect(attr(block, "Observation", "by")).toBe("Ada Bench");
+    expect(attr(block, "Observation", "by")).toBeUndefined();
     expect(attr(block, "Observation", "at")).toMatch(ISO_DATETIME);
     expect(attr(block, "Observation", "build")).toBe(`app-${h.finalHead.slice(0, 8)}`);
     // --environment was not given: it defaults to the text of the check's declared Environment.

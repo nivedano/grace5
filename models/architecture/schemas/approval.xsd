@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- GRACE 5 v0: records/approval-<rev>.xml. The decision of the owner on one contract revision, in the owner's quoted words. -->
+<!-- GRACE 5 v0: records/approval-<rev>.xml. The owner decision on one contract revision. -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
   <xs:include schemaLocation="common.xsd"/>
 
@@ -28,13 +28,14 @@
       <!-- brief-sha256: hash of the brief-<rev>.html page the owner read. -->
       <xs:attribute name="brief-sha256" type="Sha256" use="required"/>
       <xs:attribute name="date" type="xs:date" use="required"/>
-      <xs:attribute name="owner" type="Text" use="required"/>
+      <!-- Legacy personal attribution: accepted in existing records and ignored; new records omit it. -->
+      <xs:attribute name="owner" type="Text" use="optional"/>
       <xs:attribute name="decision" use="required"><xs:simpleType><xs:restriction base="xs:string">
         <xs:enumeration value="approved"/><xs:enumeration value="rejected"/>
       </xs:restriction></xs:simpleType></xs:attribute>
       <!-- Legacy executes attribute: accepted for records already written and ignored by the kernel. New records omit it. -->
       <xs:attribute name="executes" type="xs:boolean" use="optional"/>
-      <xs:attribute name="recorded-by" type="Text" use="required"/>
+      <xs:attribute name="recorded-by" type="Text" use="optional"/>
     </xs:complexType>
   </xs:element>
 </xs:schema>

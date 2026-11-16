@@ -35,7 +35,7 @@ The author adds no summary, no explanation of intent and no list of what to look
 
 - Each finding has a severity, `blocking` or `non-blocking`, and a status. A new finding is `open`.
 - A violated rule and a check that does not discriminate are each also written as a blocking finding.
-- `owner-disposed` requires the owner's quoted words in `OwnerDecision`. Never infer them.
+- `owner-disposed` requires a neutral `OwnerDecision` stating the owner's actual disposition. Never infer it.
 - You report. You do not approve, do not close, do not fix the code and do not soften a finding because the checks are green.
 
 ## The record
@@ -44,8 +44,8 @@ Write `records/review-<n>.xml`, `n` one above the highest existing, to `schemas/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<Review change="C-0007-empty-export" revision="1" contract-sha256="0000000000000000000000000000000000000000000000000000000000000000" n="1" date="2026-11-12" reviewer="reviewer subagent" independence="independent" start-revision="0000000000000000000000000000000000000000" end-revision="0000000000000000000000000000000000000000" candidate="0000000000000000000000000000000000000000000000000000000000000000" status="completed">
-  <Independence>Who reviewed, what they were given, and what they had not seen.</Independence>
+<Review change="C-0007-empty-export" revision="1" contract-sha256="0000000000000000000000000000000000000000000000000000000000000000" n="1" date="2026-11-12" independence="independent" start-revision="0000000000000000000000000000000000000000" end-revision="0000000000000000000000000000000000000000" candidate="0000000000000000000000000000000000000000000000000000000000000000" status="completed">
+  <Independence>What the reviewer was given and what they had not seen.</Independence>
   <Finding id="F1" severity="blocking" status="open" path="src/export/writer.ts">
     <Text>What is wrong and where.</Text>
   </Finding>
