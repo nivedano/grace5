@@ -1,6 +1,6 @@
 ---
 name: grace5-review
-description: Use when a GRACE 5 change has final evidence on a clean committed revision and needs its review record, or when a review has to be repeated after fixes. Covers what the reviewer receives, what it judges, and review-<n>.xml.
+description: Use when a GRACE 5 change has final evidence on a clean committed revision and needs its review record, or when a review has to be repeated after fixes. Covers what the reviewer receives, what it judges, and numbered review records.
 ---
 
 # Review a GRACE 5 change

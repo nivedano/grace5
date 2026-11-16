@@ -207,6 +207,8 @@ test(
     const plan = s.cli(["upgrade", "--plan"]);
     expect(plan.code).toBe(0);
     expect(hasLine(plan, `open, untouched: ${open}`)).toBe(true);
+    expect(hasLine(plan, "scope: upgrade paths (.grace5/ and installed packaged skills) are kernel-managed, excluded from candidate, dirty state and Protected checks even under matching globs; neighbouring project skills remain source")).toBe(true);
+    expect(plan.lines.some((line) => line.startsWith("resume:"))).toBe(false);
     expect(hasLine(plan, LOCAL_IGNORE_STEP)).toBe(true);
     expect(plan.out).not.toContain("writes:");
     expect(plan.out).not.toContain("refused:");
@@ -223,6 +225,9 @@ test(
     expect(upgrade.out).not.toContain("refused:");
     expect(hasLine(upgrade, `checked: ${open}`)).toBe(true);
     expect(hasLine(upgrade, `checked: ${closed}`)).toBe(true);
+    expect(upgrade.lines.find((line) => line.startsWith("scope:"))).toBe(plan.lines.find((line) => line.startsWith("scope:")));
+    expect(hasLine(upgrade, `resume: ${open}: keep the contract and original start; grace5 status ${open} reports remaining obligations, including evidence invalidated by a candidate-rule change`)).toBe(true);
+    expect(upgrade.lines.some((line) => line.startsWith(`resume: ${closed}:`))).toBe(false);
     expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.1.0 -> ${VERSION}`);
     expect(s.readPin()).toBe(`${VERSION}\n`);
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));

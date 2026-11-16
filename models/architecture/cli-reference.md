@@ -261,7 +261,7 @@ Checks these in order and refuses at the first unmet one, naming it:
      equals the approval's brief-sha256.
   3. A start run exists and its source revision can be resolved in the repository.
   4. The working tree has no dirty source path.
-  5. The complete diff from the start revision touches no protected path.
+  5. The complete source diff from the start revision touches no protected path.
   6. Every required automated and trace check: the current result is passed, clean, on the
      final candidate, with the current definition hash.
   7. Every required manual check: the current result is a passed observation, recorded clean
@@ -333,12 +333,14 @@ Output:
   step: <from> -> <to>: <description>       a migration step of the plan
   bump: <from> -> <to>: <reason>            a boundary without a step; only the pin advances
   open, untouched: <id>, <id>               the open changes, which no step writes
+  scope: <explanation>                      why upgrade paths cannot violate Protected globs
   refreshed: <path>                         a skill directory refreshed in place
   skills: none installed                    no skill directory exists in either location
   pinned: <version>                         the pin written after a link
   failed: <from> -> <to>: <reason>          a step failed; the pin is at <from>
   failed: post-upgrade check: <id>: <what>  a change reads differently after the chain
   checked: <id>                             a change read unchanged after the chain
+  resume: <id>: <guidance>                  retain the contract and start; read status for obligations
   upgraded: <from> -> <to>                  the chain completed and the check passed
   refused: <reason>                         not a git repository, .grace5/ does not exist,
                                             repository pin is unreadable: <reason>,

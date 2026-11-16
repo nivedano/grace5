@@ -115,7 +115,10 @@ export async function applyUpgrade(input: UpgradeInput): Promise<number> {
     }
   }
   for (const link of chain) print(describeLink(link));
-  if (open.length > 0) print(`open, untouched: ${open.join(", ")}`);
+  if (open.length > 0) {
+    print(`open, untouched: ${open.join(", ")}`);
+    print("scope: upgrade paths (.grace5/ and installed packaged skills) are kernel-managed, excluded from candidate, dirty state and Protected checks even under matching globs; neighbouring project skills remain source");
+  }
   if (input.plan) return 0;
   const before = await snapshot(root);
   for (const link of chain) {
@@ -144,6 +147,7 @@ export async function applyUpgrade(input: UpgradeInput): Promise<number> {
     return 1;
   }
   for (const id of after.keys()) print(`checked: ${id}`);
+  for (const id of open) print(`resume: ${id}: keep the contract and original start; grace5 status ${id} reports remaining obligations, including evidence invalidated by a candidate-rule change`);
   print(`upgraded: ${pin} -> ${version}`);
   return 0;
 }
