@@ -1,4 +1,4 @@
-// Conformance cases UP-07, UP-12, UP-14, UP-15, UP-19, UP-20 and AUTH-03 of models/architecture/conformance.md: the
+// Conformance cases UP-07, UP-12, UP-14, UP-15, UP-19, UP-20, UP-21 and AUTH-03 of models/architecture/conformance.md: the
 // installed grace5-* skill directories, their refresh, the kernel-managed paths outside the candidate and the dirty
 // state, upgrade beside open changes, and the kernel skill-source guard. Split mechanically from upgrade.test.ts by
 // C-0010; the tests are unchanged except for UP-20.
@@ -520,6 +520,64 @@ test(
     expect(cleanLines).toContain("refreshed: .claude/skills/grace5-orchestrate");
     expect(cleanLines.at(-1)).toBe(`upgraded: 0.5.0 -> ${VERSION}`);
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "UP-21 the 0.6.0 to 0.7.0 step installs orchestrate only beside existing packaged skills, is idempotent and self-verifying, and leaves open changes untouched",
+  async () => {
+    const s = prepared({ id: "C-0536-orchestrate-07", checks: [automated("CK1")] });
+    s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare\n");
+    s.write(".claude/skills/grace5-local/SKILL.md", "repository-owned skill\n");
+    s.commit("fixture at 0.6.0 with one installed packaged skill");
+    expect(s.start().code).toBe(0);
+    s.pin("0.6.0");
+
+    const step = STEPS.find((candidate) => candidate.from === "0.6.0" && candidate.to === VERSION);
+    expect(step).toBeDefined();
+    if (step === undefined) throw new Error("missing the 0.6.0 to 0.7.0 migration step");
+    expect(step.touches(s.repo)).toEqual([]);
+
+    const beforeCandidate = candidateLine(s);
+    const beforeChanges = await snapshot(s.repo);
+    const receiptBefore = s.receipt();
+    const runCountBefore = s.runNumbers().length;
+
+    step.apply(s.repo);
+    expect(refreshSkills(s.repo)).toContain(".agents/skills/grace5-orchestrate");
+    step.verify(s.repo);
+    expect(s.read(".agents/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
+    expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
+    expect(s.exists(".claude/skills/grace5-orchestrate")).toBe(false);
+    expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
+
+    // Applying it twice changes nothing, and verification rejects a missing or drifted orchestrator.
+    const oncePorcelain = s.porcelain();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    expect(s.porcelain()).toBe(oncePorcelain);
+    fs.rmSync(path.join(s.repo, ".agents/skills/grace5-orchestrate"), { recursive: true, force: true });
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-orchestrate/SKILL.md"), "drifted\n");
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+
+    const upgrade = s.cli(["upgrade"]);
+    expect(upgrade.code).toBe(0);
+    expect(upgrade.lines).toContain(`step: 0.6.0 -> ${VERSION}: install grace5-orchestrate beside the installed skills and refresh them to ${VERSION}`);
+    expect(upgrade.lines).toContain(`upgraded: 0.6.0 -> ${VERSION}`);
+    expect(s.readPin()).toBe(`${VERSION}\n`);
+    expect(candidateLine(s)).toBe(beforeCandidate);
+    expect(snapshotDifference(beforeChanges, await snapshot(s.repo))).toBeUndefined();
+    expect(s.receipt()).toBe(receiptBefore);
+    expect(s.runNumbers()).toHaveLength(runCountBefore);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
   },
   TEST_TIMEOUT,
 );

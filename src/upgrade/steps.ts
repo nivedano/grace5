@@ -152,6 +152,21 @@ export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills
   touches() {
     return [];
   },
+}, {
+  from: "0.6.0",
+  to: "0.7.0",
+  describe: "install grace5-orchestrate beside the installed skills and refresh them to 0.7.0",
+  apply(root, packaged) {
+    installOrchestrateSkill(root, packaged);
+  },
+  verify(root, packaged) {
+    const missing = missingOrchestrateSkills(root, packaged);
+    if (missing.length > 0) throw new Error(`the orchestrator skill is missing: ${missing.join(", ")}`);
+    refreshTheSkills.verify(root, packaged);
+  },
+  touches() {
+    return [];
+  },
 }];
 
 // The packaged skills, their locations and the refresh live in skills.ts; re-exported for the chain runner and the tools.
