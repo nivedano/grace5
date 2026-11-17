@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0012-orchestration-adapter" revision="2" contract-sha256="2b3934626d2c82815b6c1e22aed3614ae44e945e0295a13c022e3365c0d23fc3" n="2" run-id="47b76a3ce48b433fb284e902544288af" started="2026-11-17T06:40:52.318Z" ended="2026-11-17T06:43:25.331Z" status="completed" source-revision="4ee04fe7b83bd291c0449bbee71506ad0d768fc0" dirty="false" candidate="8ee0f967c03cbf639ce74392578d67827259d394b94679761fec71fa84010037" kernel="grace5 0.8.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="4981" log="records/logs/run-2/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=120
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="147295" log="records/logs/run-2/CK2.log" log-sha256="ce3fbfecb20c07838122c5d03bc389a20aa0de810bc438f14985f020be4e4bdf">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="579" log="records/logs/run-2/CK3.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="trace" required="true" definition-sha256="b3204745f697f0277c711955b1491b470fe30c3d3077daa25563caf5a9e11915" verdict="passed" claim="marker-sequence-unattributed" cwd="." exit="0" elapsed-ms="147" log="records/logs/run-2/CK4.log" log-sha256="e0239383f19c20ee8d2f5031e459e3b5d4b9f35528b667d34da1d8fc95f9ac2e">
+    <Definition>kind=trace
+id=CK4
+required=true
+cwd=.
+budget=30
+origin=any
+command=bun src/cli.ts --help
+expect=1,|documentation root:
+</Definition>
+    <Trace origin-source="absent" run-echo="false" capture-started="2026-11-17T06:43:25.182Z" capture-ended="2026-11-17T06:43:25.329Z" device-source="absent" build-source="absent" matched="1" expected="1"/>
+  </Result>
+</Run>

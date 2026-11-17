@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0012-orchestration-adapter" revision="2" contract-sha256="2b3934626d2c82815b6c1e22aed3614ae44e945e0295a13c022e3365c0d23fc3" n="3" run-id="2fee72f7ef324333b6ba50ef61830345" started="2026-11-17T06:43:33.972Z" ended="2026-11-17T06:43:33.972Z" status="completed" source-revision="4ee04fe7b83bd291c0449bbee71506ad0d768fc0" dirty="false" candidate="8ee0f967c03cbf639ce74392578d67827259d394b94679761fec71fa84010037" kernel="grace5 0.8.0">
+  <Result check="CK5" kind="manual" required="true" definition-sha256="3f4c404e1e2318c61e6383779858ff8cff0db1cddfcb0bf2cd713c340ae28281" verdict="passed" claim="observation">
+    <Definition>kind=manual
+id=CK5
+required=true
+procedure=Rehearse in an OMP session an approved serial batch with one parked unapproved change. Record: at most one active implementer; same-conversation preparation of a requested revision with only the unresolved owner decision asked; reuse of an approval of unchanged bytes; an honest red baseline; a reviewer packet with the contract, complete diff, receipts and cited rules and no authoring conversation; continuation with the parked change without presenting it as completed; and location of the lifecycle documents from the printed documentation root. Do not record an observation for interruption recovery, a conflicting higher-priority policy or a non-OMP path; those are deferred by NonGoal N6.
+</Definition>
+    <Observation at="2026-11-17T06:43:33.972Z" build="4ee04fe" environment="local OMP session, D:/repos/github.com/nivedano/grace5">Rehearsed the serial batch: one active implementer at a time; C-0012 revision 2 was prepared and briefed in the same conversation and only the unresolved decision was asked; the owner-approved exact revision was not re-asked; C-0013 and C-0014 start runs recorded honest red baselines (missing CK4/CK5 tools) before green final runs; C-0013 and C-0014 reviewers received the contract, complete diff, receipts and cited rules with no authoring conversation; the unapproved C-0019 remained parked and was not presented as completed; bun src/cli.ts --help printed documentation root: models/architecture/ and models/architecture/method.md was opened there. Interruption recovery, a conflicting higher-priority policy and a non-OMP path were not exercised and are deferred by N6.</Observation>
+  </Result>
+</Run>
