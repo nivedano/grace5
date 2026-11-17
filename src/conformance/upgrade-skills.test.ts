@@ -432,13 +432,12 @@ test(
   TEST_TIMEOUT,
 );
 
-/** A throwaway kernel checkout with both skill trees committed; the caller dirties one of them. */
+/** A throwaway kernel checkout with its skill source committed; the caller dirties it. */
 function kernelRepo(dir: string): string {
   const root = path.join(dir, "kernel");
-  for (const rel of ["skills/grace5-prepare", "packages/skills/grace5-prepare"]) {
-    fs.mkdirSync(path.join(root, rel), { recursive: true });
-    fs.writeFileSync(path.join(root, rel, "SKILL.md"), `${rel}\n`);
-  }
+  const rel = "skills/grace5-prepare";
+  fs.mkdirSync(path.join(root, rel), { recursive: true });
+  fs.writeFileSync(path.join(root, rel, "SKILL.md"), `${rel}\n`);
   const git = (...args: string[]): void => {
     const result = spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
     if (result.status !== 0) throw new Error(String(result.stderr));
@@ -462,7 +461,10 @@ test(
     s.commit("installed skill at 0.5.0");
 
     const kernel = kernelRepo(s.scratch);
-    fs.writeFileSync(path.join(kernel, "packages", "skills", "grace5-prepare", "SKILL.md"), "edited packaged\n");
+    fs.writeFileSync(path.join(kernel, "skills", "grace5-prepare", "SKILL.md"), "edited source\n");
+    // A generated packages/ tree is a build output, not a skill source the guard reads.
+    fs.mkdirSync(path.join(kernel, "packages", "skills", "grace5-prepare"), { recursive: true });
+    fs.writeFileSync(path.join(kernel, "packages", "skills", "grace5-prepare", "SKILL.md"), "generated\n");
 
     const refused: string[] = [];
     const lines: string[] = [];
@@ -479,7 +481,7 @@ test(
       }),
     ).toBe(1);
     expect(refused).toHaveLength(1);
-    expect(refused[0]).toStartWith("kernel skills are modified relative to HEAD: packages/skills/grace5-prepare/SKILL.md");
+    expect(refused[0]).toStartWith("kernel skills are modified relative to HEAD: skills/grace5-prepare/SKILL.md");
     expect(lines).toHaveLength(0);
     expect(s.readPin()).toBe("0.5.0\n");
 

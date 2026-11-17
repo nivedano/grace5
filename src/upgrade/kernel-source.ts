@@ -1,4 +1,4 @@
-// Kernel source hygiene (upgrade.md): the skill trees a refresh reads must match HEAD, so a running checkout
+// Kernel source hygiene (upgrade.md): the skill tree a refresh reads must match HEAD, so a running checkout
 // cannot install uncommitted skill text into a governed repository. The kernel reads no project file.
 
 import { spawnSync } from "node:child_process";
@@ -7,8 +7,8 @@ import { join, resolve } from "node:path";
 
 /** The kernel checkout root: this file lives in src/upgrade/. */
 export const KERNEL_ROOT = resolve(import.meta.dir, "..", "..");
-/** The skill trees the kernel authors and reads; both are kernel source, not project files. */
-export const SKILL_SOURCES = ["skills", "packages/skills"] as const;
+/** The skill tree the kernel authors and reads: the sole maintained skill source, kernel source and not a project file. The generated packages under packages/ are build outputs and are not read here. */
+export const SKILL_SOURCES = ["skills"] as const;
 
 function run(root: string, args: readonly string[]): { ok: boolean; out: string } {
   const result = spawnSync("git", ["-c", "core.quotepath=false", ...args], { cwd: root, windowsHide: true, maxBuffer: 1 << 24 });

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0018-deduplicated-packages" revision="1" contract-sha256="8fca2258fe1f364e3cf9f238b17dcb533b6379a620db2b42d6ab383149df7333" n="1" run-id="e0cbb613b01f4fc18904948f02f3ff89" started="2026-11-17T07:32:51.437Z" ended="2026-11-17T07:35:38.620Z" status="completed" start="true" source-revision="f3fe370311975716029d822d9005a35a8f7bd83e" dirty="false" candidate="47c465beaa1d7ac330d29b2ecf47bbf6fb80a6623b97ce5e1d27d4b7afccef63" kernel="grace5 0.8.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="5072" log="records/logs/run-1/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=120
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="151863" log="records/logs/run-1/CK2.log" log-sha256="c67d7efaee1878491d048a3cbaa9ccdaf3affcb8db90abfddff44c2173f5e121">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="549" log="records/logs/run-1/CK3.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="4d2329dd5f78414553fd48f74baab4a996bc65ad3340bcd2c5912b7845561124" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="9689" log="records/logs/run-1/CK4.log" log-sha256="fe39b263354349530018cb348392e5e1a0a86e4c88ef579176f8e2d22a7798cc">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun run examples:verify
+</Definition>
+  </Result>
+</Run>

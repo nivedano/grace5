@@ -11,7 +11,7 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 | `models/` | Architecture and design documents: the method, schemas, worked examples, the rationale ledger, and the groundings |
 | `src/` | The kernel CLI `grace5` (Bun, TypeScript), its conformance suite and its tools |
 | `skills/` | The four skills: prepare, execute, review, orchestrate |
-| `packages/` | Harness packages generated from `skills/`; never edited by hand |
+| `packages/` | Harness packages materialized from `skills/` by `bun run package` at build or release staging; not tracked, never edited by hand |
 | `.grace5/` | This repository's own GRACE 5 state: the version pin `kernel-version`, the open changes under `.grace5/changes/`, the closed ones under `.grace5/changes/closed/`, each with its briefs, receipts and records |
 
 ## Status

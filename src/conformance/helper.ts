@@ -444,10 +444,10 @@ export const LOCAL_IGNORE_TEXT = "changes/*/records/logs/\nchanges/closed/*/reco
 /** Where a repository may hold the installed grace5-* skills (upgrade.md). */
 export const SKILL_LOCATIONS = [".agents/skills", ".claude/skills"] as const;
 
-/** The names of the skills the kernel packages, read from packages/skills/: the directories the candidate rule excludes under each location. */
+/** The names of the skills the kernel packages, read from the sole source skills/: the directories the candidate rule excludes under each location. */
 export function packagedSkillNames(): string[] {
   return fs
-    .readdirSync(path.join(REPO_ROOT, "packages", "skills"), { withFileTypes: true })
+    .readdirSync(path.join(REPO_ROOT, "skills"), { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && entry.name.startsWith("grace5-"))
     .map((entry) => entry.name)
     .sort();
@@ -1048,7 +1048,7 @@ export function waitForExit(child: ChildProcess, timeoutMs: number): Promise<num
 export const UPGRADE_VERSION = kernelVersion();
 /** The line the 0.2.0 to 0.4.0 kernels wrote into a project's .gitignore; this kernel leaves it alone wherever it finds it. */
 export const OLD_PROJECT_IGNORE_LINE = ".grace5/changes/closed/*/records/logs/";
-export const PACKAGED_SKILLS = path.join(REPO_ROOT, "packages", "skills");
+export const PACKAGED_SKILLS = path.join(REPO_ROOT, "skills");
 export const LOCAL_IGNORE_STEP = `step: 0.4.0 -> 0.5.0: write the local ignore file ${LOCAL_IGNORE_PATH}`;
 
 export const behind = (pin: string): string => `refused: repository state is at ${pin}, kernel is ${UPGRADE_VERSION}: run grace5 upgrade`;

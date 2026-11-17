@@ -1,0 +1,24 @@
+{
+  "packages": {
+    "claude-plugin/.claude-plugin/plugin.json": "84a6ad01cafb53342453ab116e2528682cec5e83f38aefff83f68fce94d567c5",
+    "claude-plugin/README.md": "bbc164f877cff1974998a40c4aef11b13327559fa90053d77828c997680ebea7",
+    "claude-plugin/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
+    "claude-plugin/skills/grace5-execute/SKILL.md": "70e5f1dc2ca42605c9bf9965c9ba2e0adc4fd7be940a6697bf0bd08ccff7bdde",
+    "claude-plugin/skills/grace5-orchestrate/SKILL.md": "a7da922407b9c281c4336ff9e34dca5e972e6f46bce994afc82ffad06ae58c14",
+    "claude-plugin/skills/grace5-prepare/SKILL.md": "91de3a34ce56c8017597e5de95b3889f3b7d49751ea1c243c7009f104c211b49",
+    "claude-plugin/skills/grace5-review/SKILL.md": "a44ed85efe7f4fb8f1fef31e5e779a73d29474ee85d7d137f2ab9e349f03ecc8",
+    "openpackage/README.md": "f6a223ed557a24a0a3c0cecebf68b5438c95a48ba86296e58fbe84feeb722014",
+    "openpackage/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
+    "openpackage/openpackage.yml": "024c3717d12846dc487a6887b4a6a9da882d57b14641500c8d4f6d64895e1738",
+    "openpackage/skills/grace5-execute/SKILL.md": "70e5f1dc2ca42605c9bf9965c9ba2e0adc4fd7be940a6697bf0bd08ccff7bdde",
+    "openpackage/skills/grace5-orchestrate/SKILL.md": "a7da922407b9c281c4336ff9e34dca5e972e6f46bce994afc82ffad06ae58c14",
+    "openpackage/skills/grace5-prepare/SKILL.md": "91de3a34ce56c8017597e5de95b3889f3b7d49751ea1c243c7009f104c211b49",
+    "openpackage/skills/grace5-review/SKILL.md": "a44ed85efe7f4fb8f1fef31e5e779a73d29474ee85d7d137f2ab9e349f03ecc8",
+    "skills/README.md": "4066a2fc282fc4a02b567959de0bc80059fd0dc40259c699e5e2e26ba2c2372f",
+    "skills/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
+    "skills/grace5-execute/SKILL.md": "70e5f1dc2ca42605c9bf9965c9ba2e0adc4fd7be940a6697bf0bd08ccff7bdde",
+    "skills/grace5-orchestrate/SKILL.md": "a7da922407b9c281c4336ff9e34dca5e972e6f46bce994afc82ffad06ae58c14",
+    "skills/grace5-prepare/SKILL.md": "91de3a34ce56c8017597e5de95b3889f3b7d49751ea1c243c7009f104c211b49",
+    "skills/grace5-review/SKILL.md": "a44ed85efe7f4fb8f1fef31e5e779a73d29474ee85d7d137f2ab9e349f03ecc8"
+  }
+}

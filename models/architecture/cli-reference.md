@@ -316,8 +316,8 @@ abandon it). Open changes no step touches are listed as open, untouched: and rea
 post-upgrade check like every other change. The kernel writes no project file: a line an
 earlier version wrote into the project's .gitignore is left alone.
 
-When the chain contains a step, the kernel also refuses to refresh from a checkout whose own
-skills/ or packages/skills/ differs from HEAD: uncommitted skill text is never installed into a
+When the chain contains a step, the kernel also refuses to refresh from a checkout whose
+skills/ differs from HEAD: uncommitted skill text is never installed into a
 governed repository. A chain of pin bumps reads no skills and is not refused, and a checkout
 without .git is not checked.
 
@@ -329,7 +329,7 @@ if any reports a new defect, or a contract or definition hash other than before.
 
 Refuses: outside a git repository; without .grace5/; when the pin cannot be read as a version;
 when the pin is ahead of this kernel; when a step would write an open change; when the chain
-contains a step and the kernel's own skills/ or packages/skills/ differs from HEAD. It never
+contains a step and the kernel's own skills/ differs from HEAD. It never
 downgrades and takes no target version.
 
 Output:

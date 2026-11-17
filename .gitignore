@@ -4,6 +4,9 @@ dist/
 *.log
 .claude/settings.local.json
 
+# Generated harness packages, materialized by `bun run package` from `skills/`; the source is `skills/`.
+packages/
+
 # Local working notes, not published.
 models/decisions/grace-slim-session/
 models/decisions/2026-11-12-consensus.md

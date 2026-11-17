@@ -6,8 +6,8 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-/** The kernel's packaged skills: packages/skills/<name>/ of this source tree. */
-export const PACKAGED_SKILLS_DIR = resolve(import.meta.dir, "..", "..", "packages", "skills");
+/** The kernel's packaged skills: skills/<name>/, the sole maintained skill source of this source tree and of the installed distribution (the package's `files` ships `skills/`). */
+export const PACKAGED_SKILLS_DIR = resolve(import.meta.dir, "..", "..", "skills");
 /** Where a repository may already hold the skills; no other location is ever created. */
 export const SKILL_LOCATIONS = [".agents/skills", ".claude/skills"] as const;
 
