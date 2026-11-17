@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0016-feasible-evidence" revision="1" contract-sha256="8a70a63bd79093a8ae9bf836c2f5468b1336ab23443214345e3ce1759215f0cb" n="2" run-id="a2098035f91340c2876c3777fdab5fdf" started="2026-11-17T06:56:44.872Z" ended="2026-11-17T06:59:19.395Z" status="completed" source-revision="1cafbb3a2d0f9acf668bff6d4d1d9db8be56cebf" dirty="false" candidate="ef7e7936768abe052534fb4230b55933a81fb9f1b8e3b58a5f6a573324f99380" kernel="grace5 0.8.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="4904" log="records/logs/run-2/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=120
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="149082" log="records/logs/run-2/CK2.log" log-sha256="440fa1bb2ece692d408c68fcbc20d83eb47d741f9a8c2119464f1bbb36cf9cd6">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="533" log="records/logs/run-2/CK3.log" log-sha256="c9854891b422d504a5e51ac586b9a0b93fb699c4321b91c943bf5b7a519bed57">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+</Run>

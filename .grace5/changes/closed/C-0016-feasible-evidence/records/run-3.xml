@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0016-feasible-evidence" revision="1" contract-sha256="8a70a63bd79093a8ae9bf836c2f5468b1336ab23443214345e3ce1759215f0cb" n="3" run-id="39e251083f9347c7a9bb8eaab797a610" started="2026-11-17T06:59:46.602Z" ended="2026-11-17T06:59:46.602Z" status="completed" source-revision="1cafbb3a2d0f9acf668bff6d4d1d9db8be56cebf" dirty="false" candidate="ef7e7936768abe052534fb4230b55933a81fb9f1b8e3b58a5f6a573324f99380" kernel="grace5 0.8.0">
+  <Result check="CK4" kind="manual" required="true" definition-sha256="0c32226ccb931d4fbb64106c2948f7a5a71f92d6167135a3bf2a70d9731b6be4" verdict="passed" claim="observation">
+    <Definition>kind=manual
+id=CK4
+required=true
+procedure=Prepare a change whose required device, build or environment is unavailable. Observe that preparation reports the unknown as unknown, presents one explicit choice between waiting and alternative evidence with its limitation before approval, and that the brief names a plausible faulty implementation the check rejects and, for a trace, the setup whose absence also fails. Confirm feasibility is not recorded as a final observation, no required check is optionalised without the owner, and no device state is changed.
+</Definition>
+    <Observation at="2026-11-17T06:59:46.602Z" build="1cafbb3" environment="local Windows host, no BENCH-X device">Tabletop preparation rehearsal with a required manual check on device BENCH-X. The read-only PnP diagnostic failed, so availability was reported as unknown, not as available or as a product failure. The rehearsal presented one bounded choice: wait for BENCH-X, or accept an alternative host trace with its limitation. The brief's evidence discussion named a plausible faulty implementation (the reconnect path drops the sample after the device returns) and, for the trace, the setup whose absence also fails (serial capture not attached). Feasibility was not recorded as an observation and no device state was changed.</Observation>
+  </Result>
+</Run>
