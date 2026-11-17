@@ -11,16 +11,13 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 ## Before opening a change
 
-- Triage the request by risk, not by habit. A chore — a minor skill-text correction, a small CLI bug fix, a similarly contained edit — is carried out directly, without a specification and without asking; keep bureaucracy low.
-- The test is consequence: if this edit goes wrong, can the damage be seen and undone with the project's own commands? If yes, edit directly. If the risk outruns what a direct edit can tackle — behaviour, boundaries, evidence or state others depend on — open a full GRACE 5 change.
-- An explicit request for a specification always gets one.
-- A direct edit is an ordinary source edit outside the lifecycle: no contract, approval or receipts. Verify it with the project's own commands and commit it; if the work grows past the triage, stop and open a change.
+- Edit a chore directly, without asking or creating a contract, approval or receipts, when its worst outcome is visible and reversible with the project's own commands. Verify and commit it.
+- Open a full change when risk to behaviour, boundaries, evidence or state exceeds that test, including when a direct edit grows beyond it. An explicit specification request always gets one.
 
 ## Interview
 
-- Read the repository and its rule files first. Ask the owner only what is theirs to decide: behaviour, boundary, what is left alone, what evidence they accept, what burden they take on (a bench session, a manual procedure).
-- Do not ask procedural questions. Sequence, file choice and technique are yours and go to `notes.md`.
-- Record settled policies and tradeoffs as neutral Decision statements. Do not copy dialogue or add conversational speaker labels and dates; keep technical literals and required responsibilities explicit. Record formal approval authority and provenance separately under the owner gate.
+- Read the repository and its rules. Ask only for owner decisions: behaviour, boundary, non-goals, acceptable evidence and owner burdens. Sequence, file choice and technique belong in `notes.md`, not questions.
+- Record policies and tradeoffs as neutral Decisions with explicit technical literals and responsibilities, without dialogue, speaker labels or conversational dates. Record approval separately below.
 
 ## Contract
 
@@ -28,7 +25,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - State the behavioural delta once, in Change. Cite a standing rule by path in `rule`; never recopy its text. No tasks, no sequence, no pre-written code.
 - Affected names what may be written, and Protected what must not be (`authorization.md`).
 - Never bump the version or pin or register migration boundaries or rows; a release is a separate owner-requested act (`upgrade.md`).
-- Make each check decisive: it must fail if the behaviour is broken. `grace5-review` states the question every required check is judged by; write checks that survive it.
+- Each check must reject broken behaviour; `grace5-review` judges its discriminating power.
 - A check decides between candidates only on the candidate's own bytes. Where its result depends on an excluded input — the installed `grace5-*` skills or anything else under a kernel-managed path — it cannot: state it as installation health, re-evaluated afresh at handoff (`source-identity.md`, `upgrade.md`), not as candidate evidence. Binding such an input into evidence needs a bounded fingerprint under its own approved contract; do not hash caches or the state directory.
 - Choose Automated when a project command's exit status separates working from broken. Choose Trace over Manual whenever the behaviour leaves ordered lines in a log a command can capture, because the kernel then checks sequence and provenance itself (`trace-provenance.md`). Keep Manual for what only a person can judge, and declare its Environment.
 - A check that is red before the work starts is fine, and is often the reason for the change.
@@ -36,11 +33,11 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 ## Feasible, discriminating checks
 
-- Before approval, identify for every required check its device, build and environment state and the observation it needs, and use the available read-only diagnostics to establish that each is available. Report what cannot be established as unknown; never assume it, and never record an observation nobody made.
-- When required evidence is unavailable, present one explicit choice before approval: wait until the evidence is available, or accept alternative evidence with its stated limitation. An agent never optionalises a required check without the owner, and a check that fails only because its environment is unavailable is recorded as an environment failure, separately from a product regression.
-- Feasibility is not the final observation and authorizes no flashing, reset or other hardware-state change: establishing that a check can run is never recorded as its result.
+- Before approval, identify each required check's device, build, environment state and observation. Establish availability with read-only diagnostics; report unknowns honestly and never invent observations.
+- If evidence is unavailable, ask the owner to wait or accept alternative evidence with its limitation. Never optionalise a required check yourself. Record unavailable-environment failures separately from product regressions.
+- Feasibility authorizes no flashing, reset or hardware-state change and never counts as a check result.
 - The contract's evidence discussion must name a plausible faulty implementation the check would reject and, for a trace, the setup whose absence would also fail, so a bare missing marker cannot pass.
-- An already approved unchanged check is not reapproved merely because it is run; a run yields evidence for the current candidate, not a new approval.
+- Running an unchanged approved check needs no reapproval; it produces evidence for the current candidate.
 
 ## Independent contract read
 
@@ -49,7 +46,7 @@ Before the owner gate, hand the contract, without the conversation, to an indepe
 > Discover extensions for `contract-reader` as `method.md`, Local extensions describes. Read `.grace5/changes/<id>/contract.xml`, the rule files the contract cites in a `rule` attribute, and the repository read-only to confirm cited paths. You may run `grace5 check <id>` for the contract hash, word count and check count. Read no notes and ask for no background, because the contract must stand alone. Write nothing. Return findings only: a criterion its check cannot serve, an undefined term, a contradiction, a boundary that does not cover Change, a cited path that does not exist.
 
 - The reader proposes no design and decides nothing. The author resolves every finding by editing the contract, reruns `grace5 check`, and only then does the owner gate happen.
-- This independent contract read, findings only, is the whole pre-approval independence: no page, no template, no `grace5:writer` metadata and no fidelity parser is produced. The final independent review is separate and unchanged (`grace5-review`).
+- This findings-only read is the whole pre-approval independence. Produce no brief page. Final review is separate (`grace5-review`).
 - Without subagents, do the read yourself and tell the owner so.
 
 ## Owner gate
@@ -60,8 +57,8 @@ Before the owner gate, hand the contract, without the conversation, to an indepe
 
 ## Material revision
 
-Once a revision has an approval or a rejection, any edit to `contract.xml` is a material revision (`authorization.md`): increment `revision`, never reuse a rejected number, rerun `grace5 check`, repeat the independent contract read where the change is material, and pass the owner gate again. What may run meanwhile is in `authorization.md`.
+After an approval or rejection, any contract edit is a material revision: increment `revision` (never reuse a rejected number), rerun `grace5 check`, repeat the independent read for material changes, and obtain approval before resuming execution. `authorization.md` defines what may run meanwhile.
 
-The revision, the contract edit, `grace5 check`, the independent contract read and the owner gate happen in the same conversation that revealed the need: preparation is a phase, not a new session. Present only the unresolved owner decision, not the work that produced it. An existing approval of the exact unchanged revision is reused rather than asked again, and execution resumes only under an approval of this revision.
+Complete revision preparation and the owner gate in the conversation that revealed the need. Present only the unresolved owner decision. Reuse approval of an exact unchanged revision; do not request it again.
 
 Next: `grace5-execute`.

@@ -40,21 +40,9 @@ The author adds no summary, no explanation of intent and no list of what to look
 
 ## The record
 
-Write `records/review-<n>.xml`, `n` one above the highest existing, to `schemas/review.xsd`. Element order is fixed: `Independence`, then every `Finding`, then every `Adequacy`, then every `Rule`.
+Write `records/review-<n>.xml`, `n` one above the highest existing, using `schemas/review.xsd` for fields and element order and `evidence-records.md`, The review record, for semantics. State in `Independence` what you received and had not seen.
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<Review change="C-0007-empty-export" revision="1" contract-sha256="0000000000000000000000000000000000000000000000000000000000000000" n="1" date="2026-11-12" independence="independent" start-revision="0000000000000000000000000000000000000000" end-revision="0000000000000000000000000000000000000000" candidate="0000000000000000000000000000000000000000000000000000000000000000" status="completed">
-  <Independence>What the reviewer was given and what they had not seen.</Independence>
-  <Finding id="F1" severity="blocking" status="open" path="src/export/writer.ts">
-    <Text>What is wrong and where.</Text>
-  </Finding>
-  <Adequacy check="CK1" discriminates="true">Why a pass separates the behaviour from its failure mode.</Adequacy>
-  <Rule rule="docs/design-rules.md#DR-3" verdict="upheld">Why.</Rule>
-</Review>
-```
-
-- Replace the zeros: `contract-sha256` from `grace5 check`, `start-revision` and `candidate` from `grace5 status`, `end-revision` the commit reviewed. `rule` repeats the contract's `rule` value exactly. `Resolution` and `OwnerDecision` follow `Text` inside a finding when they apply.
+- Take `contract-sha256` from `grace5 check`, `start-revision` and `candidate` from `grace5 status`, and `end-revision` from the commit reviewed. Repeat the contract's `rule` values exactly; include `Resolution` and `OwnerDecision` when applicable.
 - Use `status="incomplete"` when you could not cover the complete diff, and say what was missing in `Independence`.
 - Run `grace5 check <id>` to validate the record, and return the findings to the author.
 
