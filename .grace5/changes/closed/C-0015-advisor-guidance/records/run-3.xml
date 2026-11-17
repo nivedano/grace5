@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0015-advisor-guidance" revision="1" contract-sha256="ef560274c3e59ba76cc855a49fd5f0ae3e19815e428d34bce67a1c08f688734b" n="3" run-id="27306ec50a684965b2a61a612d0099f9" started="2026-11-17T07:32:31.173Z" ended="2026-11-17T07:32:31.173Z" status="completed" source-revision="f3fe370311975716029d822d9005a35a8f7bd83e" dirty="false" candidate="47c465beaa1d7ac330d29b2ecf47bbf6fb80a6623b97ce5e1d27d4b7afccef63" kernel="grace5 0.8.0">
+  <Result check="CK5" kind="manual" required="true" definition-sha256="b794c5493bf4754301c1b495b5126bd4fe89196a1ffe617add2f7aee649658b8" verdict="passed" claim="observation">
+    <Definition>kind=manual
+id=CK5
+required=true
+procedure=Replay three advisor findings against the guidance: a missing-trailer concern, an obsolete ledger warning and contradictory skill-boundary advice. Confirm the main agent checks the current kernel and git state, acts on a current material error, ignores a superseded observation without a repair narrative, and that the independent reviewer receives none of the advisor's context. On a client without OMP, confirm the repository remains usable and no runtime advisor dependency is introduced.
+</Definition>
+    <Observation at="2026-11-17T07:32:31.173Z" build="f3fe370" environment="local OMP session, GRACE 5 repository">Replayed three advice cases from this session. Missing-trailer concern: the main agent checked the current commit and fixed the parsed trailer via the C-0013 repair instead of repeating the reminder. Obsolete ledger/commit warning: the current git parentage and status were checked, and the stale claim was not acted on. Contradictory skill-boundary advice: the conflict was resolved from the contract and evidence, and the finding process was restored rather than narrated as a repair. The independent reviewers for C-0014, C-0013 and C-0012 received only the contract, diff, receipts and cited rules, not advisor or authoring context. bun src/tools/advisor-setup.ts ran idempotently and left WATCHDOG.md unchanged; the setup tests show a non-OMP client gains no runtime dependency.</Observation>
+  </Result>
+</Run>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0015-advisor-guidance" revision="1" contract-sha256="ef560274c3e59ba76cc855a49fd5f0ae3e19815e428d34bce67a1c08f688734b" date="2026-11-17T07:43:35.192Z" source-revision="f3fe370311975716029d822d9005a35a8f7bd83e" candidate="47c465beaa1d7ac330d29b2ecf47bbf6fb80a6623b97ce5e1d27d4b7afccef63" start-revision="dec7abea395f1c9281b0dfe6579d8fe3d23a8b59" brief="brief-1.html" approval="approval-1.xml" review="1" kernel="grace5 0.8.0">
+  <Satisfied check="CK1" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK4" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK5" kind="manual" run="3" claim="observation"/>
+</Close>
