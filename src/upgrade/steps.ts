@@ -180,6 +180,20 @@ export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills
   touches() {
     return [];
   },
+}, {
+  from: "0.8.0",
+  to: "0.9.0",
+  describe: "refresh the installed skills to 0.9.0 and remove the retired grace5-orchestrate installation",
+  apply() {
+    // Nothing beyond the skill refresh the runner performs for every step: 0.9.0 changed the skills, retired
+    // grace5-orchestrate in favour of the packaged orchestration extension, and changed nothing else in the state.
+  },
+  verify(root, packaged) {
+    refreshTheSkills.verify(root, packaged);
+  },
+  touches() {
+    return [];
+  },
 }];
 
 // The packaged skills, their locations and the refresh live in skills.ts; re-exported for the chain runner and the tools.

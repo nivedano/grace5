@@ -1,6 +1,6 @@
 {
   "packages": {
-    "claude-plugin/.claude-plugin/plugin.json": "84a6ad01cafb53342453ab116e2528682cec5e83f38aefff83f68fce94d567c5",
+    "claude-plugin/.claude-plugin/plugin.json": "a8bd3c9ef77c912825df9ded56b54d33d2c80cb4190704e9ffe727d1eef5000b",
     "claude-plugin/README.md": "bbc164f877cff1974998a40c4aef11b13327559fa90053d77828c997680ebea7",
     "claude-plugin/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
     "claude-plugin/extensions/orchestration.md": "7f09f66cbb411dff5a5c046ea4a64caf18132f7260af6fcbcae2cbaa318f0dc9",
@@ -10,7 +10,7 @@
     "openpackage/README.md": "f6a223ed557a24a0a3c0cecebf68b5438c95a48ba86296e58fbe84feeb722014",
     "openpackage/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
     "openpackage/extensions/orchestration.md": "7f09f66cbb411dff5a5c046ea4a64caf18132f7260af6fcbcae2cbaa318f0dc9",
-    "openpackage/openpackage.yml": "024c3717d12846dc487a6887b4a6a9da882d57b14641500c8d4f6d64895e1738",
+    "openpackage/openpackage.yml": "f3ec3902efe6fa3135cb40be0e7f27e94dcf720e097ab10b2bf576df5b153816",
     "openpackage/skills/grace5-execute/SKILL.md": "6f0656ad752537f0897dcfa1a0859759681bda8ad57c011361c4a79161309ad2",
     "openpackage/skills/grace5-prepare/SKILL.md": "31320dc46f57bf00ab01e5f830d3e326d42383d40c942d02b4b0dfc31de65708",
     "openpackage/skills/grace5-review/SKILL.md": "53a0ad6f663b523f9cde31e397d496d07533b1f19b82142906ab2edba6427693",
