@@ -34,6 +34,14 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - A check that is red before the work starts is fine, and is often the reason for the change.
 - Run `grace5 check <id>` and clear every `defect:` line. Size is reported, not enforced; explain an excess to the brief writer.
 
+## Feasible, discriminating checks
+
+- Before approval, identify for every required check its device, build and environment state and the observation it needs, and use the available read-only diagnostics to establish that each is available. Report what cannot be established as unknown; never assume it, and never record an observation nobody made.
+- When required evidence is unavailable, present one explicit choice before approval: wait until the evidence is available, or accept alternative evidence with its stated limitation. An agent never optionalises a required check without the owner, and a check that fails only because its environment is unavailable is recorded as an environment failure, separately from a product regression.
+- Feasibility is not the final observation and authorizes no flashing, reset or other hardware-state change: establishing that a check can run is never recorded as its result.
+- The brief's evidence discussion must name a plausible faulty implementation the check would reject and, for a trace, the setup whose absence would also fail, so a bare missing marker cannot pass.
+- An already approved unchanged check is not reapproved merely because it is run; a run yields evidence for the current candidate, not a new approval.
+
 ## Brief
 
 Hand the contract, without the conversation, to an independent subagent that never saw it. Give it exactly this task:

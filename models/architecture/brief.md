@@ -13,13 +13,15 @@ The page keeps the template's sections, in order, and its style block unchanged.
 | Section (`id`) | Must contain |
 |---|---|
 | `result` | The intended result as theses the owner can agree or disagree with. |
-| `evidence` | One table row per check with `data-check`, `data-kind` and `data-required`, opening with a plain name for the check in a few words so the owner never has to decode an id: under the headings "If it passes, we know" and "Even then, we do not know": what a passing result establishes, and for every manual or trace check, and wherever it matters for an automated one, what it leaves unknown. |
+| `evidence` | One table row per check with `data-check`, `data-kind` and `data-required`, opening with a plain name for the check in a few words so the owner never has to decode an id: under the headings "If it passes, we know" and "Even then, we do not know": what a passing result establishes, and for every manual or trace check, and wherever it matters for an automated one, what it leaves unknown. Each row also names the plausible faulty implementation the check would reject and, for a trace, the setup whose absence would also fail, so a bare missing marker cannot pass. |
 | `decisions` | Every Decision of the contract, as an item with `data-decision` equal to its id, stated as a neutral policy or tradeoff. |
 | `risks` | Consequential risks of the contract as written. |
 | `burdens` | What the owner must do or rule on: a bench session, a manual procedure, an open limitation. |
 | `boundaries` | Every material boundary; every exclusion, one item per NonGoal, in the list of class `exclusions`; every protected path as its own item with `data-protected` equal to the path. |
 | `findings` | The mechanical findings returned, each with `data-finding` of `resolved` or `open`. |
 | footer | Contract words and check count against the target with the reason for any excess, and the contract hash. |
+
+Every check keeps its evidence row and its limitation cell; the added discussion replaces no check and invents no observation. Each row states the faulty implementation the check would reject, and a trace row also names the setup whose absence would fail, so a bare missing marker cannot pass. Where a check's device, build, environment or observation cannot be established, its row says so as unknown and states the one choice the owner has: wait for the evidence, or accept alternative evidence with its stated limitation. Feasibility is not an observation, so no row records a result nobody observed.
 
 The page head carries the binding as `meta` elements named `grace5:change`, `grace5:revision`, `grace5:contract-sha256`, `grace5:date`, `grace5:writer`, `grace5:basis` (`full` or `difference`, the latter with `grace5:previous-revision`), `grace5:words`, `grace5:target-words`, `grace5:checks` and `grace5:target-checks`.
 
