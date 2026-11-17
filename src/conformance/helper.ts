@@ -1022,14 +1022,35 @@ export function preparedBriefless(def: ContractDef): Scenario {
   return s;
 }
 
-/** Kills a process and everything under it, without relying on POSIX signals on Windows. */
-export function killTree(child: ChildProcess): void {
-  if (child.pid === undefined) return;
+/** The direct children of a process on Windows, from WMI; empty where the query fails or the process has none. */
+function windowsChildren(pid: number): number[] {
+  const query = `(Get-CimInstance Win32_Process -Filter "ParentProcessId=${String(pid)}").ProcessId -join ","`;
+  try {
+    const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", query], { encoding: "utf8", windowsHide: true });
+    if (result.status !== 0) return [];
+    return (result.stdout ?? "").trim().split(",").map(Number).filter((id) => Number.isInteger(id) && id > 0);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Kills a process and everything under it, without relying on POSIX signals on Windows.
+ * The process under test dies first and is awaited, so a CLI cannot observe its check child's death and write a
+ * receipt for a run that was meant to be killed outright; the trees it spawned are killed afterwards.
+ */
+export async function killTree(child: ChildProcess): Promise<void> {
+  const pid = child.pid;
+  if (pid === undefined) return;
   if (process.platform === "win32") {
-    spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { encoding: "utf8" });
+    child.kill();
+    await waitForExit(child, 15_000);
+    for (const descendant of windowsChildren(pid)) {
+      spawnSync("taskkill", ["/PID", String(descendant), "/T", "/F"], { encoding: "utf8", windowsHide: true });
+    }
   } else {
     try {
-      process.kill(-child.pid, "SIGKILL");
+      process.kill(-pid, "SIGKILL");
     } catch {
       child.kill("SIGKILL");
     }

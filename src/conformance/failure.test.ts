@@ -38,7 +38,7 @@ test(
     const started = path.join(s.scratch, "sleep-started");
     // The run reserves its log directory first; the check command notes when it is running.
     const running = await waitFor(() => fs.existsSync(logDir) && fs.existsSync(started), 45_000);
-    killTree(child);
+    await killTree(child);
     await waitForExit(child, 15_000);
     expect(running).toBe(true);
 
@@ -79,7 +79,7 @@ test.skipIf(process.platform === "win32")(
     expect(running).toBe(true);
     child.kill("SIGINT");
     await waitForExit(child, 20_000);
-    killTree(child);
+    await killTree(child);
 
     expect(s.hasRecord("run-2.xml")).toBe(true);
     const receipt = s.receipt(2);
