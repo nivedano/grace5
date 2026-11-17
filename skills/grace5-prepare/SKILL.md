@@ -5,7 +5,7 @@ description: Use when a GRACE 5 change has to be opened or its contract revised,
 
 # Prepare a GRACE 5 change
 
-Before working, read the repository's optional `.grace5/extensions/` files and follow those addressed to your role (`method.md`, Local extensions).
+Before working, discover extensions for `preparer` by reading only the `roles` and `when` headers of `.grace5/extensions/*.md`, then load matching bodies (`method.md`, Local extensions). Repeat discovery when your role changes. The independent contract reader uses `contract-reader`.
 
 File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere those shipped with the package. `method.md` is the whole method; read it once.
 
@@ -46,7 +46,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 
 Before the owner gate, hand the contract, without the conversation, to an independent subagent that did not write it. Give it exactly this task:
 
-> Read `.grace5/changes/<id>/contract.xml`, the rule files the contract cites in a `rule` attribute, and the repository read-only to confirm cited paths. You may run `grace5 check <id>` for the contract hash, word count and check count. Read no notes and ask for no background, because the contract must stand alone. Write nothing. Return findings only: a criterion its check cannot serve, an undefined term, a contradiction, a boundary that does not cover Change, a cited path that does not exist.
+> Discover extensions for `contract-reader` as `method.md`, Local extensions describes. Read `.grace5/changes/<id>/contract.xml`, the rule files the contract cites in a `rule` attribute, and the repository read-only to confirm cited paths. You may run `grace5 check <id>` for the contract hash, word count and check count. Read no notes and ask for no background, because the contract must stand alone. Write nothing. Return findings only: a criterion its check cannot serve, an undefined term, a contradiction, a boundary that does not cover Change, a cited path that does not exist.
 
 - The reader proposes no design and decides nothing. The author resolves every finding by editing the contract, reruns `grace5 check`, and only then does the owner gate happen.
 - This independent contract read, findings only, is the whole pre-approval independence: no page, no template, no `grace5:writer` metadata and no fidelity parser is produced. The final independent review is separate and unchanged (`grace5-review`).

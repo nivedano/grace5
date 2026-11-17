@@ -10,7 +10,7 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 |---|---|
 | `models/` | Architecture and design documents: the method, schemas, worked examples, the rationale ledger, and the groundings |
 | `src/` | The kernel CLI `grace5` (Bun, TypeScript), its conformance suite and its tools |
-| `skills/` | The four skills: prepare, execute, review, orchestrate |
+| `skills/` | The three lifecycle skills: prepare, execute, review |
 | `packages/` | Harness packages materialized from `skills/` by `bun run package` at build or release staging; not tracked, never edited by hand |
 | `.grace5/` | This repository's own GRACE 5 state: the version pin `kernel-version`, the open changes under `.grace5/changes/`, the closed ones under `.grace5/changes/closed/`, each with its receipts and records; historical changes also carry legacy brief pages |
 
@@ -19,6 +19,8 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 Version 0.8.0, the last release: a version marks an owner-requested release and carries any number of changes (`models/architecture/upgrade.md`). An approval records a decision bound to the contract text, its checks and the decision; a legacy approval also names its brief page, and legacy execution and source fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Upgrading
+
+For batch execution, use the harness's coordinator and install `models/architecture/extensions/orchestration.md` as `.grace5/extensions/orchestration.md` in the client repository. Each generated distribution includes it at `extensions/orchestration.md`. This repository's extension points to the maintained policy. Agents select local extensions by their `roles` and `when` headers before loading bodies (`models/architecture/method.md`, Local extensions).
 
 `grace5 status` tells you when the repository state is behind the kernel and names the command. A version is created only when the owner requests a release; changes between releases carry the last release's version, and a release ships the migration steps they need (`models/architecture/upgrade.md`). `grace5 upgrade --plan` shows the steps the kernel will apply, in plain words, and the open changes it leaves untouched. `grace5 upgrade` applies them, and you commit the result. Everything it writes is kernel-managed, the state under `.grace5/` and the installed `grace5-*` skills, which no change's candidate or diff reads, so open changes do not stop it unless a step would write one of them; `upgrade.md` names the ways out.
 

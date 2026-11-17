@@ -1,5 +1,5 @@
 // Generates the three harness packages under packages/ from the canonical skills in skills/ and the
-// advisor guidance resource in models/architecture/, records their bytes in the tracked manifest
+// advisor guidance and orchestration extension in models/architecture/, records their bytes in the tracked manifest
 // models/architecture/package-manifest.json, and generates models/architecture/cli-reference.md from the
 // CLI help text. The generated packages/ tree is a build output, excluded by .gitignore and never tracked,
 // so `--verify` regenerates in memory and compares with the manifest, needing no prior build; where a built
@@ -23,6 +23,7 @@ export const MANIFEST_PATH = "models/architecture/package-manifest.json";
 /** The advisor guidance resource: the maintained source and where each generated package ships it. */
 const GUIDANCE_SOURCE = "models/architecture/advisor-guidance.md";
 const GUIDANCE_TARGET = "advisor-guidance.md";
+const ORCHESTRATION_SOURCE = "models/architecture/extensions/orchestration.md";
 
 type Files = Map<string, Buffer>;
 
@@ -106,12 +107,13 @@ function readme(what: string): string {
   return `This ${what} is generated from \`skills/\` by \`bun run package\` and must not be edited; edit the skill under \`skills/\` and regenerate.\n`;
 }
 
-function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>, guidance: string): Files {
+function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>, guidance: string, orchestration: string): Files {
   const files: Files = new Map();
   const put = (path: string, text: string): void => {
     files.set(path, Buffer.from(lf(text), "utf8"));
   };
   put(GUIDANCE_TARGET, guidance);
+  put("extensions/orchestration.md", orchestration);
   switch (id) {
     case "claude-plugin": {
       const manifest = { name: PACKAGE_NAME, description: meta.description, version: meta.version };
@@ -141,15 +143,16 @@ function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>,
   return files;
 }
 
-/** Generates every package in memory from the canonical skills and the advisor resource; writes nothing. */
+/** Generates every package in memory from the canonical skills, advisor resource and batch extension; writes nothing. */
 export function materialize(root: string): Materialization {
   const meta = readMeta(root);
   const skills = readSkills(root);
   const guidance = readGuidance(root);
+  const orchestration = lf(readFileSync(join(root, ORCHESTRATION_SOURCE), "utf8"));
   const packages = new Map<PackageId, Files>();
   const files = new Map<string, Buffer>();
   for (const id of PACKAGE_IDS) {
-    const generated = generatePackage(id, meta, skills, guidance);
+    const generated = generatePackage(id, meta, skills, guidance, orchestration);
     packages.set(id, generated);
     for (const [rel, bytes] of generated) files.set(`${id}/${rel}`, bytes);
   }

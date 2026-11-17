@@ -86,8 +86,8 @@ test(
     expect(s.exists(".claude/skills/grace5-review")).toBe(false);
     expect(s.exists(".agents/skills/grace5-execute")).toBe(false);
     expect(s.exists(".agents/skills/grace5-review")).toBe(false);
-    expect(s.read(".claude/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
-    expect(s.read(".agents/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
+    expect(s.exists(".claude/skills/grace5-orchestrate")).toBe(false);
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
     expect(s.exists("skills")).toBe(false);
     expect(s.exists("packages")).toBe(false);
   },
@@ -95,10 +95,12 @@ test(
 );
 
 test(
-  "UP-19 the 0.5.0 to 0.6.0 step installs orchestrate only beside existing packaged skills, is idempotent and self-verifying, and leaves open changes untouched",
+  "UP-19 the 0.5.0 to 0.6.0 step skips the retired orchestrate install, retires legacy copies and preserves open changes",
   async () => {
     const s = prepared({ id: "C-0530-orchestrate-upgrade", checks: [automated("CK1")] });
     s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare\n");
+    s.write(".agents/skills/grace5-orchestrate/SKILL.md", "legacy orchestrate in agents\n");
+    s.write(".claude/skills/grace5-orchestrate/SKILL.md", "legacy orchestrate in claude\n");
     // This location has a skill directory, but no packaged skill, so it does not qualify for installation.
     s.write(".claude/skills/grace5-local/SKILL.md", "repository-owned skill\n");
     s.commit("fixture at 0.5.0 with one installed packaged skill");
@@ -121,32 +123,28 @@ test(
 
     // Applying the step once and twice, with the runner's mirror after each application, produces the same tree.
     step.apply(s.repo);
-    expect(refreshSkills(s.repo)).toContain(".agents/skills/grace5-orchestrate");
+    expect(refreshSkills(s.repo)).not.toContain(".agents/skills/grace5-orchestrate");
     step.verify(s.repo);
-    const orchestrateDir = path.join(s.repo, ".agents/skills/grace5-orchestrate");
-    const onceFiles = fs.readdirSync(orchestrateDir).sort();
-    const onceBytes = onceFiles.map((name) => [name, fs.readFileSync(path.join(orchestrateDir, name)).toString("hex")]);
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
     const oncePorcelain = s.porcelain();
     step.apply(s.repo);
     refreshSkills(s.repo);
     step.verify(s.repo);
-    const twiceFiles = fs.readdirSync(orchestrateDir).sort();
-    const twiceBytes = twiceFiles.map((name) => [name, fs.readFileSync(path.join(orchestrateDir, name)).toString("hex")]);
-    expect(twiceFiles).toEqual(onceFiles);
-    expect(twiceBytes).toEqual(onceBytes);
     expect(s.porcelain()).toBe(oncePorcelain);
-    expect(s.read(".agents/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
     expect(s.exists(".claude/skills/grace5-orchestrate")).toBe(false);
     expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
     expect(s.exists(".agents/skills/grace5-review")).toBe(false);
 
-    // The step refuses a missing install and a changed installed copy.
-    fs.rmSync(path.join(s.repo, ".agents/skills/grace5-orchestrate"), { recursive: true, force: true });
+    // Current packages skip the obsolete install; verification catches a lingering retired directory.
+    fs.mkdirSync(path.join(s.repo, ".agents/skills/grace5-orchestrate"), { recursive: true });
+    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-orchestrate/SKILL.md"), "retired\n");
     expect(() => step.verify(s.repo)).toThrow();
-    step.apply(s.repo);
-    refreshSkills(s.repo);
-    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-orchestrate/SKILL.md"), "drifted\n");
-    expect(() => step.verify(s.repo)).toThrow();
+    const removed: string[] = [];
+    refreshSkills(s.repo, PACKAGED_SKILLS, (rel) => removed.push(rel));
+    expect(removed).toContain(".agents/skills/grace5-orchestrate");
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
+    expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
 
     // No location is made when the repository has no installed packaged skills.
     const empty = prepared({ id: "C-0531-no-installed-skills", checks: [automated("CK1")] });
@@ -293,7 +291,7 @@ test(
     expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.5.0 -> ${VERSION}`);
     expect(s.readPin()).toBe(`${VERSION}\n`);
     expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
-    expect(s.porcelain().split("\n").filter(Boolean).map((line) => line.slice(3)).sort()).toEqual([".agents/skills/grace5-prepare/SKILL.md", ".agents/skills/grace5-orchestrate/SKILL.md", PIN_PATH].sort());
+    expect(s.porcelain().split("\n").filter(Boolean).map((line) => line.slice(3)).sort()).toEqual([".agents/skills/grace5-prepare/SKILL.md", PIN_PATH].sort());
     expect(fs.readdirSync(s.recordsDir).sort().map((name) => [name, fs.readFileSync(path.join(s.recordsDir, name)).toString("hex")])).toEqual(records);
     expect(s.read(`.grace5/changes/${s.id}/contract.xml`)).toBe(checkBefore);
     expect(candidateLine(s)).toBe(before);
@@ -524,7 +522,7 @@ test(
     ).toBe(0);
     expect(cleanRefused).toHaveLength(0);
     expect(cleanLines).toContain("refreshed: .claude/skills/grace5-execute");
-    expect(cleanLines).toContain("refreshed: .claude/skills/grace5-orchestrate");
+    expect(cleanLines).not.toContain("refreshed: .claude/skills/grace5-orchestrate");
     expect(cleanLines.at(-1)).toBe(`upgraded: 0.5.0 -> ${VERSION}`);
     expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
   },
@@ -532,7 +530,7 @@ test(
 );
 
 test(
-  "UP-21 the 0.6.0 to 0.7.0 step installs orchestrate only beside existing packaged skills, is idempotent and self-verifying, and leaves open changes untouched",
+  "UP-21 the 0.6.0 to 0.7.0 step skips the retired orchestrate install, retires legacy copies and preserves open changes",
   async () => {
     const s = prepared({ id: "C-0536-orchestrate-07", checks: [automated("CK1")] });
     s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare\n");
@@ -552,32 +550,30 @@ test(
     const runCountBefore = s.runNumbers().length;
 
     step.apply(s.repo);
-    expect(refreshSkills(s.repo)).toContain(".agents/skills/grace5-orchestrate");
+    expect(refreshSkills(s.repo)).not.toContain(".agents/skills/grace5-orchestrate");
     step.verify(s.repo);
-    expect(s.read(".agents/skills/grace5-orchestrate/SKILL.md")).toBe(readSkill("grace5-orchestrate/SKILL.md"));
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
     expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
     expect(s.exists(".claude/skills/grace5-orchestrate")).toBe(false);
     expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
 
-    // Applying it twice changes nothing, and verification rejects a missing or drifted orchestrator.
+    // Applying it twice changes nothing, and verification rejects a lingering retired directory.
     const oncePorcelain = s.porcelain();
     step.apply(s.repo);
     refreshSkills(s.repo);
     step.verify(s.repo);
     expect(s.porcelain()).toBe(oncePorcelain);
-    fs.rmSync(path.join(s.repo, ".agents/skills/grace5-orchestrate"), { recursive: true, force: true });
+    fs.mkdirSync(path.join(s.repo, ".agents/skills/grace5-orchestrate"), { recursive: true });
+    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-orchestrate/SKILL.md"), "retired\n");
     expect(() => step.verify(s.repo)).toThrow();
-    step.apply(s.repo);
     refreshSkills(s.repo);
-    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-orchestrate/SKILL.md"), "drifted\n");
-    expect(() => step.verify(s.repo)).toThrow();
-    step.apply(s.repo);
-    refreshSkills(s.repo);
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
     step.verify(s.repo);
 
     const upgrade = s.cli(["upgrade"]);
     expect(upgrade.code).toBe(0);
     expect(upgrade.lines).toContain("step: 0.6.0 -> 0.7.0: install grace5-orchestrate beside the installed skills and refresh them to 0.7.0");
+    expect(s.exists(".agents/skills/grace5-orchestrate")).toBe(false);
     expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.6.0 -> ${VERSION}`);
     expect(s.readPin()).toBe(`${VERSION}\n`);
     expect(candidateLine(s)).toBe(beforeCandidate);

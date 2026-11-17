@@ -22,6 +22,8 @@ function fixture(): string {
   writeFileSync(join(root, "skills", "grace5-alpha", "SKILL.md"), "# alpha\n");
   mkdirSync(join(root, "models", "architecture"), { recursive: true });
   writeFileSync(join(root, "models", "architecture", "advisor-guidance.md"), "guidance\n");
+  mkdirSync(join(root, "models", "architecture", "extensions"));
+  writeFileSync(join(root, "models", "architecture", "extensions", "orchestration.md"), "roles: [coordinator]\n");
   return root;
 }
 
@@ -58,6 +60,10 @@ test(
     expect(materialization.files.has("skills/grace5-alpha/SKILL.md")).toBe(true);
     expect(materialization.files.has("claude-plugin/skills/grace5-alpha/SKILL.md")).toBe(true);
     expect(materialization.files.has("openpackage/advisor-guidance.md")).toBe(true);
+    for (const [id, files] of materialization.packages) {
+      expect(materialization.files.get(`${id}/extensions/orchestration.md`)?.toString()).toBe("roles: [coordinator]\n");
+      expect([...files.keys()].some((file) => file.includes("grace5-orchestrate/"))).toBe(false);
+    }
 
     expect(readManifest(root).size).toBe(materialization.files.size);
     expect(manifestFindings(readManifest(root), materialization)).toEqual([]);

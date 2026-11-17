@@ -5,14 +5,14 @@ description: Use when a GRACE 5 change has an owner approval and the work has to
 
 # Execute a GRACE 5 change
 
-Before working, read the repository's optional `.grace5/extensions/` files and follow those addressed to your role (`method.md`, Local extensions).
+Before working, discover extensions for `implementer` by reading only the `roles` and `when` headers of `.grace5/extensions/*.md`, then load matching bodies (`method.md`, Local extensions). Repeat discovery when your role changes.
 
 File names below refer to the GRACE 5 method documents: `models/architecture/` in the GRACE 5 repository, elsewhere those shipped with the package. At any point `grace5 status <id>` tells you where you are; its last line, `next:`, is the obligation to work on.
 
 ## Before starting
 
 - `grace5 status` must report `authorization: approved`. Anything else goes back to `grace5-prepare`; you do not obtain or record approvals here. A pin refusal means the state is behind the kernel: run `grace5 upgrade` first; `upgrade.md` names the ways out when a step touches this change.
-- Follow the isolation rule in `method.md`: one change per worktree for standalone execution; a serial `grace5-orchestrate` batch of approved changes may retain parked changes with one active implementer and the complete diff preserved (`source-identity.md`). Never create a branch or a worktree without the owner's consent; ask where the work should happen and use what they name.
+- Follow the isolation rule in `method.md`: one change per worktree for standalone execution; a serial batch of approved changes may retain parked changes with one active implementer and the complete diff preserved (`source-identity.md`). Never create a branch or a worktree without the owner's consent; ask where the work should happen and use what they name.
 - Run `grace5 run <id> --start` once. It records the start revision, the dirty paths already present and the starting state of the checks (`commands.md`).
 - Pre-existing dirty work is identified, never adopted: do not stage, stash, commit or tidy it. Tell the owner what the receipt lists; the final tree must be clean (`source-identity.md`).
 

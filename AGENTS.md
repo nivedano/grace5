@@ -1,6 +1,6 @@
 # Working in this repository
 
-GRACE 5 is a kernel for owner-approved, evidence-closed changes. This repository builds it and is governed by it: a change here is a GRACE 5 change under `.grace5/`, prepared, approved by the owner on the contract, executed, verified by receipts, reviewed and closed with the kernel. Start with `bun src/cli.ts status` and `models/architecture/method.md`; the four skills in `skills/` carry the lifecycle and orchestrate approved changes.
+GRACE 5 is a kernel for owner-approved, evidence-closed changes. This repository builds it and is governed by it: a change here is a GRACE 5 change under `.grace5/`, prepared, approved by the owner on the contract, executed, verified by receipts, reviewed and closed with the kernel. Start with `bun src/cli.ts status` and `models/architecture/method.md`; the three skills in `skills/` carry the lifecycle. For batch execution, take the `coordinator` role and discover matching extensions under `.grace5/extensions/` as the method describes.
 
 ## Standing truth
 

@@ -46,10 +46,21 @@ function installedSkills(root: string, packaged: string): { readonly rel: string
   return found;
 }
 
-const ORCHESTRATE_SKILL = "grace5-orchestrate";
+// Keep retired names kernel-managed so removing an installation never changes evidence identity.
+export const RETIRED_SKILLS = ["grace5-orchestrate"] as const;
+const ORCHESTRATE_SKILL = RETIRED_SKILLS[0];
+
+/** Installed retired directories absent from this package. Other project skills are never selected. */
+function retiredSkills(root: string, packaged: string): string[] {
+  const current = packagedSkillNames(packaged);
+  return SKILL_LOCATIONS.flatMap((location) => RETIRED_SKILLS
+    .filter((name) => !current.includes(name) && existsSync(join(root, location, name)))
+    .map((name) => `${location}/${name}`));
+}
 
 /** The orchestrator directories missing beside an installed packaged skill; no new skill location qualifies. */
 export function missingOrchestrateSkills(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
+  if (!packagedSkillNames(packaged).includes(ORCHESTRATE_SKILL)) return [];
   const installed = new Set(installedSkills(root, packaged).map((skill) => skill.rel));
   return SKILL_LOCATIONS
     .filter((location) => [...installed].some((rel) => rel.startsWith(`${location}/`)) && !installed.has(`${location}/${ORCHESTRATE_SKILL}`))
@@ -58,7 +69,6 @@ export function missingOrchestrateSkills(root: string, packaged = PACKAGED_SKILL
 
 /** Opens only the missing orchestrator directories; the chain's ordinary refresh mirrors their packaged files. */
 export function installOrchestrateSkill(root: string, packaged = PACKAGED_SKILLS_DIR): void {
-  if (!packagedSkillNames(packaged).includes(ORCHESTRATE_SKILL)) throw new Error(`the packaged skill is missing: ${ORCHESTRATE_SKILL}`);
   for (const rel of missingOrchestrateSkills(root, packaged)) mkdirSync(join(root, rel), { recursive: true });
 }
 
@@ -76,7 +86,7 @@ function mirrorDifference(source: string, target: string): string[] {
 
 /** The installed skill files, relative to the root, whose bytes differ from the packaged ones; empty where the skills already match or none is installed. */
 export function skillDifferences(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
-  const paths: string[] = [];
+  const paths: string[] = retiredSkills(root, packaged);
   for (const skill of installedSkills(root, packaged)) for (const rel of mirrorDifference(skill.source, skill.target)) paths.push(`${skill.rel}/${rel}`);
   return paths.sort();
 }
@@ -95,9 +105,13 @@ function mirror(source: string, target: string): void {
 /**
  * Refreshes the grace5-* skill directories wherever they already exist under .agents/skills/ or .claude/skills/, from the
  * packaged skills, and returns their paths relative to the root. Creates no new location; a grace5-* directory the kernel
- * does not package is left alone.
+ * does not package is left alone unless explicitly retired. Retired directories remain kernel-managed.
  */
-export function refreshSkills(root: string, packaged = PACKAGED_SKILLS_DIR): string[] {
+export function refreshSkills(root: string, packaged = PACKAGED_SKILLS_DIR, removed?: (path: string) => void): string[] {
+  for (const rel of retiredSkills(root, packaged)) {
+    rmSync(join(root, rel), { recursive: true, force: true });
+    removed?.(rel);
+  }
   const refreshed: string[] = [];
   for (const skill of installedSkills(root, packaged)) {
     mirror(skill.source, skill.target);

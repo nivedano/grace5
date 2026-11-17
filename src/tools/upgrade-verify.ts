@@ -3,8 +3,8 @@
 // the local ignore file, list the same changes as closed, report the same contract and definition hashes as before, and
 // leave the project's .gitignore byte for byte as it was (CK6 of C-0006-kernel-managed-paths).
 // With --with-open-change (CK6 of C-0005-upgrade-with-open-changes) an open change is laid out beside the closed ones
-// first and stale prepare/execute skills are installed in both supported locations; the upgrade must install orchestrate
-// alongside them, list the change as open and untouched, and leave its candidate unchanged.
+// first and stale prepare/execute skills are installed in both supported locations; the upgrade must retire any old
+// orchestrate copies, list the change as open and untouched, and leave its candidate unchanged.
 // The hashes before the upgrade are read with the kernel's own reader, because `check` refuses a stale pin.
 
 import { spawnSync } from "node:child_process";
@@ -140,16 +140,6 @@ async function main(withOpenChange: boolean): Promise<number> {
       const secondRefreshed = upgrade.lines.filter((line) => line === `refreshed: ${SECOND_STALE_SKILL}`).length;
       if (secondRefreshed === stepLines.length) ok(`refreshed: ${SECOND_STALE_SKILL} once per step (${String(secondRefreshed)})`);
       else fail(`expected refreshed: ${SECOND_STALE_SKILL} ${String(stepLines.length)} times, got ${String(secondRefreshed)}`);
-      for (const location of [".agents/skills", ".claude/skills"]) {
-        const orchestrate = join(clone, location, "grace5-orchestrate");
-        const orchestrateLine = `refreshed: ${location}/grace5-orchestrate`;
-        if (upgrade.lines.filter((line) => line === orchestrateLine).length === 1) ok(orchestrateLine);
-        else fail(`expected ${orchestrateLine} once, got ${String(upgrade.lines.filter((line) => line === orchestrateLine).length)}`);
-        const installedOrchestrate = readIfPresent(join(orchestrate, "SKILL.md"));
-        const packagedOrchestrate = readFileSync(join(PACKAGED_SKILLS_DIR, "grace5-orchestrate", "SKILL.md"), "utf8");
-        if (installedOrchestrate === packagedOrchestrate) ok(`${location}/grace5-orchestrate/SKILL.md equals the packaged skill`);
-        else fail(`${location}/grace5-orchestrate/SKILL.md differs from the packaged skill after the upgrade`);
-      }
       const installed = readIfPresent(join(clone, STALE_SKILL, "SKILL.md"));
       const packaged = readFileSync(join(PACKAGED_SKILLS_DIR, "grace5-prepare", "SKILL.md"), "utf8");
       if (installed === packaged) ok(`${STALE_SKILL}/SKILL.md equals the packaged skill`);
@@ -161,6 +151,12 @@ async function main(withOpenChange: boolean): Promise<number> {
       else fail(`upgrade did not print checked: ${OPEN_CHANGE}`);
     } else if (skillsLines === stepLines.length && !upgrade.lines.some((line) => line.startsWith("refreshed:"))) ok(`skills: none installed once per step (${String(skillsLines)})`);
     else fail(`expected skills: none installed ${String(stepLines.length)} times and no refreshed: line, got ${String(skillsLines)}`);
+
+    for (const location of [".agents/skills", ".claude/skills"]) {
+      const orchestrate = join(clone, location, "grace5-orchestrate");
+      if (!existsSync(orchestrate)) ok(`${location}/grace5-orchestrate absent after upgrade`);
+      else fail(`${location}/grace5-orchestrate remains after upgrade`);
+    }
 
     const pinFile = join(clone, PIN_PATH);
     const pin = readIfPresent(pinFile);

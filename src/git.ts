@@ -2,7 +2,7 @@
 
 import { spawnSync } from "node:child_process";
 import { sha256Hex } from "./contract";
-import { packagedSkillNames, SKILL_LOCATIONS } from "./upgrade/skills";
+import { packagedSkillNames, RETIRED_SKILLS, SKILL_LOCATIONS } from "./upgrade/skills";
 
 /** The state directory: everything under it is kernel-managed (source-identity.md). */
 export const STATE_DIR = ".grace5/";
@@ -37,11 +37,11 @@ let managedPrefixes: readonly string[] | undefined;
 
 /**
  * The kernel-managed path prefixes (source-identity.md): the whole state directory and, under each skill location, the
- * directories named by the packaged skills, read once per process. A repository's own skill beside them is source.
+ * directories named by the packaged and retired skills, read once per process. A repository's own skill beside them is source.
  */
 function kernelManagedPrefixes(): readonly string[] {
   if (managedPrefixes === undefined) {
-    const names = packagedSkillNames();
+    const names = [...new Set([...packagedSkillNames(), ...RETIRED_SKILLS])];
     managedPrefixes = [STATE_DIR, ...SKILL_LOCATIONS.flatMap((location) => names.map((name) => `${location}/${name}/`))];
   }
   return managedPrefixes;
