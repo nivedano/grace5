@@ -23,7 +23,9 @@
       <xs:attribute name="source-revision" type="GitRevision" use="required"/>
       <xs:attribute name="candidate" type="Sha256" use="required"/>
       <xs:attribute name="start-revision" type="GitRevision" use="required"/>
-      <xs:attribute name="brief" type="Text" use="required"/>
+      <!-- brief: legacy. The brief page of the change in a record already written; a new approval has no brief,
+           so a new close omits this attribute (evidence-records.md, C-0019). -->
+      <xs:attribute name="brief" type="Text" use="optional"/>
       <xs:attribute name="approval" type="Text" use="required"/>
       <xs:attribute name="review" type="xs:positiveInteger" use="required"/>
       <xs:attribute name="kernel" type="Text" use="required"/>

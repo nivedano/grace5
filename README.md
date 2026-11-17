@@ -1,6 +1,6 @@
 # GRACE 5
 
-A kernel for owner-approved, evidence-closed changes made by coding agents: one contract per change, one owner approval on an independent brief, isolated execution, receipts for every check, independent review, and a closure that validates verdicts.
+A kernel for owner-approved, evidence-closed changes made by coding agents: one contract per change, one findings-only independent contract read before the owner approves it, one owner approval on the contract, isolated execution, receipts for every check, independent review, and a closure that validates verdicts.
 
 The method is one document, `models/architecture/method.md`. The measured baseline that motivates the design is in `models/decisions/`.
 
@@ -12,11 +12,11 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 | `src/` | The kernel CLI `grace5` (Bun, TypeScript), its conformance suite and its tools |
 | `skills/` | The four skills: prepare, execute, review, orchestrate |
 | `packages/` | Harness packages materialized from `skills/` by `bun run package` at build or release staging; not tracked, never edited by hand |
-| `.grace5/` | This repository's own GRACE 5 state: the version pin `kernel-version`, the open changes under `.grace5/changes/`, the closed ones under `.grace5/changes/closed/`, each with its briefs, receipts and records |
+| `.grace5/` | This repository's own GRACE 5 state: the version pin `kernel-version`, the open changes under `.grace5/changes/`, the closed ones under `.grace5/changes/closed/`, each with its receipts and records; historical changes also carry legacy brief pages |
 
 ## Status
 
-Version 0.8.0, the last release: a version marks an owner-requested release and carries any number of changes (`models/architecture/upgrade.md`). An approval records a decision bound to the contract, its checks and the brief; legacy execution and source fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
+Version 0.8.0, the last release: a version marks an owner-requested release and carries any number of changes (`models/architecture/upgrade.md`). An approval records a decision bound to the contract text, its checks and the decision; a legacy approval also names its brief page, and legacy execution and source fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Upgrading
 

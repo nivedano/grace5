@@ -21,7 +21,7 @@ import {
 afterAll(() => disposeAll());
 
 test(
-  "RV-04 a defective brief holds close",
+  "RV-04 a defective legacy brief holds close",
   () => {
     const s = new Scenario({ id: "C-0304-brief-defect", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
     s.takeHashes();
@@ -161,20 +161,22 @@ test(
 );
 
 test(
-  "FL-04 a defective draft brief does not stop bound checks",
+  "FL-04 a material amendment not yet approved: no brief obligation, bound checks run, amended checks are refused",
   () => {
     const rev1: ContractDef = { id: "C-0314-draft-brief", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] };
     const s = prepared(rev1);
     expect(s.start().code).toBe(0);
 
-    // Revision 2 adds a check. Its brief is drafted, defective, and not approved.
+    // Revision 2 adds a check. It is unapproved, so it has no legacy approval and no brief obligation; a page written
+    // for it is never validated (C-0019), and it still holds nothing.
     s.writeContract({ id: rev1.id, revision: 2, protectedPaths: ["src/secret/**"], checks: [automated("CK1"), automated("CK2", "bun tools/env.js")] });
     s.takeHashes();
     s.writeBrief({ omitProtected: ["src/secret/**"] });
     const check = s.check();
-    expect(check.code).toBe(1);
-    expect(hasLine(check, "defect: brief-2.html: protected path src/secret/** is missing")).toBe(true);
+    expect(check.code).toBe(0);
+    expect(check.out).not.toContain("brief-2.html");
     expect(s.hasRecord("approval-2.xml")).toBe(false);
+    expect(hasLine(s.status(), "next: no approval for revision 2")).toBe(true);
 
     const bound = s.run("--check", "CK1");
     expect(bound.out).not.toContain("change has defects");
@@ -185,12 +187,17 @@ test(
     expect(added.code).toBe(1);
     expect(hasLine(added, "run 3: CK2 refused: amended in unapproved revision")).toBe(true);
     expect(added.out).not.toContain("change has defects");
+
+    const close = s.close();
+    expect(close.code).toBe(1);
+    expect(hasLine(close, "refused: no approval for revision 2")).toBe(true);
+    expect(s.hasRecord("close.xml")).toBe(false);
   },
   TEST_TIMEOUT,
 );
 
 test(
-  "FS-14 a brief of an older revision is history and is no defect",
+  "FS-14 a legacy brief of an older revision is history and is no defect",
   () => {
     const rev1: ContractDef = { id: "C-0315-old-brief", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] };
     const s = prepared(rev1);

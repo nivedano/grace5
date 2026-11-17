@@ -1,5 +1,6 @@
 // Conformance cases FS-07 .. FS-14 of models/architecture/conformance.md: states that look like success and are not,
-// refused at run and close. Split mechanically from fake-success.test.ts by C-0010; the tests are unchanged.
+// refused at run and close. Split mechanically from fake-success.test.ts by C-0010. C-0019 makes a brief a legacy
+// obligation: FS-12 and FS-14 now write the legacy approval that names the page they exercise.
 
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
@@ -16,6 +17,7 @@ import {
   prepared,
   resultAttr,
   resultBlock,
+  sha256,
   trace,
 } from "./helper";
 
@@ -186,7 +188,7 @@ test(
 );
 
 test(
-  "FS-12 no brief for the current revision, or a brief edited after approval: close refuses",
+  "FS-12 a legacy approval's brief, missing or edited after approval: close refuses",
   () => {
     const s = prepared({ id: "C-0012-no-brief", checks: [automated("CK1")] });
     expect(s.start().code).toBe(0);
@@ -246,7 +248,7 @@ test(
 );
 
 test(
-  "FS-14 check reports a brief that omits a protected path",
+  "FS-14 check reports a legacy brief that omits a protected path",
   () => {
     const s = new Scenario({
       id: "C-0014-brief",
@@ -254,17 +256,27 @@ test(
       checks: [automated("CK1"), manual("MK1")],
     });
     s.takeHashes();
+    // A brief is validated only for a legacy approval that names it (C-0019).
     s.writeBrief({ omitProtected: ["src/secret/**"] });
+    s.writeApproval();
     const defective = s.check();
     expect(defective.code).toBe(1);
     expect(hasLine(defective, "defect: brief-1.html: protected path src/secret/** is missing")).toBe(true);
     expect(defective.out).not.toContain("protected path docs/frozen.md is missing");
 
-    // Control: the complete brief has no defect.
+    // Control: the complete brief, with the approval that names it, has no defect.
     s.writeBrief();
+    s.writeApproval();
     const complete = s.check();
     expect(complete.defects).toEqual([]);
     expect(complete.code).toBe(0);
+
+    // A brief with no legacy approval naming it is never validated.
+    fs.rmSync(path.join(s.recordsDir, "approval-1.xml"));
+    s.writeBrief({ omitProtected: ["src/secret/**"] });
+    const unchecked = s.check();
+    expect(unchecked.defects).toEqual([]);
+    expect(unchecked.code).toBe(0);
   },
   TEST_TIMEOUT,
 );
@@ -276,10 +288,24 @@ test(
     const s = new Scenario({ id: "C-0001-bystander", checks: [automated("CK1")] });
     // The rule file the example contract cites must exist, so the brief defect is the only one.
     s.write("docs/design-rules.md", "# Design rules\n\nDR-FW-3 and DR-FW-9 live here.\n");
-    const install = (example: string) => {
+    // A brief is validated only for a legacy approval that names it (C-0019), so each install writes the page and an
+    // approval bound to its bytes.
+    const install = (example: string): void => {
       const from = path.join(ARCH, "examples", example);
+      const briefRel = `.grace5/changes/${id}/records/brief-1.html`;
       s.write(`.grace5/changes/${id}/contract.xml`, fs.readFileSync(path.join(from, "contract.xml"), "utf8"));
-      s.write(`.grace5/changes/${id}/records/brief-1.html`, fs.readFileSync(path.join(from, "records", "brief-1.html"), "utf8"));
+      s.write(briefRel, fs.readFileSync(path.join(from, "records", "brief-1.html"), "utf8"));
+      const info = s.check(id);
+      const briefSha = sha256(fs.readFileSync(path.join(s.repo, briefRel)));
+      const lines = [
+        `<?xml version="1.0" encoding="UTF-8"?>`,
+        `<Approval change="${id}" revision="1" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="2026-11-17" decision="approved">`,
+        `  <Statement>approved</Statement>`,
+        ...Object.keys(info.definitions).map((check) => `  <Bound check="${check}" definition-sha256="${info.definitions[check] ?? ""}"/>`),
+        `</Approval>`,
+        ``,
+      ];
+      s.write(`.grace5/changes/${id}/records/approval-1.xml`, lines.join("\n"));
     };
 
     install("defective-brief");

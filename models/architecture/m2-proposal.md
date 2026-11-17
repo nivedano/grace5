@@ -20,22 +20,24 @@ The unit of exposure stays the change: a `C-NNNN` bundle with a `contract.xml`; 
 | Exposure by phase and version | Changes and days per phase and exact version | changes, days | `kernel` of `run` and `close`; install ledger otherwise |
 | Distinct incidents | A series of non-passed results of one check and one definition hash, ended by a pass; results after the first are repeated diagnostics, counted apart | incidents, diagnostics | `run` |
 | Isolation-failure events | A write outside `Affected` or into `Protected`, adopted pre-existing work, or two active changes in one worktree | events | human-recorded |
-| Contract size and check count | As reported | words, checks | `brief` |
+| Contract size and check count | As reported | words, checks | `contract` (legacy: brief) |
 
 ## 2. Record sources
 
 | Record | Fields read |
 |---|---|
 | `contract.xml` | `id`, `revision`, `Criterion/@checks`, check ids and kinds, `Decision/@id` |
-| `brief-<rev>.html` | `meta` elements `grace5:date`, `grace5:writer`, `grace5:basis`, `grace5:words`, `grace5:target-words`, `grace5:checks`, `grace5:target-checks`; data attributes `data-check`, `data-kind`, `data-required`, `data-decision`, `data-finding`; the prose is not read |
+| legacy `brief-<rev>.html` (historical changes only) | `meta` elements `grace5:date`, `grace5:writer`, `grace5:basis`, `grace5:words`, `grace5:target-words`, `grace5:checks`, `grace5:target-checks`; data attributes `data-check`, `data-kind`, `data-required`, `data-decision`, `data-finding`; the prose is not read |
 | `approval-<rev>.xml` | `date`, `decision`, `brief-sha256`, `Bound/@check`, `@definition-sha256` |
 | `run-<n>.xml` | `n`, `started`, `ended`, `status`, `start`, `dirty`, `candidate`, `kernel`, `Preexisting`; per `Result`: `check`, `kind`, `required`, `definition-sha256`, `verdict`, `claim`, `elapsed-ms`, and `Trace/@origin`, `@origin-source`, `@run-echo` |
 | `review-<n>.xml` | `date`, `independence`, `status`, `Finding/@id`, `@severity`, `@status`, `Adequacy/@check`, `@discriminates` |
 | `close.xml` | `date`, `kernel`, `candidate`, `review`, `Satisfied/@check`, `@run`, `@claim` |
 
-`change` and `revision` join the records (`grace5:change` and `grace5:revision` on the brief). Gaps: `grace5:date` on brief and `date` on approval and review are a day, so waiting per gate cannot come from records; only `run` and `close` carry a version, so prepare and review exposure is attributed by date; `contract.xml` has no date, so draft time comes from git; no record holds agent cost, a cancellation or an isolation-failure category.
+`change` and `revision` join the records (`grace5:change` and `grace5:revision` on a legacy brief; a new change joins on the contract revision). Gaps: `grace5:date` on a legacy brief and `date` on approval and review are a day, so waiting per gate cannot come from records; only `run` and `close` carry a version, so prepare and review exposure is attributed by date; `contract.xml` has no date, so draft time comes from git; no record holds agent cost, a cancellation or an isolation-failure category.
 
 ## 3. Brief metrics
+
+These metrics read brief metadata; changes prepared after the brief's retirement have no brief, so these metrics are unavailable for them and the control center's method must decide their replacement separately.
 
 | Metric | Definition | Source |
 |---|---|---|
@@ -62,7 +64,7 @@ Removal criterion, owner-reviewed: no voluntary use of trace checks beyond the r
 
 ## 5. Human-recorded items
 
-Owner active time, waiting time, the owner's judgement of the brief at the gate, escaped-defect severity, cancellation reasons, isolation-failure events and the owner's impression note stay human-recorded. Approval records hold the decision, never the owner's words (`authorization.md`), so approval fidelity is the owner's own account and is read from no record. The proposal puts one owner-written entry per change in the control center's state, keyed by the change id, not in the governed repository, whose bundle admits only the contract, `notes.md` and records. The note covers the owner's judgement of the brief and the trace checks against their removal criteria.
+Owner active time, waiting time, the owner's judgement of the contract at the gate, escaped-defect severity, cancellation reasons, isolation-failure events and the owner's impression note stay human-recorded. Approval records hold the decision, never the owner's words (`authorization.md`), so approval fidelity is the owner's own account and is read from no record. The proposal puts one owner-written entry per change in the control center's state, keyed by the change id, not in the governed repository, whose bundle admits only the contract, `notes.md` and records. The note covers the owner's judgement of the contract and the trace checks against their removal criteria; a judgement of the brief is legacy-only, where a brief exists.
 
 ## 6. Comparison rules
 

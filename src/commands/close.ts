@@ -24,7 +24,8 @@ export async function closeCommand(root: string, change: string | undefined): Pr
   if (state.closed) return refuse("change is closed");
   if (state.obligation !== undefined) return refuse(state.obligation);
   const { contract, report, source, startRun, brief, approval, review } = state;
-  if (contract === undefined || report === undefined || source?.revision === undefined || source.candidate === undefined || startRun === undefined || brief === undefined || approval === undefined || review === undefined) {
+  // A legacy approval names a brief and needs it; a new approval has none and the evaluation carries none.
+  if (contract === undefined || report === undefined || source?.revision === undefined || source.candidate === undefined || startRun === undefined || approval === undefined || review === undefined || (approval.briefSha256 !== undefined && brief === undefined)) {
     return refuse("change is malformed: the evaluation is incomplete");
   }
   const record: CloseRecord = {
@@ -35,7 +36,7 @@ export async function closeCommand(root: string, change: string | undefined): Pr
     sourceRevision: source.revision,
     candidate: source.candidate,
     startRevision: startRun.sourceRevision,
-    brief: brief.file,
+    brief: brief?.file,
     approval: approval.file,
     review: review.n,
     kernel: kernelName(),

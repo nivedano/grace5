@@ -52,7 +52,7 @@ or gives the same fields in a file with `--from`. The receipt records the observ
 | A check is rerun | For each check, the result in the highest-numbered run that contains it is the current one. A later failure supersedes an earlier pass; an earlier pass is never picked over it. A run that does not contain the check does not touch it. |
 | The candidate changes | Every result recorded on another candidate, manual observations included, is history. Nothing carries over. |
 | A check definition changes in a new approved revision | Results with the old definition hash are history for that check only. |
-| A revision is approved | The brief and approval of the contract's current revision number are current. Records of other revisions stay and bind nothing. |
+| A revision is approved | The approval of the contract's current revision number is current; a legacy approval names its brief page too. Records of other revisions stay and bind nothing. |
 | A review is repeated | The highest-numbered `review-<n>.xml` is current. It must cover the complete diff to the final revision and name the final candidate; a review of an earlier candidate is history. |
 | A finding is resolved by a code change | The candidate changed, so a new review pass and fresh final evidence are due. |
 | A record is committed | Nothing is superseded; the candidate is unchanged. |
@@ -67,8 +67,8 @@ No record is deleted or rewritten to supersede it. Git and the numbering hold th
 
 `grace5 close` checks these in order and refuses at the first unmet one, naming it.
 
-1. `check` reports no defect in the contract or in an approval, run or review record; then the contract's hash equals the hash in the current revision's approval, and that approval is `approved` and binds every check; then `check` reports no defect in the current revision's brief.
-2. A brief exists for the current revision with the same contract hash, and its own hash equals the approval's `brief-sha256`.
+1. `check` reports no defect in the contract or in an approval, run or review record; then the contract's hash equals the hash in the current revision's approval, and that approval is `approved` and binds every check; then, for a legacy approval, `check` reports no defect in the current revision's brief.
+2. A legacy approval that carries `brief-sha256`: a brief exists for the current revision with the same contract hash, and its own hash equals `brief-sha256`. A new approval without the attribute has no brief obligation.
 3. A start run exists and its source revision can be resolved in the repository.
 4. The working tree has no dirty source path.
 5. The complete diff from the start revision touches no protected path.

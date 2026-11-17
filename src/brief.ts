@@ -1,5 +1,8 @@
-// The mechanical fidelity rules of brief.md. The brief is HTML and has no schema, so this reads only what the
-// rules name: the meta elements, the data- attributes, the limitation cell of an evidence row and the exclusion items.
+// The legacy brief parser. The separate HTML approval brief is retired (C-0019): no new brief is authored and the
+// active documents no longer describe one. This reader remains only to validate the briefs of records already written,
+// so `state.ts` and `examples-verify.ts` can check a legacy approval's page and historical examples stay readable.
+// The brief is HTML and has no schema, so this reads only what the fidelity rules name: the meta elements, the
+// data- attributes, the limitation cell of an evidence row and the exclusion items.
 
 import type { Contract } from "./contract";
 

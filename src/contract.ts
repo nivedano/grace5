@@ -281,10 +281,14 @@ export async function readContract(bytes: Uint8Array, options: ContractOptions =
     }
   }
   if (options.root !== undefined) {
+    // Check rule 3: every cited rule path exists, except one under the change's own Affected, which the change may
+    // create or amend, or which a closed record may cite after it was retired (commands.md).
+    const own = [...contract.paths, ...contract.protectedPaths];
     for (const constraint of contract.constraints) {
       if (constraint.rule === undefined) continue;
       const path = constraint.rule.split("#")[0] ?? "";
-      if (path === "" || !existsSync(join(options.root, path))) defects.push(`constraint ${constraint.id} cites rule ${constraint.rule}, which does not exist`);
+      if (path === "") defects.push(`constraint ${constraint.id} cites rule ${constraint.rule}, which does not exist`);
+      else if (!matchesAny(own, path) && !existsSync(join(options.root, path))) defects.push(`constraint ${constraint.id} cites rule ${constraint.rule}, which does not exist`);
     }
   }
   for (const glob of contract.protectedPaths) {

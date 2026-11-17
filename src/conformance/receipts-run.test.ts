@@ -61,7 +61,7 @@ test(
 );
 
 test(
-  "CHECK reads CRLF as LF for the contract hash and reports an open brief finding",
+  "CHECK reads CRLF as LF for the contract hash and reports an open finding in a legacy brief",
   () => {
     const s = new Scenario({ id: "C-0202-crlf", checks: [automated("CK1")] });
     const rel = `.grace5/changes/${s.id}/contract.xml`;
@@ -72,7 +72,9 @@ test(
     expect(s.check().contractSha).toBe(first.contractSha);
     s.write(rel, lf);
 
+    // A brief is validated only for a legacy approval that names one (C-0019).
     s.writeBrief({ openFinding: true });
+    s.writeApproval();
     const open = s.check();
     expect(open.code).toBe(1);
     expect(open.defects.some((d) => d.startsWith("brief-1.html: "))).toBe(true);

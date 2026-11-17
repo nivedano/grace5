@@ -4,13 +4,19 @@ AUTH an approval with no Statement validates and runs
 AUTH an approval without Source reports approved, runs and closes
 AUTH rejection ignores legacy fields and never authorizes a run
 AUTH-03 upgrade from 0.5.0 only refreshes skills and the pin; a legacy false approval stays unchanged and can start
+BN-01 a new change with no brief approves, starts, runs, reviews and closes
+BN-02 a legacy approval still validates its brief, runs and closes naming it
+BN-03 a legacy brief edited after approval, or missing, still refuses close
+BN-04 an approval without brief-sha256 binds the contract and checks; a missing Bound still fails
+BN-05 a contract altered after approval with no brief is still detected
 CHECK prints the contract hash, each definition hash and the size against target
-CHECK reads CRLF as LF for the contract hash and reports an open brief finding
+CHECK reads CRLF as LF for the contract hash and reports an open finding in a legacy brief
 CL-01 close writes close.xml, then moves the whole change directory under closed/, and the moved change validates unchanged
 CL-02 a closed change refuses run and close with the fixed phrase, under closed/ and when not yet moved
 CL-03 a directory under closed/ without close.xml is malformed, run and close refuse it, and other changes are unaffected
 CL-04 init refuses an id that exists open or closed and writes nothing for it
 CL-05 the listing shows the open changes, counts every closed one moved or not, and --all lists them
+CL-06 a cited rule path under the change's own Affected is not a defect
 CLI an unknown command is a usage error and exits 2
 CLOSE review obligations: no review, incomplete review, missing adequacy, a check that does not discriminate
 CLOSED a closed change refuses further runs
@@ -18,7 +24,7 @@ FL-01 a run killed outright is reported as interrupted and close refuses
 FL-01 a run stopped by a signal writes an interrupted receipt (POSIX only)
 FL-02 a change that starts on a red check records the failure in the start run and proceeds
 FL-03 writing only records and notes after a passing run leaves the candidate unchanged and demands no rerun
-FL-04 a defective draft brief does not stop bound checks
+FL-04 a material amendment not yet approved: no brief obligation, bound checks run, amended checks are refused
 FL-04 a material amendment not yet approved, then rejected: bound checks run, amended and new checks are refused, close refuses
 FL-05 unrelated edits before the start are listed as Preexisting, never staged or committed, and close refuses a dirty tree
 FL-06 a contract that is not well-formed XML is listed as malformed beside a valid change
@@ -39,12 +45,12 @@ FS-09 a skipped check is never counted as passed
 FS-10 receipts that passed on an earlier candidate are stale after the source changed and close refuses
 FS-11 a manual-only change with a procedure and no recorded observation makes close refuse
 FS-12 no approval for the current revision: run and close refuse
-FS-12 no brief for the current revision, or a brief edited after approval: close refuses
+FS-12 a legacy approval's brief, missing or edited after approval: close refuses
 FS-13 a pass followed by a later failure of the same check on the same candidate: the failure is current and close refuses
-FS-14 a brief of an older revision is history and is no defect
-FS-14 a current brief with a stale or missing contract hash is a defect
+FS-14 a legacy brief of an older revision is history and is no defect
+FS-14 a current legacy brief with a stale or missing contract hash is a defect
 FS-14 check exposes the omitted protected path of examples/defective-brief
-FS-14 check reports a brief that omits a protected path
+FS-14 check reports a legacy brief that omits a protected path
 FS-15 unresolvable start revision is reported before a dirty tree
 FS-15 unresolvable start revision refuses close (RV-01)
 FS-16 review must cover the complete diff (RV-02)
@@ -60,12 +66,12 @@ RECEIPT Trace provenance fields: origin, origin-source, run-echo, capture interv
 RECEIPT check commands receive GRACE5_RUN_ID, GRACE5_CHANGE, GRACE5_CHECK, GRACE5_SOURCE_REVISION and GRACE5_CANDIDATE
 REL a change closes without writing the kernel version or the pin
 RUN every form is refused before a start run, and a second start run is refused
-RV-04 a defective brief holds close
+RV-04 a defective legacy brief holds close
 RV-06 changed definition voids only that check
 RV-07 refusals are on standard error
 RV-08 a result recorded dirty does not count once the tree is clean again
 RV-09 an approval that does not bind every check does not close
-RV-10 run refuses a change whose approved brief has a fidelity defect
+RV-10 run refuses a change whose approved legacy brief has a fidelity defect
 STATUS prints the documented lines, with next last, and closed once the change is closed
 TRACE min and max bound how often a marker occurs before the next one
 UP-01 a command other than status, upgrade and the flags refuses a pin behind the kernel with the fixed phrase, and a missing pin reads as 0.1.0

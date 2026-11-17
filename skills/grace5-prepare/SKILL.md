@@ -1,6 +1,6 @@
 ---
 name: grace5-prepare
-description: Use when a GRACE 5 change has to be opened or its contract revised, before any execution. Covers the risk triage, the interview, contract.xml, the independent brief, and recording the owner's decision.
+description: Use when a GRACE 5 change has to be opened or its contract revised, before any execution. Covers the risk triage, the interview, contract.xml, the independent contract read, and recording the owner's decision.
 ---
 
 # Prepare a GRACE 5 change
@@ -14,7 +14,7 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - Triage the request by risk, not by habit. A chore — a minor skill-text correction, a small CLI bug fix, a similarly contained edit — is carried out directly, without a specification and without asking; keep bureaucracy low.
 - The test is consequence: if this edit goes wrong, can the damage be seen and undone with the project's own commands? If yes, edit directly. If the risk outruns what a direct edit can tackle — behaviour, boundaries, evidence or state others depend on — open a full GRACE 5 change.
 - An explicit request for a specification always gets one.
-- A direct edit is an ordinary source edit outside the lifecycle: no contract, brief, approval or receipts. Verify it with the project's own commands and commit it; if the work grows past the triage, stop and open a change.
+- A direct edit is an ordinary source edit outside the lifecycle: no contract, approval or receipts. Verify it with the project's own commands and commit it; if the work grows past the triage, stop and open a change.
 
 ## Interview
 
@@ -32,36 +32,36 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - A check decides between candidates only on the candidate's own bytes. Where its result depends on an excluded input — the installed `grace5-*` skills or anything else under a kernel-managed path — it cannot: state it as installation health, re-evaluated afresh at handoff (`source-identity.md`, `upgrade.md`), not as candidate evidence. Binding such an input into evidence needs a bounded fingerprint under its own approved contract; do not hash caches or the state directory.
 - Choose Automated when a project command's exit status separates working from broken. Choose Trace over Manual whenever the behaviour leaves ordered lines in a log a command can capture, because the kernel then checks sequence and provenance itself (`trace-provenance.md`). Keep Manual for what only a person can judge, and declare its Environment.
 - A check that is red before the work starts is fine, and is often the reason for the change.
-- Run `grace5 check <id>` and clear every `defect:` line. Size is reported, not enforced; explain an excess to the brief writer.
+- Run `grace5 check <id>` and clear every `defect:` line. Size is reported, not enforced; explain an excess to the owner in the Decisions or in `notes.md`.
 
 ## Feasible, discriminating checks
 
 - Before approval, identify for every required check its device, build and environment state and the observation it needs, and use the available read-only diagnostics to establish that each is available. Report what cannot be established as unknown; never assume it, and never record an observation nobody made.
 - When required evidence is unavailable, present one explicit choice before approval: wait until the evidence is available, or accept alternative evidence with its stated limitation. An agent never optionalises a required check without the owner, and a check that fails only because its environment is unavailable is recorded as an environment failure, separately from a product regression.
 - Feasibility is not the final observation and authorizes no flashing, reset or other hardware-state change: establishing that a check can run is never recorded as its result.
-- The brief's evidence discussion must name a plausible faulty implementation the check would reject and, for a trace, the setup whose absence would also fail, so a bare missing marker cannot pass.
+- The contract's evidence discussion must name a plausible faulty implementation the check would reject and, for a trace, the setup whose absence would also fail, so a bare missing marker cannot pass.
 - An already approved unchanged check is not reapproved merely because it is run; a run yields evidence for the current candidate, not a new approval.
 
-## Brief
+## Independent contract read
 
-Hand the contract, without the conversation, to an independent subagent that never saw it. Give it exactly this task:
+Before the owner gate, hand the contract, without the conversation, to an independent subagent that did not write it. Give it exactly this task:
 
-> Write the owner's brief for GRACE 5 change `<id>` revision `<rev>`. You may read `.grace5/changes/<id>/contract.xml`, the GRACE 5 method documents (`brief.md` first), `templates/brief.html`, and the repository read-only to confirm cited paths. You may run `grace5 check <id>` for the contract hash, word count and check count. Read no notes and ask for no background; the contract must stand alone. Write one file, `.grace5/changes/<id>/records/brief-<rev>.html`, by filling the template as `brief.md` requires, with `grace5:writer` set to `independent`. Edit nothing else. Return the mechanical findings `brief.md` names (a criterion its check cannot plausibly serve, an undefined term, a contradiction, a boundary that does not cover the Change, a cited path that does not exist), each with the element id it concerns, or state that there are none. Do not propose designs.
+> Read `.grace5/changes/<id>/contract.xml`, the rule files the contract cites in a `rule` attribute, and the repository read-only to confirm cited paths. You may run `grace5 check <id>` for the contract hash, word count and check count. Read no notes and ask for no background, because the contract must stand alone. Write nothing. Return findings only: a criterion its check cannot serve, an undefined term, a contradiction, a boundary that does not cover Change, a cited path that does not exist.
 
-- The subagent returns findings; the author resolves or answers each one before the owner gate. The subagent proposes no designs and decides nothing. Resolve every finding in the contract, or answer it. Then send the same subagent the corrected contract and your resolutions, and have it bring the brief up to that text with each finding marked resolved. The brief artifact and its mechanics are unchanged here.
-- Run `grace5 check` again; the owner reads nothing while it reports a defect.
-- Without subagents, write the brief yourself from the contract alone, set `grace5:writer` to `self`, and tell the owner so.
+- The reader proposes no design and decides nothing. The author resolves every finding by editing the contract, reruns `grace5 check`, and only then does the owner gate happen.
+- This independent contract read, findings only, is the whole pre-approval independence: no page, no template, no `grace5:writer` metadata and no fidelity parser is produced. The final independent review is separate and unchanged (`grace5-review`).
+- Without subagents, do the read yourself and tell the owner so.
 
 ## Owner gate
 
-- Give the owner the brief page. They answer in one statement: approve, or reject with the reason.
-- Record it in `records/approval-<rev>.xml` (`schemas/approval.xsd`): the decision, date, contract and definition hashes exactly as `grace5 check` prints them, and the SHA-256 of the brief's bytes as the owner read it, taken with a system hash tool. A rejection carries its reason in `Statement`. Omit personal attribution and conversation excerpts; compute nothing else by hand.
+- Give the owner the contract. They answer in one statement: approve, or reject with the reason.
+- Record it in `records/approval-<rev>.xml` (`schemas/approval.xsd`): the decision, date, and the contract and definition hashes exactly as `grace5 check` prints them. A rejection carries its reason in `Statement`. Omit personal attribution and conversation excerpts; compute nothing else by hand.
 - Never set or infer an approval. `authorization.md` says which words count and how a rejection is recorded. An approval authorizes execution; new records carry neither `executes` nor `Execution`. An approval worded to defer the start, such as "approved, hold", remains an approval: wait until the owner starts the change or a batch, and record no hold state.
 
 ## Material revision
 
-Once a revision has an approval or a rejection, any edit to `contract.xml` is a material revision (`authorization.md`): increment `revision`, never reuse a rejected number, rerun `grace5 check`, and request a difference brief by adding to the task text: "This is a difference brief against revision `<previous>`; follow the difference rules of `brief.md`." Then pass the owner gate again. What may run meanwhile is in `authorization.md`.
+Once a revision has an approval or a rejection, any edit to `contract.xml` is a material revision (`authorization.md`): increment `revision`, never reuse a rejected number, rerun `grace5 check`, repeat the independent contract read where the change is material, and pass the owner gate again. What may run meanwhile is in `authorization.md`.
 
-The revision, the contract edit, `grace5 check`, the brief and the owner gate happen in the same conversation that revealed the need: preparation is a phase, not a new session. Present only the unresolved owner decision, not the work that produced it. An existing approval of the exact unchanged revision is reused rather than asked again, and execution resumes only under an approval of this revision.
+The revision, the contract edit, `grace5 check`, the independent contract read and the owner gate happen in the same conversation that revealed the need: preparation is a phase, not a new session. Present only the unresolved owner decision, not the work that produced it. An existing approval of the exact unchanged revision is reused rather than asked again, and execution resumes only under an approval of this revision.
 
 Next: `grace5-execute`.

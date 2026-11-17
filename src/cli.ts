@@ -19,7 +19,7 @@ Usage:
 
 Commands:
   init     Create .grace5/ and, with a change id, a change directory with a contract template.
-  check    Validate a change: contract, records, briefs and approvals. Executes nothing.
+  check    Validate a change: contract, records and approvals. Executes nothing.
   run      Execute checks, or record a manual observation or a skip, and write one receipt.
   status   Report the whole state of a change and its next unresolved obligation, or list every change.
   close    Verify the eight closing steps and write close.xml, or refuse at the first unmet one.
@@ -27,8 +27,8 @@ Commands:
 
 Documentation:
   documentation root: models/architecture/
-  The method document and its topic files, schemas and templates ship inside the kernel package
-  under this directory. The path is relative to the kernel package, not to the repository root.
+  The method document and its topic files and the schemas ship inside the kernel package under
+  this directory. The path is relative to the kernel package, not to the repository root.
 
 Global options:
   --root <dir>   The repository root that holds .grace5/. Defaults to the current directory.
@@ -96,11 +96,14 @@ Checks, for the selected change:
   1. contract.xml validates against schemas/contract.xsd.
   2. Every id in a Criterion's checks names a check; every environment names an Environment;
      a check that serves no criterion is reported as unused.
-  3. Every rule path, without its #fragment, exists in the repository.
+  3. Every rule path, without its #fragment, exists in the repository, unless it is
+     under Affected: a contract may cite a document it creates or amends.
   4. Protected globs are well formed, and no Path is wholly covered by a Protected.
   5. Every XML record present validates against its schema and names this change.
-  6. The brief of the contract's current revision carries the current contract hash and
-     passes every mechanical fidelity rule; briefs of other revisions are not checked.
+  6. An approval that carries brief-sha256 is a legacy approval: the brief of the contract's
+     current revision carries the current contract hash and passes every mechanical fidelity
+     rule; briefs of other revisions are not checked. A new approval without brief-sha256
+     requires no brief.
   7. An approved approval has one Bound per check.
   8. A rejected approval carries a non-empty Statement as its reason.
 
@@ -109,7 +112,7 @@ Output:
   definition <id>: <hash>        per check, the hash of its canonical definition
   words: <n> (target 600)        whitespace-separated tokens of all element text
   checks: <n> (target 8)         all check elements, optional ones included
-  defect: <text>                 per defect; a brief or record defect starts with its file name
+  defect: <text>                 per defect; a legacy brief or a record defect starts with its file name
 
 Size is reported, never enforced.
 
@@ -244,10 +247,11 @@ Usage:
 Checks these in order and refuses at the first unmet one, naming it:
   1. check reports no defect in the contract or in an approval, run or review record; then
      the contract's hash equals the hash in the current revision's approval, and that
-     approval is approved, authorizes execution and binds every check; then check reports
-     no defect in the current revision's brief.
-  2. A brief exists for the current revision with the same contract hash, and its own hash
-     equals the approval's brief-sha256.
+     approval is approved, authorizes execution and binds every check; then, for a legacy
+     approval, check reports no defect in the current revision's brief.
+  2. A legacy approval that carries brief-sha256 has a brief for the current revision with
+     the same contract hash and its own hash equal to brief-sha256; a new approval without
+     the attribute has no brief obligation.
   3. A start run exists and its source revision can be resolved in the repository.
   4. The working tree has no dirty source path.
   5. The complete source diff from the start revision touches no protected path.

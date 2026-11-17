@@ -51,7 +51,7 @@ test(
 );
 
 test(
-  "RV-10 run refuses a change whose approved brief has a fidelity defect",
+  "RV-10 run refuses a change whose approved legacy brief has a fidelity defect",
   () => {
     const s = new Scenario({ id: "C-0312-run-defect", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
     s.takeHashes();
@@ -143,19 +143,19 @@ test(
 );
 
 test(
-  "FS-14 a current brief with a stale or missing contract hash is a defect",
+  "FS-14 a current legacy brief with a stale or missing contract hash is a defect",
   () => {
     const s = new Scenario({ id: "C-0313-stale-brief", protectedPaths: ["src/secret/**"], checks: [automated("CK1")] });
     s.takeHashes();
     const briefDefect = /^refused: change has defects: .*brief-1\.html/;
 
-    // The brief of the current revision carries the hash of other contract text, and omits a protected path.
+    // The brief of the current revision carries the hash of other contract text, and omits a protected path. A brief is
+    // validated only for a legacy approval that names it (C-0019); the owner approved exactly that page.
     s.writeBrief({ omitProtected: ["src/secret/**"], contractShaMeta: sha256("other contract text") });
+    s.writeApproval();
     const stale = s.check();
     expect(stale.code).toBe(1);
     expect(stale.defects.some((d) => d.startsWith("brief-1.html: "))).toBe(true);
-    // The owner approved exactly that page.
-    s.writeApproval();
     s.commit("prepare with a brief written for other contract text");
     const staleStart = s.start();
     expect(staleStart.code).toBe(1);

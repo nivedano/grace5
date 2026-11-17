@@ -50,7 +50,7 @@ function readme(root: string): string {
   return [
     "# .grace5",
     "",
-    "GRACE 5 state of this repository: one directory per open change under `changes/`, each holding `contract.xml`, an optional `notes.md` and `records/` (brief, approval, run receipts, review, close); `grace5 close` moves a closed change to `changes/closed/`.",
+    "GRACE 5 state of this repository: one directory per open change under `changes/`, each holding `contract.xml`, an optional `notes.md` and `records/` (approval, run receipts, review, close; historical changes also carry legacy brief pages); `grace5 close` moves a closed change to `changes/closed/`.",
     "",
     "`kernel-version` pins the version this state conforms to; a kernel of another version refuses to operate on it, and `grace5 upgrade` brings it to the kernel's version. `.gitignore` here keeps the run logs under `records/logs/` out of git.",
     "",

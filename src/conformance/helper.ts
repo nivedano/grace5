@@ -383,6 +383,8 @@ export interface ApprovalOptions {
   revision?: number;
   decision?: "approved" | "rejected";
   executes?: boolean;
+  /** Writes a new approval: no `brief-sha256` attribute and no brief on disk (C-0019). */
+  briefless?: boolean;
   /** Legacy fields, emitted only when explicitly requested to test compatibility. */
   execution?: boolean;
   /** Emits a legacy Source element; the kernel ignores it. Omitted by default. */
@@ -723,14 +725,14 @@ export class Scenario {
     return info;
   }
 
-  /** Fills the template's structure for the current contract (brief.md). */
+  /** Fills a legacy brief page's structure for the current contract, as the retired template once did. */
   writeBrief(o: BriefOptions = {}): void {
     const rev = o.revision ?? this.revision;
     const info = this.requirePrepared(rev);
     const def = this.def;
-    const template = fs.readFileSync(path.join(ARCH, "templates", "brief.html"), "utf8");
-    const style = /<style>[\s\S]*?<\/style>/.exec(template)?.[0];
-    if (style === undefined) throw new Error("the brief template has no style block");
+    // The retired brief template no longer ships (C-0019); the fixture page keeps a plain style block, which the
+    // fidelity rules never read.
+    const style = "<style>body{font-family:system-ui,sans-serif}table{border-collapse:collapse}td,th{border:1px solid #999;padding:.3rem}</style>";
     const title = def.title ?? "Conformance fixture change";
     const basis = rev > 1 ? "difference" : "full";
     const omitted = new Set(o.omitProtected ?? []);
@@ -850,17 +852,17 @@ export class Scenario {
     this.write(`.grace5/changes/${def.id}/records/brief-${rev}.html`, page);
   }
 
-  /** Writes approval-<rev>.xml from the hashes `check` printed and the bytes of the brief on disk. */
+  /** Writes approval-<rev>.xml from the hashes `check` printed and, unless briefless, the bytes of the brief on disk. */
   writeApproval(o: ApprovalOptions = {}): void {
     const rev = o.revision ?? this.revision;
     const info = this.requirePrepared(rev);
     const decision = o.decision ?? "approved";
     const legacyExecutes = o.executes === undefined ? "" : ` executes="${o.executes}"`;
-    const briefSha = sha256(fs.readFileSync(path.join(this.recordsDir, `brief-${rev}.html`)));
+    const briefSha = o.briefless === true ? undefined : sha256(fs.readFileSync(path.join(this.recordsDir, `brief-${rev}.html`)));
     const statement = o.omitStatement === true ? "" : decision === "approved" ? "approved" : "Rejected: not this way.";
     const lines = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
-      `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}" brief-sha256="${briefSha}" date="${today()}" decision="${decision}"${legacyExecutes}>`,
+      `<Approval change="${this.id}" revision="${rev}" contract-sha256="${info.contractSha}"${briefSha === undefined ? "" : ` brief-sha256="${briefSha}"`} date="${today()}" decision="${decision}"${legacyExecutes}>`,
       ...(statement === "" ? [] : [`  <Statement>${statement}</Statement>`]),
       ...(o.source === undefined ? [] : [`  <Source>${o.source}</Source>`]),
     ];
@@ -880,11 +882,19 @@ export class Scenario {
     this.write(`.grace5/changes/${this.id}/records/approval-${rev}.xml`, lines.join("\n"));
   }
 
-  /** check, brief, approval that authorizes execution, and one commit holding everything. */
+  /** check, a legacy brief, an approval that authorizes execution, and one commit holding everything. */
   prepare(): CheckInfo {
     const info = this.takeHashes();
     this.writeBrief();
     this.writeApproval();
+    this.commit("prepare the change");
+    return info;
+  }
+
+  /** check, a new approval that carries no brief, and one commit holding everything (C-0019). */
+  prepareBriefless(): CheckInfo {
+    const info = this.takeHashes();
+    this.writeApproval({ briefless: true });
     this.commit("prepare the change");
     return info;
   }
@@ -1002,6 +1012,13 @@ export function trace(
 export function prepared(def: ContractDef): Scenario {
   const s = new Scenario(def);
   s.prepare();
+  return s;
+}
+
+/** A prepared and approved change with no brief, not yet started: the new approval path (C-0019). */
+export function preparedBriefless(def: ContractDef): Scenario {
+  const s = new Scenario(def);
+  s.prepareBriefless();
   return s;
 }
 

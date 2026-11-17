@@ -269,7 +269,8 @@ async function runInner(options: RunOptions): Promise<number> {
   if (state.closed) return refuse("change is closed");
   if (state.malformed !== undefined || contract === undefined || state.report === undefined) return refuse(`change is malformed: ${state.malformed ?? ""}`);
   // commands.md, Details settled in implementation: a defect of the contract or of a record holds a run at any time,
-  // a defect of the current revision's brief only once that revision is approved, so a draft brief never stops the bound checks.
+  // a defect of a legacy approval's current brief only once that revision is approved, so a draft legacy brief never
+  // stops the bound checks. A new briefless revision has no brief defect at all.
   const approved = state.authorization === "approved";
   const holding = state.blocking.find((defect) => approved || !state.briefDefects.includes(defect));
   if (holding !== undefined) return refuse(`change has defects: ${holding}`);

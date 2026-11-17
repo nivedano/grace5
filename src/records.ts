@@ -19,7 +19,8 @@ export interface Binding {
 
 export interface Approval extends Binding {
   readonly file: string;
-  readonly briefSha256: string;
+  /** Legacy: the hash of the brief page the owner read. Undefined for a new approval, which binds no page (authorization.md). */
+  readonly briefSha256: string | undefined;
   readonly decision: "approved" | "rejected";
   /** `approved` or empty for an approval, the reason for a rejection. */
   readonly statement: string;
@@ -101,7 +102,8 @@ export interface CloseRecord extends Binding {
   readonly sourceRevision: string;
   readonly candidate: string;
   readonly startRevision: string;
-  readonly brief: string;
+  /** Legacy: the brief page of the change. Undefined for a new approval, whose close names no brief (evidence-records.md). */
+  readonly brief: string | undefined;
   readonly approval: string;
   readonly review: number;
   readonly kernel: string;
@@ -160,7 +162,7 @@ function readApproval(root: XmlElement, file: string): Approval {
   return {
     ...binding(root),
     file,
-    briefSha256: attr(root, "brief-sha256"),
+    briefSha256: optionalAttr(root, "brief-sha256"),
     decision: attr(root, "decision") === "approved" ? "approved" : "rejected",
     statement: collapse(childNamed(root, "Statement")?.text ?? ""),
     bound: childrenNamed(root, "Bound").map((b) => ({ check: attr(b, "check"), definitionSha256: attr(b, "definition-sha256") })),
@@ -254,7 +256,7 @@ function readClose(root: XmlElement): CloseRecord {
     sourceRevision: attr(root, "source-revision"),
     candidate: attr(root, "candidate"),
     startRevision: attr(root, "start-revision"),
-    brief: attr(root, "brief"),
+    brief: optionalAttr(root, "brief"),
     approval: attr(root, "approval"),
     review: Number(attr(root, "review")),
     kernel: attr(root, "kernel"),

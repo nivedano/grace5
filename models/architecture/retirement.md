@@ -28,10 +28,10 @@ For a retired skill, absent means the surface has no skill of that name or purpo
 | grace-init | Retire | `grace5 init` (detect existing rules and documents, never overwrite) | [x] |
 | grace-spec | Merge into prepare | Prepare skill; Problem, Change, Constraints, NonGoals, Acceptance and Decisions of `contract.xml` | [x] |
 | grace-plan | Merge into prepare | Prepare skill; Checks and `Affected` (with `Protected`) of `contract.xml`; dependencies and slices in `notes.md` | [x] |
-| grace-brief | Rewrite as the brief step that closes prepare | Prepare skill; `brief-<rev>.html` and `approval-<rev>.xml`; no state machine | [x] |
+| grace-brief | Retired with the brief (C-0019, 2026-11-17) | Prepare skill; the contract, the findings-only independent contract read, and `approval-<rev>.xml`; no state machine, no page | [x] |
 | grace-execute | Rewrite as execute | Execute skill with `grace5 run` | [x] |
 | grace-refactor | Retire | Prepare and execute skills, as an ordinary change | [x] |
-| grace-setup-subagents | Retire | Harness capabilities; the brief writer and the reviewer receive a bounded task and the contract | [x] |
+| grace-setup-subagents | Retire | Harness capabilities; the independent contract reader and the reviewer receive a bounded task and the contract | [x] |
 | grace-fix | Retire | Prepare and execute skills; a check that starts red is recorded by `run --start` | [x] |
 | grace-refresh | Retire | Nowhere; there is no hand-maintained corpus to synchronize | [x] |
 | grace-status | Retire | `grace5 status` | [x] |

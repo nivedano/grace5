@@ -25,8 +25,10 @@
         </xs:complexType></xs:element>
       </xs:sequence>
       <xs:attributeGroup ref="Binding"/>
-      <!-- brief-sha256: hash of the brief-<rev>.html page the owner read. -->
-      <xs:attribute name="brief-sha256" type="Sha256" use="required"/>
+      <!-- brief-sha256: legacy. The hash of the brief page the owner read, in a record already written; a legacy
+           approval keeps that obligation. A new approval carries no brief, omits this attribute, and binds the
+           contract text and each check definition instead (authorization.md, C-0019). -->
+      <xs:attribute name="brief-sha256" type="Sha256" use="optional"/>
       <xs:attribute name="date" type="xs:date" use="required"/>
       <!-- Legacy personal attribution: accepted in existing records and ignored; new records omit it. -->
       <xs:attribute name="owner" type="Text" use="optional"/>

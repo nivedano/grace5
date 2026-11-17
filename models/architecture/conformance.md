@@ -17,13 +17,23 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | FS-09 | A check was skipped or cancelled. | Never counted as passed. |
 | FS-10 | Receipts pass on an earlier candidate; the source changed afterwards. | `close` refuses as stale. |
 | FS-11 | A manual-only change has a procedure and no recorded observation. | `close` refuses. |
-| FS-12 | There is no brief, or no approval, for the current revision. | `close` refuses. |
+| FS-12 | There is no approval for the current revision, or a legacy approval's brief is missing or edited after approval. | `close` refuses; a new approval without `brief-sha256` needs no brief. |
 | FS-13 | A pass is followed by a later failure of the same check on the same candidate. | The failure is current; `close` refuses. |
-| FS-14 | A brief omits a protected path. | `check` reports the omission, and `close` refuses while it stands. |
+| FS-14 | A legacy approval's brief omits a protected path. | `check` reports the omission, and `close` refuses while it stands. |
 | FS-15 | The start revision cannot be resolved, so the complete diff cannot be computed. | `close` refuses; the protected-path step is never skipped. |
 | FS-16 | The review names another start revision, another contract hash, or an end revision of another candidate. | `close` refuses. |
 | FS-17 | A blocking finding is marked owner-disposed without a neutral `OwnerDecision` stating the owner's actual disposition. | `close` refuses. |
 | FS-18 | The review records a violated rule or a check that does not discriminate. | `close` refuses. |
+
+## Briefless approval (new path)
+
+| Id | Case | Required behaviour |
+|---|---|---|
+| BN-01 | A new change has no brief and its approval carries no `brief-sha256`. | `check` reports no defect, `status` reports approved, `run`, review and `close` proceed, and `close.xml` carries no `brief` attribute. |
+| BN-02 | A legacy change carries a brief and a `brief-sha256`. | The brief validates, the change runs, reviews and closes, and `close.xml` names the brief. |
+| BN-03 | A legacy change's brief is missing or edited after approval. | `close` refuses with `no brief for revision <n>`, or `brief does not match the approval`. |
+| BN-04 | A contract is edited after approval without a new revision, with no brief. | Reported altered after approval and treated as unapproved; the absence of a brief hides no alteration. |
+| BN-05 | A new approval omits a `Bound` for a check, or carries a wrong definition hash. | `check` reports the defect and `close` refuses. |
 
 ## Failure
 
@@ -70,6 +80,7 @@ The kernel's conformance suite has at least one test per case below. A test fail
 | CL-03 | A directory under `closed/` has no `records/close.xml`. | Reported malformed, the first error naming the missing close record; `run` and `close` refuse it as malformed; it is not counted as closed; every other change is unaffected. |
 | CL-04 | `init` is given an id that has a directory, open or under `closed/`. | Refused on one line naming the location; nothing is written. |
 | CL-05 | The listing is read with closed changes present, moved or not. | Open changes one line each, no line for a closed change, and last `closed changes: <n>` counting every closed change; with `--all` one `<id>: closed` line per closed change before the count. `--all` with a change id, or on another command, is a usage error. |
+| CL-06 | A contract cites a `rule` path that does not exist, once under its own Affected and once outside it. | `check` reports no defect for the citation under Affected — a document the change creates or amends, or one a historical record cited before its retirement — and reports the citation outside it. |
 
 ## Upgrade
 

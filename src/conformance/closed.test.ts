@@ -1,9 +1,11 @@
-// Conformance cases CL-01 .. CL-05 of models/architecture/conformance.md: closed changes move under closed/ and stay closed there.
+// Conformance cases CL-01 .. CL-06 of models/architecture/conformance.md: closed changes move under closed/ and stay
+// closed there, and a cited rule under a change's own Affected is never a defect, so a historical record survives a
+// retirement.
 
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { HEX64, TEST_TIMEOUT, automated, contractXml, disposeAll, hasLine, prepared, type CliResult, type ContractDef, type Scenario } from "./helper";
+import { HEX64, Scenario, TEST_TIMEOUT, automated, contractXml, disposeAll, hasLine, prepared, type CliResult, type ContractDef } from "./helper";
 
 afterAll(() => disposeAll());
 
@@ -211,6 +213,26 @@ test(
     expect(s.cli(["status", "--all", first]).code).toBe(2);
     expect(s.cli(["check", first, "--all"]).code).toBe(2);
     expect(HEX64.test(s.check(first).contractSha)).toBe(true);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "CL-06 a cited rule path under the change's own Affected is not a defect",
+  () => {
+    const s = new Scenario({ id: "C-0411-retired-rule", checks: [automated("CK1")] });
+    // A contract may cite a document it creates or amends, so a citation under its own write boundary need not exist.
+    // This is what keeps a closed record readable after the framework retires a document it cited.
+    s.writeContract({ id: s.id, paths: ["docs/**"], rule: "docs/retired.md#R-1", checks: [automated("CK1")] });
+    const inside = s.check();
+    expect(inside.defects).toEqual([]);
+    expect(inside.code).toBe(0);
+
+    // Outside the write boundary the same missing citation is still a defect.
+    s.writeContract({ id: s.id, paths: ["src/**"], rule: "docs/retired.md#R-1", checks: [automated("CK1")] });
+    const outside = s.check();
+    expect(hasLine(outside, "defect: constraint K1 cites rule docs/retired.md#R-1, which does not exist")).toBe(true);
+    expect(outside.code).toBe(1);
   },
   TEST_TIMEOUT,
 );
