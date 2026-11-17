@@ -25,6 +25,16 @@ File names below refer to the GRACE 5 method documents: `models/architecture/` i
 - Commit through the change-commit routine, which constructs and verifies the `Change: <id>` trailer instead of relying on memory: where the harness has no verified commit facility, `bun src/tools/change-commit.ts --change <id> --message <subject> -- <paths>...` commits exactly the named paths with `git commit --only` and reads the created commit back — its parsed `Change: <id>` trailer and its changed-path list — before accepting it, refusing an empty selection, a path with no modified content and any read-back mismatch. Use it for every change-owned commit: product, test, evidence and observation records, the review record and the close move. Commit receipts and notes as you go; committing records never invalidates evidence. A batch-only ledger commit that carries no change's records follows its actual ownership and is not assigned to a change.
 - If the work shows that a boundary, a constraint or a check must change, stop that part. Do not edit `contract.xml` in passing and do not bend a check until it passes. Go back to `grace5-prepare` for a material revision; `authorization.md` lists what may continue meanwhile.
 
+## Verification cost
+
+- Profile one representative receipt into build, packaging, test and live-capture time before adding any reuse; a long duration alone is not a finding of waste. Identify duplicate coordinator verification as its own target rather than caching over it (I-007 removes it).
+- Run focused checks while editing and the complete required final set on the clean final candidate. A receipt taken while iterating is for iteration only; it never becomes the final evidence.
+- When reuse is added, document the cache keys and cover the relevant source, toolchain, configuration and firmware variants, then validate that changing any relevant input invalidates the cache.
+- A successful cache never supplies a receipt for different inputs: no required check is skipped, no receipt is reused across candidates, and final evidence stays kernel-counted on the actual clean candidate (`source-identity.md`).
+- Hardware capture stays honest and live even when build artifacts are reused.
+- A change to required command semantics is a material revision and returns to the owner gate, not a fix.
+- Profiling precedes concrete reuse: this section states the profiling and iteration obligation only. A concrete cache implementation, its pilot key lists and its scripts follow a separate governed scope after profiling identifies the work.
+
 ## Final evidence
 
 - Commit everything, so that the source revision is clean, then run `grace5 run <id>` with no selection.
