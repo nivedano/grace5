@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Contract id="C-0012-orchestration-adapter" revision="1" title="One lifecycle adapter over harness task facilities, with bounded role handoffs">
+<Contract id="C-0012-orchestration-adapter" revision="2" title="One lifecycle adapter over harness task facilities, with bounded role handoffs">
   <Problem>Control-center interventions I-007 and I-011, approved 2026-11-16, record P-014 and P-018: the OMP case duplicated orchestration instructions, assigned verification and scheduling to conflicting owners, required ledger repairs, treated preparation as a separate conversation, and made workers rediscover installation roots. The framework must keep one GRACE lifecycle while using the harness's native task mechanics.</Problem>
   <Change>`grace5-orchestrate` becomes a thin lifecycle adapter: harness task facilities own spawning, messaging, waiting, cancelling, inspection and transient progress; the adapter owns change selection, isolation decisions and the next lifecycle phase, reading `grace5 status` and the existing lifecycle skills. One implementer is active in a shared worktree; implementers run baseline, targeted and final evidence; the orchestrating agent validates status and the complete diff rather than repeating fresh evidence on an unchanged candidate. A material revision is prepared in the same conversation as its trigger, produces the contract and independent brief, and presents only the unresolved owner decision; execution resumes only under an approval of that revision, and an approval of the exact unchanged revision is reused. The run keeps one compact prose checkpoint under `.grace5/orchestration/runs/` recording the workspace, selected and excluded changes, original starts, worker identity and deadline where not otherwise recoverable, fix-round count, parked obligations and unsettled decisions. Dispatch packets carry verified repository and documentation roots, shell convention, change id, original start and current candidate, permitted role and return stage; `grace5 --help` prints the installed documentation root. Reviewer packets contain only the contract, complete diff, receipts and cited rules, never author reasoning.</Change>
   <Constraints>
@@ -16,15 +16,14 @@
     <NonGoal id="N3">No change to execute or review mechanics beyond cited pointers; their check, receipt, approval and closure semantics stay.</NonGoal>
     <NonGoal id="N4">No dependency-policy redesign, advisor scheduling, commit-trailer automation, installation-mirror repair or M3 measurement.</NonGoal>
     <NonGoal id="N5">No kernel command, schema, receipt format, source-identity rule, migration boundary or release.</NonGoal>
+    <NonGoal id="N6">No rehearsal claim for interruption recovery, a conflicting higher-priority harness policy or a non-OMP task path; those remain a later rehearsal, and this change records no observation for them.</NonGoal>
   </NonGoals>
   <Acceptance>
     <Criterion id="A1" checks="CK2 CK5">An approved batch in one shared worktree keeps at most one active implementer, uses no forced fan-out or duplicate task runtime, and requires implementer receipts and independent review before kernel closure.</Criterion>
     <Criterion id="A2" checks="CK2 CK5">An owner request for a material revision produces the contract and independent brief in the same conversation and presents only the unresolved owner decision; no product execution occurs under the unapproved revision.</Criterion>
     <Criterion id="A3" checks="CK2 CK5">An approval of the exact unchanged revision is reused without a repeated question or a new approval record.</Criterion>
     <Criterion id="A4" checks="CK2 CK5">A red baseline and a later green final result are recorded honestly; generic orchestration neither forbids lifecycle-valid partial commits nor repeats a full final run without changed inputs.</Criterion>
-    <Criterion id="A5" checks="CK2 CK5">An interrupted run with an active worker or parked change reconciles worker, git and status, restores the next obligation, preserves the original start and performs no duplicate start, dispatch or close.</Criterion>
     <Criterion id="A6" checks="CK2 CK5">A reviewer receives the approved contract, complete diff, receipts and cited rules, and no authoring conversation or hinted findings.</Criterion>
-    <Criterion id="A7" checks="CK5">A conflicting higher-priority harness policy is exposed before dispatch, with no claim that skill prose overrides it and no silent relaxation of a GRACE gate.</Criterion>
     <Criterion id="A8" checks="CK1 CK3 CK4">The help change compiles; `grace5 --help` and the generated CLI reference name the installed documentation root, so a fresh session can orient from an installed layout without filesystem-wide guesses.</Criterion>
   </Acceptance>
   <Affected>
@@ -68,7 +67,7 @@
       <Expect>documentation root:</Expect>
     </Trace>
     <Manual id="CK5">
-      <Procedure>Rehearse, in an OMP session and one non-OMP task path, an approved serial batch and an interrupted worker. Record: at most one active implementer; same-conversation preparation of a requested revision with only the unresolved owner decision asked; reuse of an approval of unchanged bytes; an honest red baseline; a reviewer packet with the contract, complete diff, receipts and cited rules and no authoring conversation; recovery that reconciles worker, git and status without a duplicate start, dispatch or close; and a pre-dispatch critical stop when the harness policy conflicts with the adapter. On each path, locate the lifecycle documents from the printed documentation root and from an installed layout, not by a filesystem-wide guess.</Procedure>
+      <Procedure>Rehearse in an OMP session an approved serial batch with one parked unapproved change. Record: at most one active implementer; same-conversation preparation of a requested revision with only the unresolved owner decision asked; reuse of an approval of unchanged bytes; an honest red baseline; a reviewer packet with the contract, complete diff, receipts and cited rules and no authoring conversation; continuation with the parked change without presenting it as completed; and location of the lifecycle documents from the printed documentation root. Do not record an observation for interruption recovery, a conflicting higher-priority policy or a non-OMP path; those are deferred by NonGoal N6.</Procedure>
     </Manual>
   </Checks>
   <Decisions>

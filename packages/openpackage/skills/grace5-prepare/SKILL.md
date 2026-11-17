@@ -40,7 +40,7 @@ Hand the contract, without the conversation, to an independent subagent that nev
 
 > Write the owner's brief for GRACE 5 change `<id>` revision `<rev>`. You may read `.grace5/changes/<id>/contract.xml`, the GRACE 5 method documents (`brief.md` first), `templates/brief.html`, and the repository read-only to confirm cited paths. You may run `grace5 check <id>` for the contract hash, word count and check count. Read no notes and ask for no background; the contract must stand alone. Write one file, `.grace5/changes/<id>/records/brief-<rev>.html`, by filling the template as `brief.md` requires, with `grace5:writer` set to `independent`. Edit nothing else. Return the mechanical findings `brief.md` names (a criterion its check cannot plausibly serve, an undefined term, a contradiction, a boundary that does not cover the Change, a cited path that does not exist), each with the element id it concerns, or state that there are none. Do not propose designs.
 
-- Resolve every finding in the contract, or answer it. Then send the same subagent the corrected contract and your resolutions, and have it bring the brief up to that text with each finding marked resolved.
+- The subagent returns findings; the author resolves or answers each one before the owner gate. The subagent proposes no designs and decides nothing. Resolve every finding in the contract, or answer it. Then send the same subagent the corrected contract and your resolutions, and have it bring the brief up to that text with each finding marked resolved. The brief artifact and its mechanics are unchanged here.
 - Run `grace5 check` again; the owner reads nothing while it reports a defect.
 - Without subagents, write the brief yourself from the contract alone, set `grace5:writer` to `self`, and tell the owner so.
 
@@ -53,5 +53,7 @@ Hand the contract, without the conversation, to an independent subagent that nev
 ## Material revision
 
 Once a revision has an approval or a rejection, any edit to `contract.xml` is a material revision (`authorization.md`): increment `revision`, never reuse a rejected number, rerun `grace5 check`, and request a difference brief by adding to the task text: "This is a difference brief against revision `<previous>`; follow the difference rules of `brief.md`." Then pass the owner gate again. What may run meanwhile is in `authorization.md`.
+
+The revision, the contract edit, `grace5 check`, the brief and the owner gate happen in the same conversation that revealed the need: preparation is a phase, not a new session. Present only the unresolved owner decision, not the work that produced it. An existing approval of the exact unchanged revision is reused rather than asked again, and execution resumes only under an approval of this revision.
 
 Next: `grace5-execute`.

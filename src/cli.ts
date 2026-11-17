@@ -25,6 +25,11 @@ Commands:
   close    Verify the eight closing steps and write close.xml, or refuse at the first unmet one.
   upgrade  Bring the repository state from its pinned version to this kernel's version, step by step.
 
+Documentation:
+  documentation root: models/architecture/
+  The method document and its topic files, schemas and templates ship inside the kernel package
+  under this directory. The path is relative to the kernel package, not to the repository root.
+
 Global options:
   --root <dir>   The repository root that holds .grace5/. Defaults to the current directory.
   --help, -h     Show this help, or the help of a command (grace5 <command> --help).

@@ -61,7 +61,7 @@ Brings the state from its pinned version to the kernel's version (`upgrade.md`).
 
 With open changes, `upgrade` prints `scope:` with its plan (including `--plan`) to explain the kernel-managed path exclusion from candidate, dirty state and Protected checks. After successful post-upgrade validation it also prints `resume: <id>: <guidance>` for each open change before the final `upgraded:` line: retain the contract and original start and read status for remaining obligations, including evidence invalidated by a candidate-rule change. Closed changes receive no resume guidance.
 
-Output is plain text, one fact per line, stable enough to grep. The invocation is `grace5 [--root <dir>] <command> [change] [flags]`; `--root` defaults to the current directory. Exit status is 0 on success, 1 on a refusal, a defect or a run in which any executed check did not pass, and 2 on a usage error.
+Output is plain text, one fact per line, stable enough to grep. The invocation is `grace5 [--root <dir>] <command> [change] [flags]`; `--root` defaults to the current directory. Exit status is 0 on success, 1 on a refusal, a defect or a run in which any executed check did not pass, and 2 on a usage error. The global help also prints one stable orientation line, `documentation root: models/architecture/`, naming where the method documents and the schemas and templates ship inside the kernel package; the path is relative to the kernel package, never an absolute path, so the generated reference is machine-independent.
 
 | Command | Lines |
 |---|---|
