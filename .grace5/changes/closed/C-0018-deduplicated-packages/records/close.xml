@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0018-deduplicated-packages" revision="2" contract-sha256="c3b5216c3689049649f95ffdc03aa729f46185342d6def0be7e1d9ccf4bd8a0a" date="2026-11-17T08:22:24.887Z" source-revision="9adfc0167c6a72137371aebb17f6fe229b3d6000" candidate="f143e474f5a02de5fa3879ed88b8eaa206b91fe79b78ed7936a751717e9ff47c" start-revision="f3fe370311975716029d822d9005a35a8f7bd83e" brief="brief-2.html" approval="approval-2.xml" review="1" kernel="grace5 0.8.0">
+  <Satisfied check="CK1" kind="automated" run="3" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="3" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="3" claim="command-completion"/>
+  <Satisfied check="CK4" kind="automated" run="3" claim="command-completion"/>
+  <Satisfied check="CK5" kind="trace" run="3" claim="marker-sequence-unattributed"/>
+</Close>

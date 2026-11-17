@@ -29,3 +29,7 @@ Control-center intervention I-015 (deduplicate framework skills). This change ow
 - Source-checkout and installed-package upgrade paths refresh the same bytes; repeated upgrade is idempotent.
 - No tracked `packages/**/SKILL.md` remains; the local release skill is untouched.
 - No symlink assumption; Windows, archive and installer paths are proven with real files.
+
+## Revision 2
+
+Revision 2 is a minor correction after the owner's standing instruction of 2026-11-17 to continue without waiting for reapproval of minor modifications: CK5's Expect order now matches the sorted `git ls-files` output (orchestrate before prepare), and Affected now declares the tracked `models/architecture/package-manifest.json` that package verification reads. The original revision-1 approval and brief bytes are preserved in git; revision 2 has its own difference brief and approval. CK1-CK4 definitions are unchanged.

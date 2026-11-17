@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0018-deduplicated-packages" revision="2" contract-sha256="c3b5216c3689049649f95ffdc03aa729f46185342d6def0be7e1d9ccf4bd8a0a" n="3" run-id="3b76c3971e9240d0988ab3ffc20782d1" started="2026-11-17T08:05:18.165Z" ended="2026-11-17T08:08:06.718Z" status="completed" source-revision="9adfc0167c6a72137371aebb17f6fe229b3d6000" dirty="false" candidate="f143e474f5a02de5fa3879ed88b8eaa206b91fe79b78ed7936a751717e9ff47c" kernel="grace5 0.8.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="5ee2e0cc7401a5a9e8886e6df2b370b5c4280195e1bc1177ff4042d7b31ef669" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="5073" log="records/logs/run-3/CK1.log" log-sha256="8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=120
+command=bun run check
+</Definition>
+  </Result>
+  <Result check="CK2" kind="automated" required="true" definition-sha256="304329f8cf03862db6c42a40c16df5c7ad12b6e34966692b42125a786ab2d011" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="152461" log="records/logs/run-3/CK2.log" log-sha256="f694e7fc7f5088dff109d5d8d05083863f3a2fd7be483bbb104e77982756c559">
+    <Definition>kind=automated
+id=CK2
+required=true
+cwd=.
+budget=600
+command=bun test --parallel
+</Definition>
+  </Result>
+  <Result check="CK3" kind="automated" required="true" definition-sha256="5f04e3ac76317e038af1b5c42589415b6c1f92d13cc491f944a533acf83cb165" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="582" log="records/logs/run-3/CK3.log" log-sha256="a52669258f71e8d03f89fae509d55f3b941c7eddf0cf1b882f0b6c360f66b688">
+    <Definition>kind=automated
+id=CK3
+required=true
+cwd=.
+budget=120
+command=bun run package:verify
+</Definition>
+  </Result>
+  <Result check="CK4" kind="automated" required="true" definition-sha256="4d2329dd5f78414553fd48f74baab4a996bc65ad3340bcd2c5912b7845561124" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="10331" log="records/logs/run-3/CK4.log" log-sha256="e9b1973d353b991782b98466cd19118de6db87282fde1174d7ef8e7e3e935b11">
+    <Definition>kind=automated
+id=CK4
+required=true
+cwd=.
+budget=120
+command=bun run examples:verify
+</Definition>
+  </Result>
+  <Result check="CK5" kind="trace" required="true" definition-sha256="b1e8cfa04550deedfc66572e355f6c1910f9c4facb2eaae3fa27674e49fcb41b" verdict="passed" claim="marker-sequence-unattributed" cwd="." exit="0" elapsed-ms="97" log="records/logs/run-3/CK5.log" log-sha256="f76f6144dd0392ebf1dae7e9fc1e79fe3a1f5b5cd5ddde77eba9dbc880cbc038">
+    <Definition>kind=trace
+id=CK5
+required=true
+cwd=.
+budget=30
+origin=any
+command=git ls-files skills packages
+expect=1,|skills/grace5-orchestrate/SKILL.md
+expect=1,|skills/grace5-prepare/SKILL.md
+forbid=packages/skills/grace5-prepare/SKILL.md
+forbid=packages/skills/grace5-orchestrate/SKILL.md
+forbid=packages/claude-plugin/skills/grace5-prepare/SKILL.md
+forbid=packages/openpackage/skills/grace5-prepare/SKILL.md
+</Definition>
+    <Trace origin-source="absent" run-echo="false" capture-started="2026-11-17T08:08:06.620Z" capture-ended="2026-11-17T08:08:06.717Z" device-source="absent" build-source="absent" matched="2" expected="2"/>
+  </Result>
+</Run>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Contract id="C-0018-deduplicated-packages" revision="1" title="One canonical skill copy in the source tree, with distribution materialized at build time">
+<Contract id="C-0018-deduplicated-packages" revision="2" title="One canonical skill copy in the source tree, with distribution materialized at build time">
   <Problem>Intervention I-015 records P-021: each of four lifecycle skills exists four times, as `skills/`, `packages/skills/`, `packages/claude-plugin/skills/` and `packages/openpackage/skills/`, so sixteen tracked `SKILL.md` bodies stand for four skills. The generator already establishes one authoring source, but the mirrored bodies are tracked ordinary source and drift.</Problem>
   <Change>`skills/` remains the sole maintained source-tree skill content. The three distribution layouts are generated deterministically at build or release staging rather than tracked as ordinary source, and `.gitignore` excludes the generated trees. Format-specific manifests and generation logic remain. The CLI skill refresh resolves canonical content in a source checkout and the explicitly packaged resource in an installed distribution; it does not depend on a removed generated directory or an incidental prior build. Package verification detects stale, missing or extra distribution content without requiring tracked source bodies. Direct repository consumers receive a verified compatible route or an explicit compatibility decision. Historical upgrade tests, examples, package checks and the local `grace5-release` skill still pass.</Change>
   <Constraints>
@@ -39,6 +39,7 @@
     <Path>models/architecture/conformance.md</Path>
     <Path>models/architecture/rationale-ledger.md</Path>
     <Path>models/architecture/cli-reference.md</Path>
+    <Path>models/architecture/package-manifest.json</Path>
     <Path>.gitignore</Path>
     <Path>packages/**</Path>
     <Path>AGENTS.md</Path>
@@ -73,8 +74,8 @@
     </Automated>
     <Trace id="CK5" origin="any" budget="30">
       <Command>git ls-files skills packages</Command>
-      <Expect>skills/grace5-prepare/SKILL.md</Expect>
       <Expect>skills/grace5-orchestrate/SKILL.md</Expect>
+      <Expect>skills/grace5-prepare/SKILL.md</Expect>
       <Forbid>packages/skills/grace5-prepare/SKILL.md</Forbid>
       <Forbid>packages/skills/grace5-orchestrate/SKILL.md</Forbid>
       <Forbid>packages/claude-plugin/skills/grace5-prepare/SKILL.md</Forbid>
