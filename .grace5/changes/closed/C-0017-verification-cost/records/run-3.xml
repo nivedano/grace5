@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0017-verification-cost" revision="1" contract-sha256="fa6f554e5f10de4c31b3284924526ebd46ccacf680db588dd5e3a74b6a66441d" n="3" run-id="ba33dd57f7d04a12849b90746ff26e8e" started="2026-11-17T07:13:27.122Z" ended="2026-11-17T07:13:27.122Z" status="completed" source-revision="dec7abea395f1c9281b0dfe6579d8fe3d23a8b59" dirty="false" candidate="3586c1d7a9b2bbc11c038c014b86b44c247e9b51d3d5c8f1d9b5dd30fce897c3" kernel="grace5 0.8.0">
+  <Result check="CK4" kind="manual" required="true" definition-sha256="186949afd3bbd3640efabebef5f67ee800948ea80963822d9b2874b3da6af3d8" verdict="passed" claim="observation">
+    <Definition>kind=manual
+id=CK4
+required=true
+procedure=Profile one representative receipt into build, packaging, test and live-capture time. Run focused iteration and the complete required final set on a clean candidate. If reuse is used, run cold and warm on the same candidate, change a relevant source, toolchain, configuration and firmware input, and observe invalidation; confirm a failing selected regression still fails and final evidence remains kernel-counted on the actual candidate.
+</Definition>
+    <Observation at="2026-11-17T07:13:27.122Z" build="dec7abe" environment="local Windows host, GRACE 5 repository">Profiled representative verification work: bun run check 8.5s cold and 8.3s warm; bun run package:verify 1.1s; the full test suite is the CK2 receipt. No reuse or cache was introduced by this change, so no cold/warm cache-invalidation claim is made. Focused iteration was used for the guidance changes, and the complete required final set ran on the clean candidate; final evidence remains kernel-counted on that candidate. Hardware/live capture is not applicable to this framework change. Concrete reuse and pilot key lists remain deferred by N6/D8.</Observation>
+  </Result>
+</Run>

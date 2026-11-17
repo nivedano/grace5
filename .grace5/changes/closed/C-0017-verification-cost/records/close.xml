@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0017-verification-cost" revision="1" contract-sha256="fa6f554e5f10de4c31b3284924526ebd46ccacf680db588dd5e3a74b6a66441d" date="2026-11-17T07:22:21.859Z" source-revision="dec7abea395f1c9281b0dfe6579d8fe3d23a8b59" candidate="3586c1d7a9b2bbc11c038c014b86b44c247e9b51d3d5c8f1d9b5dd30fce897c3" start-revision="1cafbb3a2d0f9acf668bff6d4d1d9db8be56cebf" brief="brief-1.html" approval="approval-1.xml" review="1" kernel="grace5 0.8.0">
+  <Satisfied check="CK1" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK2" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK3" kind="automated" run="2" claim="command-completion"/>
+  <Satisfied check="CK4" kind="manual" run="3" claim="observation"/>
+</Close>
