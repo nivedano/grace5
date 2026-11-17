@@ -1,6 +1,6 @@
-// Generates the three harness packages under packages/ from the canonical skills in skills/,
-// and models/architecture/cli-reference.md from the CLI help text.
-// `--verify` regenerates in memory and compares byte for byte with what is on disk.
+// Generates the three harness packages under packages/ from the canonical skills in skills/ and the
+// advisor guidance resource in models/architecture/, and models/architecture/cli-reference.md from the
+// CLI help text. `--verify` regenerates in memory and compares byte for byte with what is on disk.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -11,6 +11,10 @@ const SKILLS_DIR = "skills";
 const PACKAGE_NAME = "grace5";
 const PACKAGE_IDS = ["claude-plugin", "openpackage", "skills"] as const;
 type PackageId = (typeof PACKAGE_IDS)[number];
+
+/** The advisor guidance resource: the maintained source and where each generated package ships it. */
+const GUIDANCE_SOURCE = "models/architecture/advisor-guidance.md";
+const GUIDANCE_TARGET = "advisor-guidance.md";
 
 type Files = Map<string, Buffer>;
 
@@ -66,6 +70,13 @@ function readSkills(root: string): Map<string, string> {
   return skills;
 }
 
+/** The packaged advisor guidance resource: models/architecture/advisor-guidance.md, LF-normalised. */
+function readGuidance(root: string): string {
+  const path = join(root, GUIDANCE_SOURCE);
+  if (!existsSync(path)) throw new Error(`${GUIDANCE_SOURCE} is missing`);
+  return lf(readFileSync(path, "utf8"));
+}
+
 /** A YAML scalar, quoted whenever a plain scalar could be misread. */
 function yamlScalar(value: string): string {
   const plain = /^[A-Za-z0-9][A-Za-z0-9 ._/()@+,-]*$/.test(value) && !/\s$/.test(value);
@@ -77,11 +88,12 @@ function readme(what: string): string {
   return `This ${what} is generated from \`skills/\` by \`bun run package\` and must not be edited; edit the skill under \`skills/\` and regenerate.\n`;
 }
 
-function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>): Files {
+function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>, guidance: string): Files {
   const files: Files = new Map();
   const put = (path: string, text: string): void => {
     files.set(path, Buffer.from(lf(text), "utf8"));
   };
+  put(GUIDANCE_TARGET, guidance);
   switch (id) {
     case "claude-plugin": {
       const manifest = { name: PACKAGE_NAME, description: meta.description, version: meta.version };
@@ -163,10 +175,11 @@ function main(argv: readonly string[]): number {
   const packagesDir = join(root, PACKAGES_DIR);
   const meta = readMeta(root);
   const skills = readSkills(root);
+  const guidance = readGuidance(root);
   let failed = false;
 
   for (const id of PACKAGE_IDS) {
-    const expected = generatePackage(id, meta, skills);
+    const expected = generatePackage(id, meta, skills, guidance);
     const dir = join(packagesDir, id);
     if (!verify) {
       writePackage(dir, expected);
