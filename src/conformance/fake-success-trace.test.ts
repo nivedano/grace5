@@ -27,9 +27,13 @@ test(
     const s = prepared({ id: "C-0001-noop", checks: [automated("CK1")] });
     const start = s.start();
     expect(start.code).toBe(0);
-    expect(hasLine(start, "run 1: CK1 passed")).toBe(true);
-    // Every line is one of the two documented run lines; nothing speaks of a criterion or of proof.
-    for (const line of start.lines) expect(line).toMatch(/^(run 1: CK1 passed|receipt: .+)$/);
+    expect(start.lines).toEqual([
+      "logs: records/logs/run-1/",
+      "run 1: CK1 starting",
+      "run 1: CK1 passed",
+      "run 1: CK1 passed",
+      `receipt: .grace5/changes/${s.id}/records/run-1.xml`,
+    ]);
 
     const receipt = s.receipt(1);
     expect(resultAttr(receipt, "CK1", "verdict")).toBe("passed");

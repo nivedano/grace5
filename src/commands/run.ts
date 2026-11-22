@@ -315,6 +315,7 @@ async function runInner(options: RunOptions): Promise<number> {
     }
   }
 
+  console.log(`logs: records/logs/run-${String(n)}/`);
   const revision = source.revision;
   const candidate = source.candidate;
   let sameCandidate: readonly string[] | undefined;
@@ -339,19 +340,26 @@ async function runInner(options: RunOptions): Promise<number> {
 
   const started = new Date().toISOString();
   const results: RunResult[] = [];
+  const printVerdict = (result: RunResult): void => {
+    console.log(`run ${String(n)}: ${result.check} ${result.verdict}${result.reason === undefined ? "" : `: ${result.reason}`}`);
+  };
   for (const check of selected) {
-    if (skipping) results.push(blank(check, "skipped", note));
-    else if (interrupted) results.push(blank(check, "not-attempted", undefined));
-    else if (!mayRun(state, check)) results.push(blank(check, "refused", "amended in unapproved revision"));
+    console.log(`run ${String(n)}: ${check.id} starting`);
+    let result: RunResult;
+    if (skipping) result = blank(check, "skipped", note);
+    else if (interrupted) result = blank(check, "not-attempted", undefined);
+    else if (!mayRun(state, check)) result = blank(check, "refused", "amended in unapproved revision");
     else if (observing) {
       const satisfied = declared?.build === undefined || buildSatisfies(declared.build, build ?? "", context.sameCandidateRevisions);
       const verdict: Verdict = satisfied ? (observe as Verdict) : "refused";
-      results.push({
+      result = {
         ...blank(check, verdict, satisfied ? undefined : "build mismatch"),
         claim: verdict === "passed" ? "observation" : undefined,
         observation: { at: new Date().toISOString(), build: build ?? "", environment: environment ?? "", reference: reference === undefined || reference.trim() === "" ? undefined : reference, note: note ?? "" },
-      });
-    } else results.push(await runCheck(check, context));
+      };
+    } else result = await runCheck(check, context);
+    results.push(result);
+    printVerdict(result);
   }
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.off(signal, onSignal);
 
@@ -373,7 +381,7 @@ async function runInner(options: RunOptions): Promise<number> {
     results,
   };
   await writeRecord("run", join(state.dir, "records", `run-${String(n)}.xml`), runNode(record));
-  for (const result of results) console.log(`run ${String(n)}: ${result.check} ${result.verdict}${result.reason === undefined ? "" : `: ${result.reason}`}`);
+  for (const result of results) printVerdict(result);
   console.log(`receipt: ${state.path}/records/run-${String(n)}.xml`);
   if (interrupted) return 1;
   if (skipping) return 0;

@@ -1,5 +1,5 @@
 // Generates the three harness packages under packages/ from the canonical skills in skills/ and the
-// advisor guidance and orchestration extension in models/architecture/, records their bytes in the tracked manifest
+// advisor guidance, orchestration extension and schemas in models/architecture/, records their bytes in the tracked manifest
 // models/architecture/package-manifest.json, and generates models/architecture/cli-reference.md from the
 // CLI help text. The generated packages/ tree is a build output, excluded by .gitignore and never tracked,
 // so `--verify` regenerates in memory and compares with the manifest, needing no prior build; where a built
@@ -24,6 +24,9 @@ export const MANIFEST_PATH = "models/architecture/package-manifest.json";
 const GUIDANCE_SOURCE = "models/architecture/advisor-guidance.md";
 const GUIDANCE_TARGET = "advisor-guidance.md";
 const ORCHESTRATION_SOURCE = "models/architecture/extensions/orchestration.md";
+const SCHEMA_SOURCE = "models/architecture/schemas";
+const SCHEMA_TARGET = "schemas";
+const SCHEMA_FILES = ["approval.xsd", "close.xsd", "common.xsd", "contract.xsd", "review.xsd", "run.xsd"];
 
 type Files = Map<string, Buffer>;
 
@@ -107,8 +110,8 @@ function readme(what: string): string {
   return `This ${what} is generated from \`skills/\` by \`bun run package\` and must not be edited; edit the skill under \`skills/\` and regenerate.\n`;
 }
 
-function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>, guidance: string, orchestration: string): Files {
-  const files: Files = new Map();
+function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>, guidance: string, orchestration: string, schemas: Files): Files {
+  const files: Files = new Map(schemas);
   const put = (path: string, text: string): void => {
     files.set(path, Buffer.from(lf(text), "utf8"));
   };
@@ -119,7 +122,6 @@ function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>,
       const manifest = { name: PACKAGE_NAME, description: meta.description, version: meta.version };
       put(".claude-plugin/plugin.json", `${JSON.stringify(manifest, null, 2)}\n`);
       put("README.md", readme("Claude plugin"));
-      for (const [rel, text] of skills) put(`skills/${rel}`, text);
       break;
     }
     case "openpackage": {
@@ -131,28 +133,32 @@ function generatePackage(id: PackageId, meta: Meta, skills: Map<string, string>,
       ];
       put("openpackage.yml", `${lines.join("\n")}\n`);
       put("README.md", readme("OpenPackage package"));
-      for (const [rel, text] of skills) put(`skills/${rel}`, text);
       break;
     }
     case "skills": {
       put("README.md", readme("plain skills directory"));
-      for (const [rel, text] of skills) put(rel, text);
       break;
     }
   }
+  const prefix = id === "skills" ? "" : "skills/";
+  for (const [rel, text] of skills) put(`${prefix}${rel}`, text);
   return files;
 }
 
-/** Generates every package in memory from the canonical skills, advisor resource and batch extension; writes nothing. */
+/** Generates every package in memory from canonical sources; writes nothing. */
 export function materialize(root: string): Materialization {
   const meta = readMeta(root);
   const skills = readSkills(root);
+  const schemas: Files = new Map();
+  for (const file of SCHEMA_FILES) {
+    schemas.set(`${SCHEMA_TARGET}/${file}`, readFileSync(join(root, SCHEMA_SOURCE, file)));
+  }
   const guidance = readGuidance(root);
   const orchestration = lf(readFileSync(join(root, ORCHESTRATION_SOURCE), "utf8"));
   const packages = new Map<PackageId, Files>();
   const files = new Map<string, Buffer>();
   for (const id of PACKAGE_IDS) {
-    const generated = generatePackage(id, meta, skills, guidance, orchestration);
+    const generated = generatePackage(id, meta, skills, guidance, orchestration, schemas);
     packages.set(id, generated);
     for (const [rel, bytes] of generated) files.set(`${id}/${rel}`, bytes);
   }

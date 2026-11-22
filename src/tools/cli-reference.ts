@@ -7,7 +7,7 @@ import { dirname, join, resolve } from "node:path";
 export const CLI_REFERENCE_PATH = "models/architecture/cli-reference.md";
 
 const CLI_ENTRY = "src/cli.ts";
-const COMMANDS = ["init", "check", "run", "status", "close", "upgrade"] as const;
+const COMMANDS = ["init", "check", "run", "status", "close", "upgrade", "schema"] as const;
 
 const decoder = new TextDecoder();
 

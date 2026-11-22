@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 // grace5: argument parsing, help and dispatch. Behaviour is in models/architecture/commands.md.
 
-import { resolve } from "node:path";
+import { realpathSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { SCHEMA_DIR } from "./schema";
 import { checkCommand } from "./commands/check";
 import { closeCommand } from "./commands/close";
 import { initCommand } from "./commands/init";
@@ -24,9 +26,11 @@ Commands:
   status   Report the whole state of a change and its next unresolved obligation, or list every change.
   close    Verify the eight closing steps and write close.xml, or refuse at the first unmet one.
   upgrade  Bring the repository state from its pinned version to this kernel's version, step by step.
+  schema   Locate an XSD shipped with this kernel.
 
 Documentation:
   documentation root: models/architecture/
+  grace5 schema <name> prints the absolute path of a shipped schema.
   The method document and its topic files and the schemas ship inside the kernel package under
   this directory. The path is relative to the kernel package, not to the repository root.
 
@@ -37,7 +41,7 @@ Global options:
 
 The version pin:
   .grace5/kernel-version holds the version the state conforms to; a missing pin where .grace5/
-  exists reads as 0.1.0. Every command except status, upgrade, the help and version flags, and
+  exists reads as 0.1.0. Every command except status, upgrade, schema, the help and version flags, and
   init on a repository without .grace5/ refuses when the pin differs from this kernel or cannot
   be read as a version:
     refused: repository state is at <pin>, kernel is <version>: run grace5 upgrade
@@ -53,12 +57,17 @@ The change:
   a change lists the open changes and counts the closed ones (--all lists them too).
 
 Output:
-  Plain text, one fact per line. Paths are relative to the root, with forward slashes.
+  Plain text, one fact per line. Change paths are relative to the repository root unless specified.
 
 Exit status:
   0  success
   1  a refusal, a defect, or a run in which any executed check did not pass
   2  a usage error`,
+
+  schema: `Usage: grace5 schema <contract|approval|run|review|close|common>
+
+Print the absolute path of the named XSD in the running kernel package.
+Works from any directory without a repository or version pin.`,
 
   init: `grace5 init: create the GRACE 5 entry point and, optionally, a change
 
@@ -176,7 +185,9 @@ tree and records cancelled. An interrupt (SIGINT, SIGTERM) stops the running com
 writes the receipt with status interrupted.
 
 Output:
-  run <n>: <check> <verdict>[: <reason>]   per result
+  logs: records/logs/run-<n>/              first, relative to the change directory
+  run <n>: <check> starting                as processing of each selected check begins
+  run <n>: <check> <verdict>[: <reason>]   as resolved, repeated in order after receipt publication
   receipt: <path>                          the receipt written, records/run-<n>.xml
   refused: <reason>                        a refused invocation; no receipt is written
 
@@ -408,9 +419,17 @@ async function main(argv: readonly string[]): Promise<number> {
     return 0;
   }
   const text = HELP[command];
-  if (text === undefined || command === "") return usage(`unknown command ${command}; the commands are init, check, run, status, close, upgrade`);
+  if (text === undefined || command === "") return usage(`unknown command ${command}; the commands are init, check, run, status, close, upgrade, schema`);
   if (help) {
     console.log(text);
+    return 0;
+  }
+  if (command === "schema") {
+    const name = positional[0];
+    if (positional.length !== 1 || name === undefined || !["contract", "approval", "run", "review", "close", "common"].includes(name)) {
+      return usage("schema expects one of contract, approval, run, review, close, common");
+    }
+    console.log(realpathSync(join(SCHEMA_DIR, `${name}.xsd`)));
     return 0;
   }
   if (command === "upgrade" && positional.length > 0) return usage(`upgrade takes no change, got ${positional.join(" ")}`);

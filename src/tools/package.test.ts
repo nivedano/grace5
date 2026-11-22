@@ -7,23 +7,29 @@
 import { afterAll, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { validateXML } from "xmllint-wasm";
 import { MANIFEST_PATH, diskFindings, manifestFindings, materialize, readManifest, writePackages } from "./package";
 
 const TEMP_DIRS: string[] = [];
 const TIMEOUT = 60_000;
+const ARCHITECTURE = resolve(import.meta.dir, "../../models/architecture");
+const SCHEMA_FILES = ["approval.xsd", "close.xsd", "common.xsd", "contract.xsd", "review.xsd", "run.xsd"];
 
-/** A throwaway kernel root with one skill, the advisor resource and a `package.json`. */
+/** A throwaway kernel root with a skill and the resources that ship with it. */
 function fixture(): string {
   const root = mkdtempSync(join(tmpdir(), "grace5-package-"));
   TEMP_DIRS.push(root);
   writeFileSync(join(root, "package.json"), `{\n  "description": "a fixture kernel",\n  "version": "1.0.0",\n  "license": "MIT"\n}\n`);
-  mkdirSync(join(root, "skills", "grace5-alpha"), { recursive: true });
-  writeFileSync(join(root, "skills", "grace5-alpha", "SKILL.md"), "# alpha\n");
+  mkdirSync(join(root, "skills", "grace5-review"), { recursive: true });
+  writeFileSync(join(root, "skills", "grace5-review", "SKILL.md"), "# Review\n");
   mkdirSync(join(root, "models", "architecture"), { recursive: true });
   writeFileSync(join(root, "models", "architecture", "advisor-guidance.md"), "guidance\n");
   mkdirSync(join(root, "models", "architecture", "extensions"));
   writeFileSync(join(root, "models", "architecture", "extensions", "orchestration.md"), "roles: [coordinator]\n");
+  const schemas = join(root, "models", "architecture", "schemas");
+  mkdirSync(schemas);
+  for (const file of SCHEMA_FILES) writeFileSync(join(schemas, file), readFileSync(join(ARCHITECTURE, "schemas", file)));
   return root;
 }
 
@@ -57,8 +63,8 @@ test(
     writePackages(root, materialization);
 
     expect([...materialization.packages.keys()].sort()).toEqual(["claude-plugin", "openpackage", "skills"]);
-    expect(materialization.files.has("skills/grace5-alpha/SKILL.md")).toBe(true);
-    expect(materialization.files.has("claude-plugin/skills/grace5-alpha/SKILL.md")).toBe(true);
+    expect(materialization.files.has("skills/grace5-review/SKILL.md")).toBe(true);
+    expect(materialization.files.has("claude-plugin/skills/grace5-review/SKILL.md")).toBe(true);
     expect(materialization.files.has("openpackage/advisor-guidance.md")).toBe(true);
     for (const [id, files] of materialization.packages) {
       expect(materialization.files.get(`${id}/extensions/orchestration.md`)?.toString()).toBe("roles: [coordinator]\n");
@@ -73,6 +79,32 @@ test(
     rmSync(join(root, "packages"), { recursive: true });
     expect(manifestFindings(readManifest(root), materialization)).toEqual([]);
     expect(diskFindings(root, materialization)).toEqual([]);
+  },
+  TIMEOUT,
+);
+
+test(
+  "each package ships the canonical schemas with locally resolvable includes",
+  async () => {
+    const root = fixture();
+    const materialization = materialize(root);
+    writePackages(root, materialization);
+    const xml = readFileSync(join(ARCHITECTURE, "examples", "A-small-fix", "contract.xml"), "utf8");
+    for (const id of ["claude-plugin", "openpackage", "skills"]) {
+      const schemas = join(root, "packages", id, "schemas");
+      for (const file of SCHEMA_FILES) {
+        const bytes = readFileSync(join(schemas, file));
+        expect(bytes).toEqual(readFileSync(join(ARCHITECTURE, "schemas", file)));
+        if (file !== "common.xsd") expect(bytes.toString()).toContain('schemaLocation="common.xsd"');
+      }
+      const result = await validateXML({
+        xml: { fileName: "contract.xml", contents: xml },
+        schema: { fileName: "contract.xsd", contents: readFileSync(join(schemas, "contract.xsd"), "utf8") },
+        preload: [{ fileName: "common.xsd", contents: readFileSync(join(schemas, "common.xsd"), "utf8") }],
+      });
+      expect(result.errors).toEqual([]);
+      expect(result.valid).toBe(true);
+    }
   },
   TIMEOUT,
 );

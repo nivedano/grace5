@@ -40,7 +40,7 @@ The author adds no summary, no explanation of intent and no list of what to look
 
 ## The record
 
-Write `records/review-<n>.xml`, `n` one above the highest existing, using `schemas/review.xsd` for fields and element order and `evidence-records.md`, The review record, for semantics. State in `Independence` what you received and had not seen.
+Write `records/review-<n>.xml`, `n` one above the highest existing, using the XSD located by `grace5 schema review` for fields and element order (generated harness packages also include `schemas/review.xsd` at the distribution root) and `evidence-records.md`, The review record, for semantics. State in `Independence` what you received and had not seen.
 
 - Take `contract-sha256` from `grace5 check`, `start-revision` and `candidate` from `grace5 status`, and `end-revision` from the commit reviewed. Repeat the contract's `rule` values exactly; include `Resolution` and `OwnerDecision` when applicable.
 - Use `status="incomplete"` when you could not cover the complete diff, and say what was missing in `Independence`.

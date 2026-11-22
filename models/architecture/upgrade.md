@@ -16,7 +16,7 @@ An ordinary change does not bump the version or pin, register a migration bounda
 
 ## The refusal
 
-Every command except `status`, `upgrade`, `--help`, `--version`, and `init` on a repository without `.grace5/` refuses when the pin differs from the running kernel or cannot be read as a version, on one line, on standard error, and with exit status 1; `upgrade` refuses the unreadable and the ahead cases too:
+Every command except `status`, `upgrade`, `schema`, `--help`, `--version`, and `init` on a repository without `.grace5/` refuses when the pin differs from the running kernel or cannot be read as a version, on one line, on standard error, and with exit status 1; `upgrade` refuses the unreadable and the ahead cases too:
 
 | State | Line |
 |---|---|

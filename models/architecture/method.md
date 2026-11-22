@@ -12,7 +12,7 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 |---|---|
 | Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` while the change is open, and under `.grace5/changes/closed/<id>/` once `close` has moved it (`commands.md`) |
 | Records | `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/`. Historical changes also carry legacy brief pages, which the kernel reads only for a legacy approval. |
-| Commands | `grace5 init`, `check`, `run`, `status`, `close`, `upgrade`; `--help` and `--version` |
+| Commands | `grace5 init`, `check`, `run`, `status`, `close`, `upgrade`, `schema`; `--help` and `--version` |
 | State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, `.grace5/.gitignore`, the local ignore file that keeps the run logs out of git, and the migration steps `upgrade` composes from the pin to the kernel's version (`upgrade.md`); optional local instructions in `.grace5/extensions/` and run ledgers in `.grace5/orchestration/runs/`, neither read nor written by the kernel |
 | Skills | prepare, execute, review, in `skills/`, the sole maintained skill source; the harness packages are materialized under `packages/` at build or release staging from `skills/`, are not tracked ordinary source, and are never edited |
 | Tools of this repository | `src/tools/`: the package generator, the CLI reference generator, the example verifier and the historical-chain upgrade verifier (`upgrade-verify.ts`, fixed to an older release tag); `.agents/skills/grace5-release/SKILL.md`: the local release procedure, including verification from the actual previous release tag. Neither is part of the installed CLI; the local release skill is not packaged. |
@@ -58,7 +58,7 @@ A check is required unless it says `required="false"`. Markers are plain substri
 5. Review. An independent reviewer reads the complete diff from the start revision against the contract and the cited rules, and writes `records/review-<n>.xml`: findings, per-check adequacy, rule verdicts, and a statement of independence. A small change may be self-reviewed, and the record says so.
 6. Close. `grace5 close` verifies the verdicts on the final candidate and writes `close.xml`, or refuses and names the exact unmet obligation; then it moves the change directory under `.grace5/changes/closed/`, so the open changes stay in view. Which record supersedes which is in `evidence-records.md`.
 
-`grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. Without an id it lists the open changes and counts the closed ones. A malformed change is reported as malformed and never hides a valid one. Its first line names the kernel's version and the pin of the state, and every other command refuses state pinned to another version until `grace5 upgrade` has brought it to the kernel's (`upgrade.md`).
+`grace5 status` is the one whole-change read at any point: contract revision, authorization, actual evidence, next unresolved obligation. Without an id it lists the open changes and counts the closed ones. A malformed change is reported as malformed and never hides a valid one. Its first line names the kernel's version and the pin of the state, and commands that operate on changes refuse state pinned to another version until `grace5 upgrade` has brought it to the kernel's (`upgrade.md`).
 
 ## Releases
 

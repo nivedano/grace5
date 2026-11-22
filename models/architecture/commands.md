@@ -1,6 +1,6 @@
 # Commands
 
-What each of the six commands does, to the level an implementer needs. The reference of flags, `cli-reference.md`, is generated from the help text; this file states behaviour. Every command but `upgrade` takes the change id, or finds the single change directory when only one is open. Exit status is 0 on success and nonzero when the command refuses or finds a defect; a refusal names the unmet obligation on one line.
+What each command does, to the level an implementer needs. The reference of flags, `cli-reference.md`, is generated from the help text; this file states behaviour. Every command except `schema` and `upgrade` takes the change id, or finds the single change directory when only one is open. Exit status is 0 on success and nonzero when the command refuses or finds a defect; a refusal names the unmet obligation on one line.
 
 ## Where a change lives
 
@@ -8,7 +8,11 @@ An open change is the directory `.grace5/changes/<id>/`. `close` moves the whole
 
 ## The pin
 
-`.grace5/kernel-version` holds the version the state conforms to (`upgrade.md`); where `.grace5/` exists without it, the state is at 0.1.0. Every command except `status`, `upgrade`, `--help`, `--version`, and `init` on a repository without `.grace5/` refuses when the pin differs from the running kernel or cannot be read as a version: `repository state is at <pin>, kernel is <version>: run grace5 upgrade` when the state is behind, `repository state is at <pin>, kernel is <version>: kernel too old` when it is ahead, `repository pin is unreadable: <reason>` when the file holds something other than a version, the reason naming the file and what it holds. `upgrade` refuses the ahead and the unreadable cases too. The refusal comes before anything else the command would do or write; `status` reports an unreadable pin as `state: unreadable (<reason>)`. The pin, like everything under `.grace5/`, is a kernel-managed path outside the candidate and the dirty state (`source-identity.md`).
+`.grace5/kernel-version` holds the version the state conforms to (`upgrade.md`); where `.grace5/` exists without it, the state is at 0.1.0. Every command except `status`, `upgrade`, `schema`, `--help`, `--version`, and `init` on a repository without `.grace5/` refuses when the pin differs from the running kernel or cannot be read as a version: `repository state is at <pin>, kernel is <version>: run grace5 upgrade` when the state is behind, `repository state is at <pin>, kernel is <version>: kernel too old` when it is ahead, `repository pin is unreadable: <reason>` when the file holds something other than a version, the reason naming the file and what it holds. `upgrade` refuses the ahead and the unreadable cases too. The refusal comes before anything else the command would do or write; `status` reports an unreadable pin as `state: unreadable (<reason>)`. The pin, like everything under `.grace5/`, is a kernel-managed path outside the candidate and the dirty state (`source-identity.md`).
+
+## schema
+
+Run `grace5 schema <name>` from any directory to print the absolute path of a schema shipped with the running kernel. Accepted names are contract, approval, run, review, close and common. The generated harness distributions also ship these definitions together under `schemas/` at the distribution root.
 
 ## init
 
@@ -66,7 +70,8 @@ Output is plain text, one fact per line, stable enough to grep. The invocation i
 | Command | Lines |
 |---|---|
 | `check` | `contract-sha256: <hash>`, `definition <id>: <hash>` per check, `words: <n> (target 600)`, `checks: <n> (target 8)`, and `defect: <text>` per defect. A legacy brief defect names the file and the omitted item, for example `defect: brief-1.html: protected path src/x/** is missing`. |
-| `run` | `run <n>: <check> <verdict>` per result with the reason after a colon when there is one, then `receipt: <path>`. A refused invocation prints `refused: <reason>` and writes no receipt. |
+| `schema` | The absolute XSD path. |
+| `run` | First the reserved `logs: records/logs/run-<n>/`, relative to the change directory. Each selected check emits a starting line and its verdict as it resolves. After publication the summary repeats `run <n>: <check> <verdict>` per result with the reason after a colon when there is one, then `receipt: <path>`. A refused invocation prints `refused: <reason>` and writes no receipt. |
 | `status` | First `kernel: <version>, state: <pin>` with `, run grace5 upgrade` or `, kernel too old` appended when the two differ, `state: none` without `.grace5/`, `state: unreadable (<reason>)` when the pin is not a version; then `change:`, `revision:`, `authorization:` (`unapproved`, `approved`, `rejected` or `altered after approval`), `start:`, `candidate: <hash> (clean)` or `(dirty)`, `outside: <path>` and `protected: <path>` per file, `check <id>: <verdict>` followed by `, counts` or `, does not count: <reason>` and then by `, recorded with <kernel>` when the receipt's `kernel` attribute is not the running kernel's name, `review:`, `interrupted: run-<n>`, `closed: <path of close.xml>` when closed, and last `next: <obligation>`. In the listing, one line per open change, `<id>: <authorization>, next: <obligation>` or `<id>: malformed: <first error>`, then with `--all` one line `<id>: closed` per closed change, and last `closed changes: <n>`. |
 | `close` | `closed: <path of close.xml>`, the path under `closed/` once moved, or `refused: <obligation>`; `not moved: <reason>` when the record was written and the move failed. |
 | `init` | `created: <path>` and `exists: <path>` per entry, or `refused: change <id> exists at <path>/`. |
