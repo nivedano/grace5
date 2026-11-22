@@ -194,6 +194,19 @@ export const STEPS: readonly Step[] = [moveClosed, writeThePin, refreshTheSkills
   touches() {
     return [];
   },
+}, {
+  from: "0.9.0",
+  to: "0.9.1",
+  describe: "refresh the installed skills to 0.9.1",
+  apply() {
+    // Nothing beyond the skill refresh the runner performs for every step: 0.9.1 changed the packaged skills and nothing else in the state.
+  },
+  verify(root, packaged) {
+    refreshTheSkills.verify(root, packaged);
+  },
+  touches() {
+    return [];
+  },
 }];
 
 // The packaged skills, their locations and the refresh live in skills.ts; re-exported for the chain runner and the tools.

@@ -16,7 +16,7 @@ The method is one document, `models/architecture/method.md`. The measured baseli
 
 ## Status
 
-Version 0.9.0, the last release: a version marks an owner-requested release and carries any number of changes (`models/architecture/upgrade.md`). An approval records a decision bound to the contract text, its checks and the decision; a legacy approval also names its brief page, and legacy execution and source fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
+Version 0.9.1, the last release: a version marks an owner-requested release and carries any number of changes (`models/architecture/upgrade.md`). An approval records a decision bound to the contract text, its checks and the decision; a legacy approval also names its brief page, and legacy execution and source fields are ignored without rewriting records. The kernel implements the method and is closed on itself: its changes, under `.grace5/changes/`, were prepared, approved, executed, reviewed and closed with the kernel. `bun src/cli.ts --help` lists the commands. Nothing is published; pilots in real repositories run the kernel from this checkout.
 
 ## Upgrading
 

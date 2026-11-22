@@ -738,3 +738,74 @@ test(
   },
   TEST_TIMEOUT,
 );
+
+test(
+  "UP-24 the 0.9.0 to 0.9.1 step refreshes the installed skills, is idempotent and self-verifying, and leaves open changes untouched",
+  async () => {
+    const s = prepared({ id: "C-0542-refresh-091", checks: [automated("CK1")] });
+    s.write(".agents/skills/grace5-prepare/SKILL.md", "stale prepare\n");
+    s.write(".claude/skills/grace5-execute/SKILL.md", "stale execute\n");
+    s.write(".claude/skills/grace5-local/SKILL.md", "repository-owned skill\n");
+    s.commit("fixture at 0.9.0 with installed packaged skills");
+    expect(s.start().code).toBe(0);
+    s.pin("0.9.0");
+
+    const step = STEPS.find((candidate) => candidate.from === "0.9.0" && candidate.to === "0.9.1");
+    expect(step).toBeDefined();
+    if (step === undefined) throw new Error("missing the 0.9.0 to 0.9.1 migration step");
+    expect(step.touches(s.repo)).toEqual([]);
+
+    const beforeCandidate = candidateLine(s);
+    const beforeChanges = await snapshot(s.repo);
+    const receiptBefore = s.receipt();
+    const runCountBefore = s.runNumbers().length;
+
+    const afterApply = s.porcelain();
+    step.apply(s.repo);
+    expect(s.porcelain()).toBe(afterApply);
+    expect(refreshSkills(s.repo)).toContain(".agents/skills/grace5-prepare");
+    expect(refreshSkills(s.repo)).toContain(".claude/skills/grace5-execute");
+    step.verify(s.repo);
+    expect(s.read(".agents/skills/grace5-prepare/SKILL.md")).toBe(readSkill("grace5-prepare/SKILL.md"));
+    expect(s.read(".claude/skills/grace5-execute/SKILL.md")).toBe(readSkill("grace5-execute/SKILL.md"));
+    expect(s.read(".claude/skills/grace5-local/SKILL.md")).toBe("repository-owned skill\n");
+
+    const oncePorcelain = s.porcelain();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    expect(s.porcelain()).toBe(oncePorcelain);
+    fs.rmSync(path.join(s.repo, ".agents/skills/grace5-prepare/SKILL.md"), { force: true });
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    fs.writeFileSync(path.join(s.repo, ".agents/skills/grace5-prepare/SKILL.md"), "drifted\n");
+    expect(() => step.verify(s.repo)).toThrow();
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+
+    const empty = prepared({ id: "C-0543-no-installed-skills-091", checks: [automated("CK1")] });
+    step.apply(empty.repo);
+    refreshSkills(empty.repo);
+    step.verify(empty.repo);
+    expect(empty.exists(".agents/skills")).toBe(false);
+    expect(empty.exists(".claude/skills")).toBe(false);
+
+    step.apply(s.repo);
+    refreshSkills(s.repo);
+    step.verify(s.repo);
+    const upgrade = s.cli(["upgrade"]);
+    expect(upgrade.code).toBe(0);
+    expect(upgrade.lines).toContain("step: 0.9.0 -> 0.9.1: refresh the installed skills to 0.9.1");
+    expect(upgrade.lines).toContain(`checked: ${s.id}`);
+    expect(upgrade.lines.at(-1)).toBe(`upgraded: 0.9.0 -> ${VERSION}`);
+    expect(s.readPin()).toBe(`${VERSION}\n`);
+    expect(candidateLine(s)).toBe(beforeCandidate);
+    expect(snapshotDifference(beforeChanges, await snapshot(s.repo))).toBeUndefined();
+    expect(s.receipt()).toBe(receiptBefore);
+    expect(s.runNumbers()).toHaveLength(runCountBefore);
+    expect(hasLine(s.status(), "check CK1: passed, counts")).toBe(true);
+  },
+  TEST_TIMEOUT,
+);

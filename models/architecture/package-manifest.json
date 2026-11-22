@@ -1,6 +1,6 @@
 {
   "packages": {
-    "claude-plugin/.claude-plugin/plugin.json": "a8bd3c9ef77c912825df9ded56b54d33d2c80cb4190704e9ffe727d1eef5000b",
+    "claude-plugin/.claude-plugin/plugin.json": "e7c8d25c6de0db8e1e3bd9d8f00348143af5d246ef9b5b71c363b934c72cead2",
     "claude-plugin/README.md": "bbc164f877cff1974998a40c4aef11b13327559fa90053d77828c997680ebea7",
     "claude-plugin/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
     "claude-plugin/extensions/orchestration.md": "7f09f66cbb411dff5a5c046ea4a64caf18132f7260af6fcbcae2cbaa318f0dc9",
@@ -16,7 +16,7 @@
     "openpackage/README.md": "f6a223ed557a24a0a3c0cecebf68b5438c95a48ba86296e58fbe84feeb722014",
     "openpackage/advisor-guidance.md": "2734feb48b9f853ed344b0acb5feb5d2da9a3c67058b1bceb7af1d0a8637a9b9",
     "openpackage/extensions/orchestration.md": "7f09f66cbb411dff5a5c046ea4a64caf18132f7260af6fcbcae2cbaa318f0dc9",
-    "openpackage/openpackage.yml": "f3ec3902efe6fa3135cb40be0e7f27e94dcf720e097ab10b2bf576df5b153816",
+    "openpackage/openpackage.yml": "589e95061f44a71da6388e8fe5f2c34697fb47f40c60a66a38d5d1d4758e3741",
     "openpackage/schemas/approval.xsd": "6ff30677a3e15c9be5cb06469b197a5c152b472c40fdea4b869662f1081056cd",
     "openpackage/schemas/close.xsd": "ff7643fcad8aff9b0f480a85c8a377124eb04660fe7cf463ca54b7f792d66ce4",
     "openpackage/schemas/common.xsd": "2a6f4171088709764dbde55fcdfaf0dd4ffa2813a5ef4dc44b01d1678c8757d2",
