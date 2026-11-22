@@ -180,7 +180,9 @@ refused: amended in unapproved revision. A closed or malformed change refuses ev
 A command runs through the platform shell (sh -c, or cmd /d /s /c on Windows) in the check's
 cwd, with standard output and error captured together into
 .grace5/changes/<change>/records/logs/run-<n>/<check>.log. A trace check that names a log
-file has that file copied there instead, and its output kept as <check>.output.log.
+file has that file copied there instead, and its output kept as <check>.output.log. When names
+could alias, checks/<position>/check.log and output.log keep each check separate. Recovered
+receipts reference stable snapshots under the run directory's recovered/ subdirectory.
 Exported to the command: GRACE5_RUN_ID, GRACE5_CHANGE, GRACE5_CHECK, GRACE5_SOURCE_REVISION,
 GRACE5_CANDIDATE. A capture command reports provenance by printing the line
   grace5-provenance: origin=<live|replay|fixture> run=<GRACE5_RUN_ID> device=<id> build=<id>

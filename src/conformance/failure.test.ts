@@ -1,5 +1,6 @@
 // Conformance cases FL-01 .. FL-08 of models/architecture/conformance.md: things that go wrong and must be recorded as what they are.
 
+import { Database } from "bun:sqlite";
 import { afterAll, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -34,12 +35,25 @@ test(
       id: "C-0101-killed",
       checks: [
         trace("TSAVED", "bun tools/pass.js", "any", { expect: ["MARK-A"], required: false }),
-        trace("TSLOW", "bun tools/sleep.js 60", "any", { expect: ["MARK-A"], budget: 90 }),
-        trace("TLATER", "bun tools/pass.js", "any", { expect: ["fixture check ran"] }),
+        trace("TSLOW", "bun tools/survivor.js", "any", { expect: ["MARK-A"], budget: 90 }),
+        trace("TSLOW.output", "bun tools/pass.js", "any", { expect: ["fixture check ran"] }),
         automated("CK1"),
       ],
     };
     const s = new Scenario(rev1);
+    s.write("tools/survivor.js", [
+      'import { existsSync, writeFileSync, writeSync } from "node:fs";',
+      'import { join } from "node:path";',
+      'const scratch = join(import.meta.dir, "..", "..", "scratch");',
+      'writeSync(1, "initial captured output\\n");',
+      'writeFileSync(join(scratch, "survivor-started"), "");',
+      'const release = join(scratch, "survivor-release");',
+      'const deadline = Date.now() + 120_000;',
+      'while (!existsSync(release) && Date.now() < deadline) await Bun.sleep(50);',
+      'if (!existsSync(release)) process.exit(1);',
+      'writeSync(1, "survivor output after recovery\\n");',
+      'writeFileSync(join(scratch, "survivor-finished"), "");',
+    ].join("\n"));
     const contractPath = `.grace5/changes/${s.id}/contract.xml`;
     const declaredLogs: Record<string, string> = { TSAVED: "tools/data/ordered.log", TSLOW: "trace-produced.log" };
     const writeContract = (def: ContractDef) => {
@@ -60,113 +74,167 @@ test(
     const candidate = s.computeCandidate();
     const originalReceipt = s.receipt(1);
 
-    const checks = ["TSAVED", "TSLOW", "TLATER"];
+    const checks = ["TSAVED", "TSLOW", "TSLOW.output"];
     const child = s.cliAsync(["run", s.id, ...checks.flatMap((check) => ["--check", check])]);
     const logDir = path.join(s.recordsDir, "logs", "run-2");
-    const started = path.join(s.scratch, "sleep-started");
+    const started = path.join(s.scratch, "survivor-started");
+    const release = path.join(s.scratch, "survivor-release");
+    const finished = path.join(s.scratch, "survivor-finished");
     const headerFile = path.join(logDir, "run-header.xml");
-    let header: string;
-    let lastLiveAt: number;
+    const capture = "records/logs/run-2/checks/2/output.log";
     try {
-      expect(await waitFor(() => fs.existsSync(started), 45_000)).toBe(true);
-      header = fs.readFileSync(headerFile, "utf8");
+      let header: string;
+      let lastLiveAt: number;
+      try {
+        expect(await waitFor(() => fs.existsSync(started), 45_000)).toBe(true);
+        expect(s.readLog(capture).toString()).toBe("initial captured output\n");
+        header = fs.readFileSync(headerFile, "utf8");
+        expect(s.hasRecord("run-2.xml")).toBe(false);
+        const live = s.run("--recover");
+        expect(live.code).toBe(0);
+        expect(hasLine(live, "live: run-2")).toBe(true);
+        expect(s.hasRecord("run-2.xml")).toBe(false);
+        expect(fs.readFileSync(headerFile, "utf8")).toBe(header);
+        lastLiveAt = Date.now();
+      } finally {
+        const exited = waitForExit(child, 15_000);
+        child.kill("SIGKILL");
+        await exited;
+      }
+
       expect(s.hasRecord("run-2.xml")).toBe(false);
-      const live = s.run("--recover");
-      expect(live.code).toBe(0);
-      expect(hasLine(live, "live: run-2")).toBe(true);
-      expect(s.hasRecord("run-2.xml")).toBe(false);
+      expect(hasLine(s.status(), "interrupted: run-2")).toBe(true);
+      expect(s.close().code).toBe(1);
+
+      const attrs = {
+        change: s.id,
+        n: "2",
+        revision: "1",
+        "contract-sha256": original.contractSha,
+        "source-revision": sourceRevision,
+        dirty: "false",
+        candidate,
+        kernel: attr(originalReceipt, "Run", "kernel"),
+      };
+      for (const [key, value] of Object.entries(attrs)) expect(attr(header, "RunHeader", key)).toBe(value);
+      const runId = attr(header, "RunHeader", "run-id");
+      const begunAt = attr(header, "RunHeader", "started") ?? "";
+      expect(runId).toMatch(/^[0-9a-f]{32}$/);
+      expect(Date.parse(begunAt)).toBeLessThanOrEqual(lastLiveAt);
+      expect(attr(header, "RunHeader", "start") ?? "false").toBe("false");
+      expect(elementTexts(header, "Preexisting")).toEqual([]);
+      expect(openTags(header, "Result")).toHaveLength(checks.length);
+      for (const check of checks) {
+        const canonical = canonicalDefinition(rev1, check);
+        const log = declaredLogs[check];
+        const definition = log === undefined ? canonical : canonical.replace("origin=any\n", `origin=any\nlog=${log}\n`);
+        expect(resultAttr(header, check, "kind")).toBe("trace");
+        expect(resultAttr(header, check, "required")).toBe(check === "TSAVED" ? "false" : "true");
+        expect(resultAttr(header, check, "definition-sha256")).toBe(sha256(definition));
+        expect(resultAttr(header, check, "definition-sha256")).toBe(original.definitions[check]);
+        expect(elementTexts(resultBlock(header, check) ?? "", "Definition")).toEqual([definition]);
+      }
+
+      const amended = writeContract({
+        ...rev1,
+        revision: 2,
+        checks: rev1.checks.map((check) => (check.id === "TSLOW.output" ? { ...check, budget: 91 } : check)),
+      });
+      expect(hasLine(s.status(), "authorization: approved")).toBe(true);
+      expect(amended.contractSha).not.toBe(original.contractSha);
+      expect(amended.definitions["TSLOW.output"]).not.toBe(original.definitions["TSLOW.output"]);
+      const lastStatusTime = Date.now();
+
+      const recoveries = [s.cliAsync(["run", s.id, "--recover"]), s.cliAsync(["run", s.id, "--recover"])];
+      expect(await Promise.all(recoveries.map((process) => waitForExit(process, 20_000)))).toEqual([0, 0]);
+      const receipt = s.receipt(2);
+      expect(attr(receipt, "Run", "status")).toBe("interrupted");
+      for (const key of [...Object.keys(attrs), "run-id", "started"]) expect(attr(receipt, "Run", key)).toBe(attr(header, "RunHeader", key));
+      expect(attr(receipt, "Run", "start") ?? "false").toBe("false");
+      expect(elementTexts(receipt, "Preexisting")).toEqual([]);
+      const recoveredAt = Date.parse(attr(receipt, "Run", "ended") ?? "");
+      expect(recoveredAt).toBeGreaterThanOrEqual(lastStatusTime);
+      expect(recoveredAt).toBeLessThanOrEqual(Date.now());
+      expect(openTags(receipt, "Result")).toHaveLength(checks.length);
+      for (const check of checks) {
+        for (const key of ["kind", "required", "definition-sha256"]) expect(resultAttr(receipt, check, key)).toBe(resultAttr(header, check, key));
+        expect(elementTexts(resultBlock(receipt, check) ?? "", "Definition")).toEqual(elementTexts(resultBlock(header, check) ?? "", "Definition"));
+        expect(resultAttr(receipt, check, "claim")).toBeUndefined();
+      }
+      const saved = "records/logs/run-2/checks/1/check.log";
+      const artifacts = [
+        { check: "TSAVED", index: 1, source: saved },
+        { check: "TSLOW", index: 2, source: capture },
+      ];
+      expect(s.readLog(saved)).toEqual(s.readLog("tools/data/ordered.log"));
+      for (const { check, index, source } of artifacts) {
+        expect(resultAttr(receipt, check, "verdict")).toBe("interrupted");
+        const bytes = s.readLog(source);
+        const digest = sha256(bytes);
+        const log = `records/logs/run-2/recovered/${index}-${digest}.log`;
+        expect(resultAttr(receipt, check, "log")).toBe(log);
+        expect(resultAttr(receipt, check, "log-sha256")).toBe(digest);
+        expect(s.readLog(log)).toEqual(bytes);
+      }
+      expect(s.readLog("records/logs/run-2/checks/1/output.log").toString()).toContain("fixture check ran");
+      expect(fs.existsSync(path.join(logDir, "checks", "2", "check.log"))).toBe(false);
+      expect(fs.existsSync(path.join(logDir, "checks", "3"))).toBe(false);
+      expect(resultAttr(receipt, "TSLOW.output", "verdict")).toBe("not-attempted");
+      expect(resultAttr(receipt, "TSLOW.output", "log")).toBeUndefined();
+      expect(resultAttr(receipt, "TSLOW.output", "log-sha256")).toBeUndefined();
+
+      expect(fs.existsSync(finished)).toBe(false);
+      const capturedBeforeRelease = s.readLog(capture);
+      fs.writeFileSync(release, "");
+      expect(await waitFor(() => fs.existsSync(finished), 15_000)).toBe(true);
+      expect(s.readLog(capture).toString()).toBe("initial captured output\nsurvivor output after recovery\n");
+      const snapshot = resultAttr(receipt, "TSLOW", "log") ?? "";
+      expect(s.readLog(snapshot)).toEqual(capturedBeforeRelease);
+      expect(resultAttr(receipt, "TSLOW", "log-sha256")).toBe(sha256(s.readLog(snapshot)));
+
+      expect(s.run("--recover").code).toBe(0);
+      expect(s.runNumbers()).toEqual([1, 2]);
+      expect(s.receipt(1)).toBe(originalReceipt);
+      expect(s.receipt(2)).toBe(receipt);
       expect(fs.readFileSync(headerFile, "utf8")).toBe(header);
-      lastLiveAt = Date.now();
+      const status = s.status();
+      expect(hasLine(status, "interrupted: run-2")).toBe(true);
+      for (const check of checks) {
+        expect(hasLine(status, new RegExp(`^check ${check.replace(".", "\\.")}: .*, does not count:`))).toBe(true);
+      }
+      const close = s.close();
+      expect(close.code).toBe(1);
+      expect(hasLine(close, "refused: check TSLOW: current result is interrupted")).toBe(true);
+      expect(s.hasRecord("close.xml")).toBe(false);
     } finally {
-      await killTree(child);
+      fs.writeFileSync(release, "");
+      if (fs.existsSync(started)) await waitFor(() => fs.existsSync(finished), 15_000);
     }
+  },
+  TEST_TIMEOUT,
+);
 
+test(
+  "FL-01 recovery leaves an exclusively owned startup reservation alone",
+  () => {
+    const s = prepared({ id: "C-0101-starting", checks: [automated("CK1")] });
+    expect(s.start().code).toBe(0);
+    const logs = path.join(s.recordsDir, "logs");
+    const owner = new Database(path.join(logs, "run-2.owner.sqlite"));
+    try {
+      owner.exec("BEGIN EXCLUSIVE");
+      // A run holds ownership before creating the directory or publishing a header.
+      fs.mkdirSync(path.join(logs, "run-2"));
+      const recovery = s.run("--recover");
+      expect(recovery.code).toBe(0);
+      expect(hasLine(recovery, "live: run-2")).toBe(true);
+      expect(s.hasRecord("run-2.xml")).toBe(false);
+      expect(fs.readdirSync(path.join(logs, "run-2"))).toEqual([]);
+    } finally {
+      owner.close();
+    }
+    expect(s.run("--recover").code).toBe(1);
     expect(s.hasRecord("run-2.xml")).toBe(false);
-    expect(hasLine(s.status(), "interrupted: run-2")).toBe(true);
-    expect(s.close().code).toBe(1);
-
-    const attrs = {
-      change: s.id,
-      n: "2",
-      revision: "1",
-      "contract-sha256": original.contractSha,
-      "source-revision": sourceRevision,
-      dirty: "false",
-      candidate,
-      kernel: attr(originalReceipt, "Run", "kernel"),
-    };
-    for (const [key, value] of Object.entries(attrs)) expect(attr(header, "RunHeader", key)).toBe(value);
-    const runId = attr(header, "RunHeader", "run-id");
-    const begunAt = attr(header, "RunHeader", "started") ?? "";
-    expect(runId).toMatch(/^[0-9a-f]{32}$/);
-    expect(Date.parse(begunAt)).toBeLessThanOrEqual(lastLiveAt);
-    expect(attr(header, "RunHeader", "start") ?? "false").toBe("false");
-    expect(elementTexts(header, "Preexisting")).toEqual([]);
-    expect(openTags(header, "Result")).toHaveLength(checks.length);
-    for (const check of checks) {
-      const canonical = canonicalDefinition(rev1, check);
-      const log = declaredLogs[check];
-      const definition = log === undefined ? canonical : canonical.replace("origin=any\n", `origin=any\nlog=${log}\n`);
-      expect(resultAttr(header, check, "kind")).toBe("trace");
-      expect(resultAttr(header, check, "required")).toBe(check === "TSAVED" ? "false" : "true");
-      expect(resultAttr(header, check, "definition-sha256")).toBe(sha256(definition));
-      expect(resultAttr(header, check, "definition-sha256")).toBe(original.definitions[check]);
-      expect(elementTexts(resultBlock(header, check) ?? "", "Definition")).toEqual([definition]);
-    }
-
-    const amended = writeContract({
-      ...rev1,
-      revision: 2,
-      checks: rev1.checks.map((check) => (check.id === "TLATER" ? { ...check, budget: 91 } : check)),
-    });
-    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
-    expect(amended.contractSha).not.toBe(original.contractSha);
-    expect(amended.definitions.TLATER).not.toBe(original.definitions.TLATER);
-    const lastStatusTime = Date.now();
-
-    const recoveries = [s.cliAsync(["run", s.id, "--recover"]), s.cliAsync(["run", s.id, "--recover"])];
-    expect(await Promise.all(recoveries.map((process) => waitForExit(process, 20_000)))).toEqual([0, 0]);
-    const receipt = s.receipt(2);
-    expect(attr(receipt, "Run", "status")).toBe("interrupted");
-    for (const key of [...Object.keys(attrs), "run-id", "started"]) expect(attr(receipt, "Run", key)).toBe(attr(header, "RunHeader", key));
-    expect(attr(receipt, "Run", "start") ?? "false").toBe("false");
-    expect(elementTexts(receipt, "Preexisting")).toEqual([]);
-    const recoveredAt = Date.parse(attr(receipt, "Run", "ended") ?? "");
-    expect(recoveredAt).toBeGreaterThanOrEqual(lastStatusTime);
-    expect(recoveredAt).toBeLessThanOrEqual(Date.now());
-    expect(openTags(receipt, "Result")).toHaveLength(checks.length);
-    for (const check of checks) {
-      for (const key of ["kind", "required", "definition-sha256"]) expect(resultAttr(receipt, check, key)).toBe(resultAttr(header, check, key));
-      expect(elementTexts(resultBlock(receipt, check) ?? "", "Definition")).toEqual(elementTexts(resultBlock(header, check) ?? "", "Definition"));
-      expect(resultAttr(receipt, check, "claim")).toBeUndefined();
-    }
-    for (const [check, filename] of [["TSAVED", "TSAVED.log"], ["TSLOW", "TSLOW.output.log"]] as const) {
-      expect(resultAttr(receipt, check, "verdict")).toBe("interrupted");
-      const log = `records/logs/run-2/${filename}`;
-      expect(resultAttr(receipt, check, "log")).toBe(log);
-      expect(resultAttr(receipt, check, "log-sha256")).toBe(sha256(s.readLog(log)));
-    }
-    expect(s.readLog("records/logs/run-2/TSAVED.log")).toEqual(s.readLog("tools/data/ordered.log"));
-    expect(s.readLog("records/logs/run-2/TSAVED.output.log").toString()).toContain("fixture check ran");
-    expect(fs.existsSync(path.join(logDir, "TSLOW.log"))).toBe(false);
-    expect(resultAttr(receipt, "TLATER", "verdict")).toBe("not-attempted");
-    expect(resultAttr(receipt, "TLATER", "log")).toBeUndefined();
-    expect(resultAttr(receipt, "TLATER", "log-sha256")).toBeUndefined();
-
-    expect(s.run("--recover").code).toBe(0);
-    expect(s.runNumbers()).toEqual([1, 2]);
-    expect(s.receipt(1)).toBe(originalReceipt);
-    expect(s.receipt(2)).toBe(receipt);
-    expect(fs.readFileSync(headerFile, "utf8")).toBe(header);
-    const status = s.status();
-    expect(hasLine(status, "interrupted: run-2")).toBe(true);
-    for (const check of checks) {
-      expect(hasLine(status, new RegExp(`^check ${check}: .*, does not count:`))).toBe(true);
-    }
-    const close = s.close();
-    expect(close.code).toBe(1);
-    expect(hasLine(close, "refused: check TSLOW: current result is interrupted")).toBe(true);
-    expect(s.hasRecord("close.xml")).toBe(false);
   },
   TEST_TIMEOUT,
 );
@@ -182,8 +250,8 @@ test(
       fs.writeFileSync(path.join(logDir, "CK1.log"), `orphaned output for run-${n}\n`);
     }
     fs.copyFileSync(
-      path.join(s.recordsDir, "logs", "run-1", "owner.sqlite"),
-      path.join(s.recordsDir, "logs", "run-3", "owner.sqlite"),
+      path.join(s.recordsDir, "logs", "run-1.owner.sqlite"),
+      path.join(s.recordsDir, "logs", "run-3.owner.sqlite"),
     );
     const malformed = "<RunHeader";
     fs.writeFileSync(path.join(s.recordsDir, "logs", "run-3", "run-header.xml"), malformed);

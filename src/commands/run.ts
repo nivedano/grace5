@@ -3,14 +3,14 @@
 import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { environmentIdentity, sha256Hex, type Check } from "../contract";
 import { revisionsWithCandidate } from "../git";
 import { kernelName, type RunReservation, type RunResult, type TraceRecord, type Verdict } from "../records";
 import { evaluate, mayRun, selectChange, type ChangeState } from "../state";
 import { buildSatisfies, judgeProvenance, matchMarkers, readProvenance } from "../trace";
 
-import { acquireRunLock, publishRun, recoverRuns, saveHeader } from "./run-recovery";
+import { publishRun, recoverRuns, reserveRun, runLogs, saveHeader } from "./run-recovery";
 
 export interface RunOptions {
   readonly recover: boolean;
@@ -123,14 +123,15 @@ interface RunContext {
   readonly sameCandidateRevisions: () => Iterable<string>;
 }
 
-async function runCheck(check: Check, context: RunContext): Promise<RunResult> {
+async function runCheck(check: Check, context: RunContext, paths: { saved: string; output: string }): Promise<RunResult> {
   const base = blank(check, "failed", undefined);
   const cwd = join(context.root, check.cwd ?? ".");
   if (!existsSync(cwd) || !statSync(cwd).isDirectory()) return { ...base, reason: `cwd ${check.cwd ?? "."} is not a directory` };
-  const logName = `records/logs/run-${String(context.n)}/${check.id}.log`;
+  const logName = paths.saved;
   const logPath = join(context.state.dir, logName);
+  mkdirSync(dirname(logPath), { recursive: true });
   // A trace check that names its own log file keeps the command's output beside it.
-  const outputPath = check.log === undefined ? logPath : join(context.state.dir, `records/logs/run-${String(context.n)}/${check.id}.output.log`);
+  const outputPath = check.log === undefined ? logPath : join(context.state.dir, paths.output);
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     GRACE5_RUN_ID: context.runId,
@@ -306,19 +307,7 @@ async function runInner(options: RunOptions): Promise<number> {
   const environment = statedEnvironment ?? declared?.text;
   if (observing && (environment ?? "").trim() === "") throw new Usage(`--environment is needed: check ${named[0] ?? ""} declares no Environment`);
 
-  // The log directory is reserved first; it is also what marks a run that died without a receipt.
-  let n = nextRunNumber(state);
-  mkdirSync(join(state.dir, "records", "logs"), { recursive: true });
-  for (;;) {
-    try {
-      mkdirSync(join(state.dir, "records", "logs", `run-${String(n)}`));
-      break;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      n++;
-    }
-  }
-
+  const { dir: logDir, n, lock } = reserveRun(join(state.dir, "records", "logs"), nextRunNumber(state));
   console.log(`logs: records/logs/run-${String(n)}/`);
   const revision = source.revision;
   const candidate = source.candidate;
@@ -357,9 +346,6 @@ async function runInner(options: RunOptions): Promise<number> {
     preexisting: options.start ? source.dirty : [],
     results: selected.map((check) => blank(check, "not-attempted", undefined)),
   };
-  const logDir = join(state.dir, "records", "logs", `run-${String(n)}`);
-  const lock = acquireRunLock(logDir, true);
-  if (!lock) throw new Error("new reservation is already locked");
   try {
     for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.on(signal, onSignal);
     await saveHeader(logDir, reservation);
@@ -367,7 +353,8 @@ async function runInner(options: RunOptions): Promise<number> {
     const printVerdict = (result: RunResult): void => {
       console.log(`run ${String(n)}: ${result.check} ${result.verdict}${result.reason === undefined ? "" : `: ${result.reason}`}`);
     };
-    for (const check of selected) {
+    const layout = runLogs(n, selected.map(check => check.id));
+    for (const [i, check] of selected.entries()) {
       console.log(`run ${String(n)}: ${check.id} starting`);
       let result: RunResult;
       if (skipping) result = blank(check, "skipped", note);
@@ -381,7 +368,7 @@ async function runInner(options: RunOptions): Promise<number> {
           claim: verdict === "passed" ? "observation" : undefined,
           observation: { at: new Date().toISOString(), build: build ?? "", environment: environment ?? "", reference: reference === undefined || reference.trim() === "" ? undefined : reference, note: note ?? "" },
         };
-      } else result = await runCheck(check, context);
+      } else result = await runCheck(check, context, layout[i]!);
       results.push(result);
       printVerdict(result);
     }
