@@ -39,7 +39,7 @@ The kernel's conformance suite has at least one test per case below. A test fail
 
 | Id | Case | Required behaviour |
 |---|---|---|
-| FL-01 | A run is interrupted. | Recorded as interrupted; the unfinished checks are `interrupted` or `not-attempted`. |
+| FL-01 | A run is interrupted. | After a hard kill, explicit recovery preserves the reserved identity and hashes surviving logs. Recovered checks are interrupted or not-attempted. Recovery leaves live writers and published receipts intact. |
 | FL-02 | A change starts on a check that is red. | The start run records the failure; the change proceeds. |
 | FL-03 | Only records or notes are written after a passing run. | The candidate is unchanged; no rerun is demanded. |
 | FL-04 | A material amendment is rejected or not yet approved. | Checks the last approval bound still run; amended or new checks are `refused`; `close` refuses. |

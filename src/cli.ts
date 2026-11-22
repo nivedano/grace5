@@ -134,6 +134,7 @@ Exit status:
 
 Usage:
   grace5 [--root <dir>] run [change]
+  grace5 [--root <dir>] run [change] --recover
   grace5 [--root <dir>] run [change] --check <id>...
   grace5 [--root <dir>] run [change] --start [--check <trace id>...]
   grace5 [--root <dir>] run [change] --check <id> --observe <verdict> --build <build>
@@ -144,6 +145,9 @@ Usage:
 The change, when named, comes before the flags.
 
 Forms:
+  --recover         Adopt abandoned reservations with valid headers as interrupted receipts.
+                    Skip live runs and existing receipts. Report how to rerun checks when a
+                    header is missing or invalid. This form does not execute checks.
   (no flags)        Execute every automated and trace check, optional ones included, in
                     document order. Manual checks are not touched.
   --check <id>...   Execute only the named automated or trace checks. One or more ids follow
@@ -167,7 +171,7 @@ Forms:
   --skip <id>... --note <reason>
                     Record the named checks as skipped with the reason.
 
-Requires a git repository with at least one commit, a start run (except for --start) and an
+Executing checks requires a git repository with at least one commit, a start run (except for --start) and an
 approval of the current contract revision that authorizes execution. While the current
 revision is unapproved, rejected or altered, the checks whose definition the last approval
 that authorized execution still binds run, and every other selected check is recorded as
@@ -372,6 +376,7 @@ async function main(argv: readonly string[]): Promise<number> {
   const values = new Map<string, string>();
   const lists = new Map<string, string[]>();
   let start = false;
+  let recover = false;
   let all = false;
   let plan = false;
   let help = false;
@@ -390,6 +395,7 @@ async function main(argv: readonly string[]): Promise<number> {
       if (arg.startsWith("-")) return usage(`unknown option ${arg}`);
       command = arg;
     } else if (command === "run" && arg === "--start") start = true;
+    else if (command === "run" && arg === "--recover") recover = true;
     else if (command === "status" && arg === "--all") all = true;
     else if (command === "upgrade" && arg === "--plan") plan = true;
     else if (command === "run" && (VALUE_FLAGS as readonly string[]).includes(arg)) {
@@ -436,6 +442,7 @@ async function main(argv: readonly string[]): Promise<number> {
   if (positional.length > 1) return usage(`${command} takes one change, got ${positional.join(" ")}`);
   const change = positional[0];
   if (all && change !== undefined) return usage("--all lists every change and takes no change id");
+  if (recover && (start || values.size > 0 || lists.size > 0)) return usage("--recover takes no other run flags");
   const resolved = resolve(root);
 
   // The pin (upgrade.md): every command but status and upgrade refuses state laid out for another version.
@@ -464,6 +471,7 @@ async function main(argv: readonly string[]): Promise<number> {
         root: resolved,
         change,
         start,
+        recover,
         checks: lists.get("--check") ?? [],
         skip: lists.get("--skip") ?? [],
         observe: values.get("--observe"),

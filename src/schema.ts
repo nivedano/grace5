@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { validateXML } from "xmllint-wasm";
 
-export type SchemaName = "contract" | "approval" | "run" | "review" | "close";
+export type SchemaName = "contract" | "approval" | "run" | "run-header" | "review" | "close";
 
 export const SCHEMA_DIR = resolve(import.meta.dir, "..", "models", "architecture", "schemas");
 

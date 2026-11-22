@@ -85,6 +85,8 @@ export interface RunRecord extends Binding {
   readonly results: readonly RunResult[];
 }
 
+export type RunReservation = Omit<RunRecord, "ended" | "status">;
+
 export interface Review extends Binding {
   readonly n: number;
   readonly status: "completed" | "incomplete";
@@ -179,7 +181,7 @@ function readResult(element: XmlElement): RunResult {
     required: xsBoolean(element.attributes["required"], true),
     definitionSha256: attr(element, "definition-sha256"),
     definition: childNamed(element, "Definition")?.text ?? "",
-    verdict: attr(element, "verdict") as Verdict,
+    verdict: (element.attributes["verdict"] ?? "not-attempted") as Verdict,
     claim: optionalAttr(element, "claim") as Claim | undefined,
     cwd: optionalAttr(element, "cwd"),
     exit: numberAttr(element, "exit"),
@@ -213,21 +215,27 @@ function readResult(element: XmlElement): RunResult {
   };
 }
 
-function readRun(root: XmlElement): RunRecord {
+export function readReservation(root: XmlElement): RunReservation {
   return {
     ...binding(root),
     n: Number(attr(root, "n")),
     runId: attr(root, "run-id"),
     started: attr(root, "started"),
-    ended: attr(root, "ended"),
-    status: attr(root, "status") === "completed" ? "completed" : "interrupted",
     start: xsBoolean(root.attributes["start"], false),
     sourceRevision: attr(root, "source-revision"),
     dirty: xsBoolean(root.attributes["dirty"], true),
     candidate: attr(root, "candidate"),
     kernel: attr(root, "kernel"),
-    preexisting: childrenNamed(root, "Preexisting").map((p) => collapse(p.text)),
+    preexisting: childrenNamed(root, "Preexisting").map((p) => p.text),
     results: childrenNamed(root, "Result").map(readResult),
+  };
+}
+
+function readRun(root: XmlElement): RunRecord {
+  return {
+    ...readReservation(root),
+    ended: attr(root, "ended"),
+    status: attr(root, "status") === "completed" ? "completed" : "interrupted",
   };
 }
 
@@ -341,7 +349,7 @@ export async function loadRecords(changeDir: string, changeId: string): Promise<
   return { approvals, briefs, runs, reviews, close, closeExists: pending.some((p) => p.schema === "close"), logDirs, defects };
 }
 
-function resultNode(result: RunResult): XmlNode {
+function resultNode(result: RunResult, receipt: boolean): XmlNode {
   const children: XmlNode[] = [{ name: "Definition", text: result.definition }];
   const trace = result.trace;
   if (trace !== undefined) {
@@ -379,7 +387,7 @@ function resultNode(result: RunResult): XmlNode {
       kind: result.kind,
       required: result.required,
       "definition-sha256": result.definitionSha256,
-      verdict: result.verdict,
+      verdict: receipt ? result.verdict : undefined,
       claim: result.claim,
       cwd: result.cwd,
       exit: result.exit,
@@ -392,9 +400,10 @@ function resultNode(result: RunResult): XmlNode {
   };
 }
 
-export function runNode(run: RunRecord): XmlNode {
+export function runNode(run: RunRecord | RunReservation): XmlNode {
+  const receipt = "ended" in run;
   return {
-    name: "Run",
+    name: receipt ? "Run" : "RunHeader",
     attributes: {
       change: run.change,
       revision: run.revision,
@@ -402,15 +411,15 @@ export function runNode(run: RunRecord): XmlNode {
       n: run.n,
       "run-id": run.runId,
       started: run.started,
-      ended: run.ended,
-      status: run.status,
+      ended: receipt ? run.ended : undefined,
+      status: receipt ? run.status : undefined,
       start: run.start ? true : undefined,
       "source-revision": run.sourceRevision,
       dirty: run.dirty,
       candidate: run.candidate,
       kernel: run.kernel,
     },
-    children: [...run.preexisting.map((text) => ({ name: "Preexisting", text })), ...run.results.map(resultNode)],
+    children: [...run.preexisting.map((text) => ({ name: "Preexisting", text })), ...run.results.map(result => resultNode(result, receipt))],
   };
 }
 

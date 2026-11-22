@@ -35,17 +35,18 @@ It prints the contract hash, each check's definition hash, and size against targ
 
 ## run
 
-Requires a git repository and an approval that authorizes execution (`authorization.md`). Source identity is sampled once, when the run starts.
+Executing checks requires a git repository and an approval that authorizes execution (`authorization.md`). Source identity is sampled once, when the run starts.
 
 | Form | Behaviour |
 |---|---|
 | `run` | Executes every automated and trace check, optional ones included, in document order. Manual checks are not touched. |
 | `run --check <id>...` | Executes only the named automated or trace checks. |
+| `run --recover` | On an open change, acquire exclusive ownership of each abandoned reservation, validate its header and publish its interrupted receipt. Existing receipts are preserved. Busy reservations print `live: run-<n>`. Missing or invalid headers yield a refusal and a command for obtaining fresh evidence. |
 | `run --start` | The first run of a change. Records the start revision and the pre-existing dirty source paths, and executes the automated checks, plus any trace check named with `--check`, to record the starting state. A second start run is refused; the first one counts. |
 | `run --check <id> --observe <verdict> ...` | Records a manual observation (`evidence-records.md`). `--environment` defaults to the text of the check's declared Environment and is required when the check declares none. |
 | `run --skip <id> --note <reason>` | Records the check as `skipped`. |
 
-A command is executed through the platform shell (`sh -c`, or `cmd /d /s /c` on Windows) in the check's `cwd`, with the variables of `trace-provenance.md` exported, standard output and error captured together into the log. Exceeding `budget` kills the process tree and records `cancelled`. Every other form is refused before a start run exists.
+A command is executed through the platform shell (`sh -c`, or `cmd /d /s /c` on Windows) in the check's `cwd`, with the variables of `trace-provenance.md` exported, standard output and error captured together into the log. Exceeding `budget` kills the process tree and records `cancelled`. Before a start receipt exists, only `--start` and `--recover` are available.
 
 ## status
 
@@ -98,5 +99,5 @@ The pin and `upgrade` add `repository state is at <pin>, kernel is <version>: ru
 - `Result/@log` is relative to the change directory; printed paths are relative to the root.
 - `status` shows uncommitted writes to protected and outside paths as well as committed ones, and reuses the close phrases after `does not count:`.
 - The move at close is a filesystem rename of the change directory; git sees it as deletions and untracked additions under `.grace5/changes/`, which are kernel-managed and not source (`source-identity.md`), and the agent commits the move with the records. An id with a directory in both locations is malformed; the open one is read.
-- On Windows a run can only be interrupted by killing it, so the interrupted receipt is written on POSIX systems only; the log directory without a receipt is the record everywhere.
+- After a hard kill on Windows or POSIX, use `grace5 run <change> --recover`. Legacy runs without a reservation header retain their logs and require fresh evidence.
 - Validation is by the published XSD files through xmllint; the kernel then reads the validated text with its own small XML reader, which supports elements, attributes, text and the XML declaration only. Where the two could disagree, a DOCTYPE, a CDATA section, a processing instruction or another encoding, the reader throws and the change is reported malformed, so a disagreement fails closed. Schema defaults (`required="true"`, `cwd="."`, `min="1"`, `start="false"`) and the change id pattern of `common.xsd` are restated in code and must be kept equal to the schemas by hand; `init` validates the id it is given against that copy before any schema is involved (accepted design, review finding F13 of C-0001-kernel).

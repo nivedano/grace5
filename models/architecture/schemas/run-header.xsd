@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="common.xsd"/>
+  <xs:element name="RunHeader">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Preexisting" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="Result" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence><xs:element name="Definition" type="xs:string"/></xs:sequence>
+            <xs:attribute name="check" type="xs:NCName" use="required"/>
+            <xs:attribute name="kind" type="CheckKind" use="required"/>
+            <xs:attribute name="required" type="xs:boolean" use="required"/>
+            <xs:attribute name="definition-sha256" type="Sha256" use="required"/>
+            <xs:attribute name="cwd" type="Text"/>
+            <xs:attribute name="environment" type="Text"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attributeGroup ref="Binding"/>
+      <xs:attribute name="n" type="xs:positiveInteger" use="required"/>
+      <xs:attribute name="run-id" type="Text" use="required"/>
+      <xs:attribute name="started" type="xs:dateTime" use="required"/>
+      <!-- start: this run records the start revision and the starting-state observations of the automated checks, failures included. -->
+      <xs:attribute name="start" type="xs:boolean" default="false"/>
+      <!-- Source identity (source-identity.md): the commit, whether source paths were dirty, and the hash of the source tree with record paths excluded. -->
+      <xs:attribute name="source-revision" type="GitRevision" use="required"/>
+      <xs:attribute name="dirty" type="xs:boolean" use="required"/>
+      <xs:attribute name="candidate" type="Sha256" use="required"/>
+      <!-- kernel: name and version of the tool that wrote the record, or "by-hand" before the kernel existed. -->
+      <xs:attribute name="kernel" type="Text" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

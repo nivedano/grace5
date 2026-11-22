@@ -5,8 +5,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
   TEST_TIMEOUT,
+  Scenario,
   attr,
   automated,
+  canonicalDefinition,
   contractXml,
   disposeAll,
   elementTexts,
@@ -16,6 +18,7 @@ import {
   prepared,
   resultAttr,
   resultBlock,
+  sha256,
   trace,
   waitFor,
   waitForExit,
@@ -25,37 +28,175 @@ import {
 afterAll(() => disposeAll());
 
 test(
-  "FL-01 a run killed outright is reported as interrupted and close refuses",
+  "FL-01 recovery preserves the reservation after a hard kill and contract amendment",
   async () => {
-    const s = prepared({
+    const rev1: ContractDef = {
       id: "C-0101-killed",
-      checks: [automated("CK1"), trace("TSLOW", "bun tools/sleep.js 20", "any", { expect: ["MARK-A"], budget: 60 })],
-    });
+      checks: [
+        trace("TSAVED", "bun tools/pass.js", "any", { expect: ["MARK-A"], required: false }),
+        trace("TSLOW", "bun tools/sleep.js 60", "any", { expect: ["MARK-A"], budget: 90 }),
+        trace("TLATER", "bun tools/pass.js", "any", { expect: ["fixture check ran"] }),
+        automated("CK1"),
+      ],
+    };
+    const s = new Scenario(rev1);
+    const contractPath = `.grace5/changes/${s.id}/contract.xml`;
+    const declaredLogs: Record<string, string> = { TSAVED: "tools/data/ordered.log", TSLOW: "trace-produced.log" };
+    const writeContract = (def: ContractDef) => {
+      s.writeContract(def);
+      let contract = s.read(contractPath);
+      for (const [check, log] of Object.entries(declaredLogs)) {
+        contract = contract.replace(`<Trace id="${check}"`, `<Trace id="${check}" log="${log}"`);
+      }
+      s.write(contractPath, contract);
+      return s.prepareBriefless();
+    };
+    const original = writeContract(rev1);
     expect(s.start().code).toBe(0);
+    expect(attr(s.receipt(1), "Run", "start")).toBe("true");
+    const startHeader = s.record("logs/run-1/run-header.xml");
+    expect(attr(startHeader, "RunHeader", "start")).toBe("true");
+    const sourceRevision = s.head();
+    const candidate = s.computeCandidate();
+    const originalReceipt = s.receipt(1);
 
-    const child = s.cliAsync(["run", s.id, "--check", "TSLOW"]);
+    const checks = ["TSAVED", "TSLOW", "TLATER"];
+    const child = s.cliAsync(["run", s.id, ...checks.flatMap((check) => ["--check", check])]);
     const logDir = path.join(s.recordsDir, "logs", "run-2");
     const started = path.join(s.scratch, "sleep-started");
-    // The run reserves its log directory first; the check command notes when it is running.
-    const running = await waitFor(() => fs.existsSync(logDir) && fs.existsSync(started), 45_000);
-    await killTree(child);
-    await waitForExit(child, 15_000);
-    expect(running).toBe(true);
+    const headerFile = path.join(logDir, "run-header.xml");
+    let header: string;
+    let lastLiveAt: number;
+    try {
+      expect(await waitFor(() => fs.existsSync(started), 45_000)).toBe(true);
+      header = fs.readFileSync(headerFile, "utf8");
+      expect(s.hasRecord("run-2.xml")).toBe(false);
+      const live = s.run("--recover");
+      expect(live.code).toBe(0);
+      expect(hasLine(live, "live: run-2")).toBe(true);
+      expect(s.hasRecord("run-2.xml")).toBe(false);
+      expect(fs.readFileSync(headerFile, "utf8")).toBe(header);
+      lastLiveAt = Date.now();
+    } finally {
+      await killTree(child);
+    }
 
-    // Killed outright: a log directory without a receipt.
-    expect(fs.existsSync(logDir)).toBe(true);
     expect(s.hasRecord("run-2.xml")).toBe(false);
+    expect(hasLine(s.status(), "interrupted: run-2")).toBe(true);
+    expect(s.close().code).toBe(1);
 
+    const attrs = {
+      change: s.id,
+      n: "2",
+      revision: "1",
+      "contract-sha256": original.contractSha,
+      "source-revision": sourceRevision,
+      dirty: "false",
+      candidate,
+      kernel: attr(originalReceipt, "Run", "kernel"),
+    };
+    for (const [key, value] of Object.entries(attrs)) expect(attr(header, "RunHeader", key)).toBe(value);
+    const runId = attr(header, "RunHeader", "run-id");
+    const begunAt = attr(header, "RunHeader", "started") ?? "";
+    expect(runId).toMatch(/^[0-9a-f]{32}$/);
+    expect(Date.parse(begunAt)).toBeLessThanOrEqual(lastLiveAt);
+    expect(attr(header, "RunHeader", "start") ?? "false").toBe("false");
+    expect(elementTexts(header, "Preexisting")).toEqual([]);
+    expect(openTags(header, "Result")).toHaveLength(checks.length);
+    for (const check of checks) {
+      const canonical = canonicalDefinition(rev1, check);
+      const log = declaredLogs[check];
+      const definition = log === undefined ? canonical : canonical.replace("origin=any\n", `origin=any\nlog=${log}\n`);
+      expect(resultAttr(header, check, "kind")).toBe("trace");
+      expect(resultAttr(header, check, "required")).toBe(check === "TSAVED" ? "false" : "true");
+      expect(resultAttr(header, check, "definition-sha256")).toBe(sha256(definition));
+      expect(resultAttr(header, check, "definition-sha256")).toBe(original.definitions[check]);
+      expect(elementTexts(resultBlock(header, check) ?? "", "Definition")).toEqual([definition]);
+    }
+
+    const amended = writeContract({
+      ...rev1,
+      revision: 2,
+      checks: rev1.checks.map((check) => (check.id === "TLATER" ? { ...check, budget: 91 } : check)),
+    });
+    expect(hasLine(s.status(), "authorization: approved")).toBe(true);
+    expect(amended.contractSha).not.toBe(original.contractSha);
+    expect(amended.definitions.TLATER).not.toBe(original.definitions.TLATER);
+    const lastStatusTime = Date.now();
+
+    const recoveries = [s.cliAsync(["run", s.id, "--recover"]), s.cliAsync(["run", s.id, "--recover"])];
+    expect(await Promise.all(recoveries.map((process) => waitForExit(process, 20_000)))).toEqual([0, 0]);
+    const receipt = s.receipt(2);
+    expect(attr(receipt, "Run", "status")).toBe("interrupted");
+    for (const key of [...Object.keys(attrs), "run-id", "started"]) expect(attr(receipt, "Run", key)).toBe(attr(header, "RunHeader", key));
+    expect(attr(receipt, "Run", "start") ?? "false").toBe("false");
+    expect(elementTexts(receipt, "Preexisting")).toEqual([]);
+    const recoveredAt = Date.parse(attr(receipt, "Run", "ended") ?? "");
+    expect(recoveredAt).toBeGreaterThanOrEqual(lastStatusTime);
+    expect(recoveredAt).toBeLessThanOrEqual(Date.now());
+    expect(openTags(receipt, "Result")).toHaveLength(checks.length);
+    for (const check of checks) {
+      for (const key of ["kind", "required", "definition-sha256"]) expect(resultAttr(receipt, check, key)).toBe(resultAttr(header, check, key));
+      expect(elementTexts(resultBlock(receipt, check) ?? "", "Definition")).toEqual(elementTexts(resultBlock(header, check) ?? "", "Definition"));
+      expect(resultAttr(receipt, check, "claim")).toBeUndefined();
+    }
+    for (const [check, filename] of [["TSAVED", "TSAVED.log"], ["TSLOW", "TSLOW.output.log"]] as const) {
+      expect(resultAttr(receipt, check, "verdict")).toBe("interrupted");
+      const log = `records/logs/run-2/${filename}`;
+      expect(resultAttr(receipt, check, "log")).toBe(log);
+      expect(resultAttr(receipt, check, "log-sha256")).toBe(sha256(s.readLog(log)));
+    }
+    expect(s.readLog("records/logs/run-2/TSAVED.log")).toEqual(s.readLog("tools/data/ordered.log"));
+    expect(s.readLog("records/logs/run-2/TSAVED.output.log").toString()).toContain("fixture check ran");
+    expect(fs.existsSync(path.join(logDir, "TSLOW.log"))).toBe(false);
+    expect(resultAttr(receipt, "TLATER", "verdict")).toBe("not-attempted");
+    expect(resultAttr(receipt, "TLATER", "log")).toBeUndefined();
+    expect(resultAttr(receipt, "TLATER", "log-sha256")).toBeUndefined();
+
+    expect(s.run("--recover").code).toBe(0);
+    expect(s.runNumbers()).toEqual([1, 2]);
+    expect(s.receipt(1)).toBe(originalReceipt);
+    expect(s.receipt(2)).toBe(receipt);
+    expect(fs.readFileSync(headerFile, "utf8")).toBe(header);
     const status = s.status();
     expect(hasLine(status, "interrupted: run-2")).toBe(true);
-    // The unfinished check is not a pass and does not count.
-    expect(hasLine(status, /^check TSLOW: passed/)).toBe(false);
-    expect(hasLine(status, /^check TSLOW: .*, counts$/)).toBe(false);
-
+    for (const check of checks) {
+      expect(hasLine(status, new RegExp(`^check ${check}: .*, does not count:`))).toBe(true);
+    }
     const close = s.close();
     expect(close.code).toBe(1);
-    expect(hasLine(close, /^refused: .+$/)).toBe(true);
+    expect(hasLine(close, "refused: check TSLOW: current result is interrupted")).toBe(true);
     expect(s.hasRecord("close.xml")).toBe(false);
+  },
+  TEST_TIMEOUT,
+);
+
+test(
+  "FL-01 recovery reports missing and malformed headers and preserves their logs",
+  () => {
+    const s = prepared({ id: "C-0101-orphans", checks: [automated("CK1")] });
+    expect(s.start().code).toBe(0);
+    for (const n of [2, 3]) {
+      const logDir = path.join(s.recordsDir, "logs", `run-${n}`);
+      fs.mkdirSync(logDir, { recursive: true });
+      fs.writeFileSync(path.join(logDir, "CK1.log"), `orphaned output for run-${n}\n`);
+    }
+    fs.copyFileSync(
+      path.join(s.recordsDir, "logs", "run-1", "owner.sqlite"),
+      path.join(s.recordsDir, "logs", "run-3", "owner.sqlite"),
+    );
+    const malformed = "<RunHeader";
+    fs.writeFileSync(path.join(s.recordsDir, "logs", "run-3", "run-header.xml"), malformed);
+    const recovery = s.run("--recover");
+    expect(recovery.code).toBe(1);
+    for (const n of [2, 3]) {
+      const diagnostic = recovery.lines.find((line) => line.includes(`run-${n}`)) ?? "";
+      expect(diagnostic).toMatch(n === 2 ? /missing.+header/i : /invalid header/i);
+      expect(diagnostic).toContain(`grace5 run ${s.id}`);
+      expect(s.record(`logs/run-${n}/CK1.log`)).toBe(`orphaned output for run-${n}\n`);
+    }
+    expect(s.record("logs/run-3/run-header.xml")).toBe(malformed);
+    expect(s.runNumbers()).toEqual([1]);
   },
   TEST_TIMEOUT,
 );
@@ -240,6 +381,9 @@ test(
     const receipt = s.receipt(1);
     const preexisting = elementTexts(receipt, "Preexisting").map((t) => t.trim().replace(/\\/g, "/")).sort();
     expect(preexisting).toEqual(["src/other.txt", "stray.txt"]);
+    const startHeader = s.record("logs/run-1/run-header.xml");
+    expect(elementTexts(startHeader, "Preexisting").map((t) => t.trim().replace(/\\/g, "/")).sort()).toEqual(preexisting);
+    expect(attr(startHeader, "RunHeader", "dirty")).toBe("true");
     expect(attr(receipt, "Run", "start")).toBe("true");
     expect(attr(receipt, "Run", "dirty")).toBe("true");
 

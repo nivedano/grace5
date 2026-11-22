@@ -6,11 +6,14 @@ import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readdirSync, 
 import { join } from "node:path";
 import { environmentIdentity, sha256Hex, type Check } from "../contract";
 import { revisionsWithCandidate } from "../git";
-import { kernelName, runNode, writeRecord, type RunRecord, type RunResult, type TraceRecord, type Verdict } from "../records";
+import { kernelName, type RunReservation, type RunResult, type TraceRecord, type Verdict } from "../records";
 import { evaluate, mayRun, selectChange, type ChangeState } from "../state";
 import { buildSatisfies, judgeProvenance, matchMarkers, readProvenance } from "../trace";
 
+import { acquireRunLock, publishRun, recoverRuns, saveHeader } from "./run-recovery";
+
 export interface RunOptions {
+  readonly recover: boolean;
   readonly root: string;
   readonly change: string | undefined;
   readonly start: boolean;
@@ -274,6 +277,7 @@ async function runInner(options: RunOptions): Promise<number> {
   const approved = state.authorization === "approved";
   const holding = state.blocking.find((defect) => approved || !state.briefDefects.includes(defect));
   if (holding !== undefined) return refuse(`change has defects: ${holding}`);
+  if (options.recover) return recoverRuns(state);
   const source = state.source;
   if (source === undefined) return refuse("not a git repository");
   if (source.revision === undefined || source.candidate === undefined) return refuse("no source revision");
@@ -336,56 +340,63 @@ async function runInner(options: RunOptions): Promise<number> {
     interrupted = true;
     stopRunning?.();
   };
-  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.on(signal, onSignal);
 
   const started = new Date().toISOString();
-  const results: RunResult[] = [];
-  const printVerdict = (result: RunResult): void => {
-    console.log(`run ${String(n)}: ${result.check} ${result.verdict}${result.reason === undefined ? "" : `: ${result.reason}`}`);
-  };
-  for (const check of selected) {
-    console.log(`run ${String(n)}: ${check.id} starting`);
-    let result: RunResult;
-    if (skipping) result = blank(check, "skipped", note);
-    else if (interrupted) result = blank(check, "not-attempted", undefined);
-    else if (!mayRun(state, check)) result = blank(check, "refused", "amended in unapproved revision");
-    else if (observing) {
-      const satisfied = declared?.build === undefined || buildSatisfies(declared.build, build ?? "", context.sameCandidateRevisions);
-      const verdict: Verdict = satisfied ? (observe as Verdict) : "refused";
-      result = {
-        ...blank(check, verdict, satisfied ? undefined : "build mismatch"),
-        claim: verdict === "passed" ? "observation" : undefined,
-        observation: { at: new Date().toISOString(), build: build ?? "", environment: environment ?? "", reference: reference === undefined || reference.trim() === "" ? undefined : reference, note: note ?? "" },
-      };
-    } else result = await runCheck(check, context);
-    results.push(result);
-    printVerdict(result);
-  }
-  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.off(signal, onSignal);
-
-  const record: RunRecord = {
+  const reservation: RunReservation = {
     change: state.id,
     revision: contract.revision,
     contractSha256: state.report.sha256,
     n,
     runId: context.runId,
     started,
-    ended: new Date().toISOString(),
-    status: interrupted ? "interrupted" : "completed",
     start: options.start,
     sourceRevision: revision,
     dirty: source.dirty.length > 0,
     candidate,
     kernel: kernelName(),
     preexisting: options.start ? source.dirty : [],
-    results,
+    results: selected.map((check) => blank(check, "not-attempted", undefined)),
   };
-  await writeRecord("run", join(state.dir, "records", `run-${String(n)}.xml`), runNode(record));
-  for (const result of results) printVerdict(result);
-  console.log(`receipt: ${state.path}/records/run-${String(n)}.xml`);
-  if (interrupted) return 1;
-  if (skipping) return 0;
-  // An observation the operator reported as not passed is recorded as asked; only a refusal fails the invocation.
-  if (observing) return results.some((result) => result.verdict === "refused") ? 1 : 0;
-  return results.every((result) => result.verdict === "passed") ? 0 : 1;
+  const logDir = join(state.dir, "records", "logs", `run-${String(n)}`);
+  const lock = acquireRunLock(logDir, true);
+  if (!lock) throw new Error("new reservation is already locked");
+  try {
+    for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.on(signal, onSignal);
+    await saveHeader(logDir, reservation);
+    const results: RunResult[] = [];
+    const printVerdict = (result: RunResult): void => {
+      console.log(`run ${String(n)}: ${result.check} ${result.verdict}${result.reason === undefined ? "" : `: ${result.reason}`}`);
+    };
+    for (const check of selected) {
+      console.log(`run ${String(n)}: ${check.id} starting`);
+      let result: RunResult;
+      if (skipping) result = blank(check, "skipped", note);
+      else if (interrupted) result = blank(check, "not-attempted", undefined);
+      else if (!mayRun(state, check)) result = blank(check, "refused", "amended in unapproved revision");
+      else if (observing) {
+        const satisfied = declared?.build === undefined || buildSatisfies(declared.build, build ?? "", context.sameCandidateRevisions);
+        const verdict: Verdict = satisfied ? (observe as Verdict) : "refused";
+        result = {
+          ...blank(check, verdict, satisfied ? undefined : "build mismatch"),
+          claim: verdict === "passed" ? "observation" : undefined,
+          observation: { at: new Date().toISOString(), build: build ?? "", environment: environment ?? "", reference: reference === undefined || reference.trim() === "" ? undefined : reference, note: note ?? "" },
+        };
+      } else result = await runCheck(check, context);
+      results.push(result);
+      printVerdict(result);
+    }
+    await publishRun(state.dir, {
+      ...reservation, ended: new Date().toISOString(), status: interrupted ? "interrupted" : "completed", results,
+    });
+    for (const result of results) printVerdict(result);
+    console.log(`receipt: ${state.path}/records/run-${String(n)}.xml`);
+    if (interrupted) return 1;
+    if (skipping) return 0;
+    // An observation the operator reported as not passed is recorded as asked; only a refusal fails the invocation.
+    if (observing) return results.some((result) => result.verdict === "refused") ? 1 : 0;
+    return results.every((result) => result.verdict === "passed") ? 0 : 1;
+  } finally {
+    lock.close();
+    for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) process.off(signal, onSignal);
+  }
 }

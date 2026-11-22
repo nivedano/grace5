@@ -28,14 +28,14 @@ The canonical definition text of a check is its fields, one per line as `name=va
 | `failed` | Nonzero exit, a missing or forbidden marker, or an observed failure. | No |
 | `blocked` | Manual: the procedure could not be carried out. | No |
 | `cancelled` | The budget ran out or the operator stopped the command. | No |
-| `interrupted` | The run died while this check was running. | No |
+| `interrupted` | The run stopped during this check, or recovery found its log but its verdict was lost. | No |
 | `not-attempted` | Selected, never started. | No |
 | `skipped` | Deliberately left out with a recorded reason. | No |
 | `refused` | Not authorized, or provenance missing or mismatched. | No |
 
 A pass claims only what `claim` says: `command-completion`, a `marker-sequence-*` of the recorded origin, or `observation`. A command that exits 0 without exercising the criterion is a completed command; whether a check discriminates the intended behaviour from its failure is the reviewer's `Adequacy` statement, not the receipt's.
 
-A run stopped by a signal writes its receipt with `status="interrupted"`, the running check `interrupted` and the rest `not-attempted`. A run killed outright leaves a log directory without a receipt; `status` reports that run as interrupted.
+A run stopped by a signal writes its receipt with `status="interrupted"`, the running check `interrupted` and the rest `not-attempted`. Before any selected check begins, the runner saves its original identity and canonical check definitions in `records/logs/run-<n>/run-header.xml`. Ownership of that directory is held by an exclusive SQLite transaction until receipt publication or process exit. A hard kill releases the lock. On explicit recovery the receipt retains the saved identities, including its original kernel, and its `ended` timestamp records adoption time. A saved check log yields `interrupted` and its on-disk hash. A trace with a declared log can use its captured command output if the trace log was never copied. A selected check lacking either artifact yields `not-attempted`. Neither verdict counts. Existing receipts keep their original meaning.
 
 ## The manual observation
 

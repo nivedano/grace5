@@ -11,7 +11,7 @@ The measured baseline in `models/decisions/` describes GRACE 4 in use: review an
 | Kind | Items |
 |---|---|
 | Artifacts per change | `contract.xml`, `notes.md`, `records/` under `.grace5/changes/<id>/` while the change is open, and under `.grace5/changes/closed/<id>/` once `close` has moved it (`commands.md`) |
-| Records | `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs under `records/logs/run-<n>/`. Historical changes also carry legacy brief pages, which the kernel reads only for a legacy approval. |
+| Records | `approval-<rev>.xml`, `run-<n>.xml`, `review-<n>.xml`, `close.xml`; run logs and their recovery reservation under `records/logs/run-<n>/`. Historical changes also carry legacy brief pages, which the kernel reads only for a legacy approval. |
 | Commands | `grace5 init`, `check`, `run`, `status`, `close`, `upgrade`, `schema`; `--help` and `--version` |
 | State of a repository | `.grace5/kernel-version`, the pin of the version the state conforms to, `.grace5/.gitignore`, the local ignore file that keeps the run logs out of git, and the migration steps `upgrade` composes from the pin to the kernel's version (`upgrade.md`); optional local instructions in `.grace5/extensions/` and run ledgers in `.grace5/orchestration/runs/`, neither read nor written by the kernel |
 | Skills | prepare, execute, review, in `skills/`, the sole maintained skill source; the harness packages are materialized under `packages/` at build or release staging from `skills/`, are not tracked ordinary source, and are never edited |
