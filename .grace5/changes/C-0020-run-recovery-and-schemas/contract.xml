@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Contract id="C-0020-run-recovery-and-schemas" revision="3" title="Recover a run interrupted before receipt publication">
+  <Problem>A hard kill left run-3 logs without a receipt or the identity needed to recover it.</Problem>
+  <Change>For an open change, grace5 run --recover converts each abandoned run with a valid reservation header into an interrupted receipt using the original run identity.</Change>
+  <Constraints>
+    <Constraint id="K1" rule="models/architecture/evidence-records.md">For a recovered receipt, interrupted means a log attests an attempt whose verdict was lost. Record recovery time as the receipt end time and document its meaning. Preserve existing receipt validity.</Constraint>
+    <Constraint id="K2" rule="models/architecture/rationale-ledger.md">Record the rationale and removal criterion for recovery.</Constraint>
+  </Constraints>
+  <NonGoals><NonGoal id="N1">Automatic retry, duplicate-start scheduling, release and client rollout.</NonGoal></NonGoals>
+  <Acceptance>
+    <Criterion id="A1" checks="CK1">Before executing checks, records/logs/run-&lt;n&gt;/run-header.xml captures change, run number and ID, contract revision and digest, start time and flag, source revision, dirty state, candidate, preexisting paths, kernel and selected check IDs, kinds, required flags and canonical definitions with their hashes. Recovery after amendment retains these original values.</Criterion>
+    <Criterion id="A2" checks="CK1">For a selected check recovery records the path and hash of its saved check log, falling back to its captured command output if the declared trace log was never copied. Either artifact yields interrupted. With neither artifact the result is not-attempted. Neither counts. With an approved defect-free contract binding all checks, a resolvable start revision, clean source and no protected edits, close names the first unmet required check.</Criterion>
+    <Criterion id="A3" checks="CK1">A live run holds exclusive ownership throughout execution and publication. Recovery may adopt its reservation only after obtaining exclusive ownership released on process death or normal exit and confirming the receipt is absent. Concurrent and repeated recovery preserves published receipts. For a missing or invalid header, report the run and how to obtain fresh evidence while preserving its logs.</Criterion>
+  </Acceptance>
+  <Affected>
+    <Path>src/commands/**</Path><Path>src/cli.ts</Path><Path>src/state.ts</Path><Path>src/records.ts</Path><Path>src/schema.ts</Path><Path>src/conformance/**</Path><Path>models/architecture/schemas/**</Path><Path>models/architecture/commands.md</Path><Path>models/architecture/method.md</Path><Path>models/architecture/evidence-records.md</Path><Path>models/architecture/rationale-ledger.md</Path><Path>models/architecture/conformance.md</Path><Path>models/architecture/cli-reference.md</Path>
+    <Path>models/architecture/package-manifest.json</Path><Path>src/tools/package.ts</Path><Name>Run reservation and interrupted receipt</Name><Protected>.grace5/changes/closed/**</Protected><Protected>package.json</Protected><Protected>.grace5/kernel-version</Protected>
+  </Affected>
+  <Checks><Automated id="CK1" budget="300"><Command>bun test src/conformance/failure.test.ts</Command></Automated></Checks>
+  <Decisions/>
+</Contract>

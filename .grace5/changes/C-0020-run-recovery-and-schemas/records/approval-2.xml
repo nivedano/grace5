@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Approval change="C-0020-run-recovery-and-schemas" revision="2" contract-sha256="a3987e14e3160711b98b598498e8eeb02cd45c1b3f1796f7d38c40c94db8ec1b" date="2026-11-22" decision="approved">
+  <Statement>approved</Statement>
+  <Bound check="CK1" definition-sha256="34ffb5860f1db392c170e11908562138a89d70ee783eb741518c175b9257bbcc"/>
+</Approval>

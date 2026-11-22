@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Run change="C-0020-run-recovery-and-schemas" revision="3" contract-sha256="bff8e4601080533ebf54b3991e61a1e8ec61edc24b4b91f78eba3d32b0db7220" n="1" run-id="d4f2d7851afe427eac6a2bf926d72fe9" started="2026-11-22T20:16:10.406Z" ended="2026-11-22T20:17:30.755Z" status="completed" start="true" source-revision="e98900e62a462e489c0394535d0cecbd24ce68a1" dirty="false" candidate="162561564786cfbc08fa45dd931f2c2153b5384fbd464f8dd2aaeb160e2a0b6d" kernel="grace5 0.9.0">
+  <Result check="CK1" kind="automated" required="true" definition-sha256="34ffb5860f1db392c170e11908562138a89d70ee783eb741518c175b9257bbcc" verdict="passed" claim="command-completion" cwd="." exit="0" elapsed-ms="80345" log="records/logs/run-1/CK1.log" log-sha256="15c8596b742bab274f29797788b159ee52b17d615c5e10ebd0d85a1dd6e3a89c">
+    <Definition>kind=automated
+id=CK1
+required=true
+cwd=.
+budget=300
+command=bun test src/conformance/failure.test.ts
+</Definition>
+  </Result>
+</Run>
