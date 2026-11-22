@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Close change="C-0020-run-recovery-and-schemas" revision="3" contract-sha256="bff8e4601080533ebf54b3991e61a1e8ec61edc24b4b91f78eba3d32b0db7220" date="2026-11-22T20:33:49.122Z" source-revision="747c5c1a361580d6d3d114a88115d9d85c509059" candidate="04c6faaa11ac323bf717224fbe4ac08c9c8e1c143958ffc9c30a4801f6ef3c59" start-revision="e98900e62a462e489c0394535d0cecbd24ce68a1" approval="approval-3.xml" review="2" kernel="grace5 0.9.0">
+  <Satisfied check="CK1" kind="automated" run="3" claim="command-completion"/>
+</Close>
